@@ -63,11 +63,11 @@ void respawnSnake(struct snake* s, unsigned int width, unsigned int height)
 {
     // clean up the old snake first
     struct link* curr = s->head;
-    while(curr != NULL)
+    while(curr->next != NULL)
     {
-        struct link* temp = curr;
-        curr = curr->next;
-        free(temp);
+        struct link* next = curr->next;
+        free(curr);
+        curr = next;
     }
     
     s->x = width / 2;
@@ -95,16 +95,13 @@ void endGame(struct snake* s)
     printf("game over!\nscore:%d\n", s->length - 3);
     respawnSnake(s, 32, 24);
 }
-    
-//   1
-// 0 + 2
-//   3
+
 void drawSnake(GSGLOBAL* gsGlobal, struct snake* s, unsigned int scale, unsigned int width, unsigned int height)
 {
     struct link* curr = s->head;
     unsigned int x = s->x;
     unsigned int y = s->y;
-    if(x >= width || y >= width)
+    if(x >= width || y >= height)
     {
         endGame(s);
     }
@@ -283,6 +280,7 @@ int main(int argc, char* argv[])
             new_pad = paddata & ~old_pad;
             old_pad = paddata;
 
+            // react to controller input
             if(new_pad & PAD_LEFT && s->direction%2)s->direction = west;
             else if(new_pad & PAD_UP && s->direction%2==0)s->direction = north;
             else if(new_pad & PAD_RIGHT && s->direction%2)s->direction = east;
