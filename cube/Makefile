@@ -12,10 +12,12 @@ GSKIT_LIB      = /usr/local/ps2dev/gsKit/lib
 EE_LIB         = /usr/local/ps2dev/ps2sdk/ee/lib
 CRT            = /usr/local/ps2dev/ps2sdk/ee/startup/crt0.o
 LINKFILE       = /usr/local/ps2dev/ps2sdk/ee/startup/linkfile
+IOP            = /usr/local/ps2dev/ps2sdk/iop/include
 
 all:
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES)  -c cube.c -o cube.o
-	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(GSKIT_LIB) -L$(EE_LIB) -o cube.elf $(CRT) cube.o -Xlinker --start-group  -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lm -lkernel --end-group
+	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -I$(IOP) -c cube.c -o cube.o
+	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES)  -c controller.c -o controller.o
+	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(GSKIT_LIB) -L$(EE_LIB) -o cube.elf $(CRT) cube.o controller.o -Xlinker --start-group  -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lm -lkernel --end-group
 
 clean:
 	rm -f $(EE_BIN) $(EE_OBJS)
