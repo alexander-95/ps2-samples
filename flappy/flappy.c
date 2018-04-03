@@ -12,82 +12,67 @@
 #include <libpad.h>
 #include "controller.h"
 
-struct polygon
-{
-    float x1, y1, x2, y2, x3, y3;
-    u64 color;
-    char alpha;
-    struct polygon* prev;
-    struct polygon* next;
-};
-
 struct pipe
 {
-  int x, y;
-  int d;
-  struct pipe* next;
-  struct pipe* prev;
+    int x, y;
+    int d;
+    struct pipe* next;
+    struct pipe* prev;
 };
 
-// it would be nice if this function was non-blocking, ie, if it could be interrupted
-// by controller input
-void drawRandomTriangle(GSGLOBAL* gsGlobal)
+struct pipeList
 {
-    struct polygon p1;
-    p1.alpha = 127;
-    p1.x1 = rand() % 640;
-    p1.x2 = rand() % 640;
-    p1.x3 = rand() % 640;
-    p1.y1 = rand() % 512;
-    p1.y2 = rand() % 512;
-    p1.y3 = rand() % 512;
-    while(p1.alpha > 64)
+    struct pipe* head;
+    struct pipe* tail;
+    int length;
+    int gap;
+};
+
+void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps)
+{
+    struct pipe* curr = ps->head;
+    u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
+    int bottom = 400;
+    while(curr!=NULL)
     {
-        p1.alpha--;
-        p1.color = GS_SETREG_RGBAQ(0x00, 0x00, 0xFF, p1.alpha, 0x00);
-        gsKit_prim_triangle(gsGlobal, p1.x1, p1.y1, p1.x2, p1.y2, p1.x3, p1.y3, 0, p1.color);
-        gsKit_queue_exec(gsGlobal);
-        gsKit_sync_flip(gsGlobal);
+        gsKit_prim_quad(gsGlobal,
+                        curr->x, curr->y-562,
+                        curr->x, curr->y-50,
+                        curr->x+curr->d, curr->y-562,
+                        curr->x+curr->d, curr->y-50, 1, green);
+        gsKit_prim_quad(gsGlobal,
+                        curr->x, curr->y+50,
+                        curr->x, curr->y+562,
+                        curr->x+curr->d, curr->y+50,
+                        curr->x+curr->d, curr->y+562, 1, green);
+        curr = curr->next;
     }
-    p1.alpha = 127;
 }
 
-void drawPipes(GSGLOBAL* gsGlobal, struct pipe* head)
+void movePipes(struct pipeList* ps, int val)
 {
-  struct pipe* curr = head;
-  u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
-  int bottom = 400;
-  while(curr!=NULL)
-  {
-    gsKit_prim_quad(gsGlobal,
-		    curr->x, curr->y,
-		    curr->x, bottom,
-		    curr->x+curr->d, curr->y,
-		    curr->x+curr->d, bottom, 6, green);
-    curr = curr->next;
-  }
-}
-
-void movePipes(struct pipe* head, int val)
-{
-  struct pipe* curr = head;
-  struct pipe* tail = head;
-  u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
-  int bottom = 400;
-  while(curr!=NULL)
-  {
-    curr->x -= val;
-    tail = curr;
-    curr = curr->next;
-  }
-  if(head->x < -50)
-  {
-    head->x = 640;
-    tail->next = head;
-    tail->next->next = NULL;
-    tail = tail->next;
-    head = head->next;
-  }
+    printf("head->x = %d\n", ps->head->x);
+    struct pipe* curr = ps->head;
+    u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
+    int bottom = 400;
+    int i;
+    for(i=0;i<ps->length;i++)
+    {
+        curr->x -= val;
+        ps->tail = curr;
+        curr = curr->next;
+    }
+    if(ps->head->x < -50)
+    {
+        ps->head->x = ps->tail->x+ps->gap;
+        ps->head->y = rand() % 300 + 50;
+        ps->tail->next = ps->head;
+        ps->head->prev = ps->tail;
+        ps->head = ps->head->next;
+        ps->tail = ps->head->prev;
+        ps->tail->next = NULL;
+        ps->head->prev = NULL;
+    }
 }
 
 static int padBuf[256] __attribute__((aligned(64)));
@@ -142,21 +127,19 @@ int main(int argc, char* argv[])
 
     //platform dimensions
     int top = 380, bottom = 400;
-
-    // create a linked list of pipes
-    struct pipe* head = malloc(sizeof(struct pipe));
-    head->x = 200, head->y = 200, head->d = 50;
-    struct pipe* curr = head;
-    int length = 3;
-    for(i=1;i<length;i++)
+    struct pipeList* pipes = malloc(sizeof(struct pipeList));
+    pipes->gap = 200;
+    struct pipe* curr = malloc(sizeof(struct pipe));
+    pipes->head = curr;
+    pipes->length = 4;
+    for(i=0;i<pipes->length;i++)
     {
-      struct pipe* p = malloc(sizeof(struct pipe));
-      curr->next = p;
-      p->prev = curr;
-      curr = curr->next;
-      curr->x = curr->prev->x + 100, curr->y = 200, curr->d = 50;
+        struct pipe* p = malloc(sizeof(struct pipe));
+        curr->next = p;
+        p->prev = curr;
+        curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 50;
+        curr = curr->next;
     }
-    curr->next = NULL;
     
     while(1)
     {
@@ -183,23 +166,23 @@ int main(int argc, char* argv[])
 			0, 0,
 			0, height,
 			width, 0,
-			width, height, 5, blue);
+			width, height, 0, blue);
 	
 	//draw platform
 	gsKit_prim_quad(gsGlobal,
 			0, bottom,
 			0, height,
 			width, bottom,
-			width, height, 6, yellow);
+			width, height, 2, yellow);
 	gsKit_prim_quad(gsGlobal,
 			0, top,
 			0, bottom,
 			width, top,
-			width, bottom, 6, green);
+			width, bottom, 2, green);
 
 	//draw pipe
-	drawPipes(gsGlobal, head);
-	movePipes(head, 2);
+	drawPipes(gsGlobal, pipes);
+	movePipes(pipes, 2);
 	//if(head->x < head->d*-1)head->x = width;//should also reset y to some random value
 	
 	gsKit_sync_flip(gsGlobal);
