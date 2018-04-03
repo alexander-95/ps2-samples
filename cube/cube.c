@@ -107,12 +107,12 @@ void drawSquare(GSGLOBAL* gsGlobal, struct camera cam, struct square s, GSTEXTUR
         }*/
 
     // camera translation
-    for(i=0;i<4;i++)
+    /*for(i=0;i<4;i++)
     {
         s.x[i] -= cam.pos[0];
         s.y[i] -= cam.pos[1];
         s.z[i] -= cam.pos[2];
-    }
+	}*/
 
     //camera rotation
     squareRotateY(&cam, &s, cam.rot[1]);
@@ -121,11 +121,12 @@ void drawSquare(GSGLOBAL* gsGlobal, struct camera cam, struct square s, GSTEXTUR
     float x[4], y[4], z[4];
     for(i=0;i<4;i++)
     {
-        x[i] = cam.mat[0][0]*(s.x[i]-cam.pos[0]) + cam.mat[0][1]*(s.y[i]-cam.pos[1]) + cam.mat[0][2]*(s.z[i]-cam.pos[2]);
+      x[i] = cam.mat[0][0]*(s.x[i]-cam.pos[0]) + cam.mat[0][1]*(s.y[i]-cam.pos[1]) + cam.mat[0][2]*(s.z[i]-cam.pos[2]);
         y[i] =                                 0 + cam.mat[1][1]*(s.y[i]-cam.pos[1]) + cam.mat[1][2]*(s.z[i]-cam.pos[2]);
         z[i] =                                                                                       (s.z[i]-cam.pos[2]);
-        x[i] /= z[i];
-        y[i] /= z[i];
+        
+      x[i] /= z[i];
+      y[i] /= z[i];
     }
     // calculate the center of the quad
     // get the distance from the center to the camera as the z value.
@@ -292,14 +293,30 @@ int main(int argc, char *argv[])
             old_pad = paddata;
 
             // react to controller input
-            if(old_pad & PAD_LEFT)cam.pos[0]-=10;
-            if(old_pad & PAD_RIGHT)cam.pos[0]+=10;
-            if(old_pad & PAD_UP)cam.pos[2]+=10;
-            if(old_pad & PAD_DOWN)cam.pos[2]-=10;
-            if(old_pad & PAD_TRIANGLE)cam.pos[1]-=10;
-            if(old_pad & PAD_CROSS)cam.pos[1]+=10;
-            if(old_pad & PAD_SQUARE)cam.rot[1]+=0.01;
-            if(old_pad & PAD_CIRCLE)cam.rot[1]-=0.01;
+            if(old_pad & PAD_LEFT)
+	      {
+		cam.pos[0]-=(20*cosf(cam.rot[1]));
+		cam.pos[2]-=(20*sinf(cam.rot[1]));
+	      }
+            if(old_pad & PAD_RIGHT)
+	      {
+		cam.pos[0]+=(20*cosf(cam.rot[1]));
+		cam.pos[2]+=(20*sinf(cam.rot[1]));
+	      }
+	    if(old_pad & PAD_UP)
+	      {
+		cam.pos[0]-=(20*sinf(cam.rot[1]));
+		cam.pos[2]+=(20*cosf(cam.rot[1]));
+	      }
+	    if(old_pad & PAD_DOWN)
+	      {
+		cam.pos[0]+=(20*sinf(cam.rot[1]));
+		cam.pos[2]-=(20*cosf(cam.rot[1]));
+	      }
+            if(old_pad & PAD_TRIANGLE) cam.pos[1]-=(20);
+            if(old_pad & PAD_CROSS)    cam.pos[1]+=(20);
+            if(old_pad & PAD_SQUARE)   cam.rot[1]+=0.01;
+            if(old_pad & PAD_CIRCLE)   cam.rot[1]-=0.01;
             
         }
 
