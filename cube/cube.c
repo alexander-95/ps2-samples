@@ -96,7 +96,7 @@ void squareRotateY(struct camera* cam, struct square* s, float theta)
     for(i=0;i<4;i++) rotateY(cam, &s->x[i], &s->y[i], &s->z[i], theta);
 }
 
-void drawSquare(GSGLOBAL* gsGlobal, struct camera cam, struct square s)
+void drawSquare(GSGLOBAL* gsGlobal, struct camera cam, struct square s, GSTEXTURE* tex)
 {
     int i;
     // frustum culling check(need to account for camera rotation)
@@ -135,8 +135,30 @@ void drawSquare(GSGLOBAL* gsGlobal, struct camera cam, struct square s)
     float distance = sqrtf(powf((cx - cam.pos[0]),2) +
                            powf((cy - cam.pos[1]),2) +
                            powf((cz - cam.pos[2]),2));
-    
-    gsKit_prim_quad(gsGlobal, x[0], y[0], x[1], y[1], x[2], y[2], x[3], y[3], (int)distance*(-1), s.color);
+
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    //gsKit_prim_quad(gsGlobal, x[0], y[0], x[1], y[1], x[2], y[2], x[3], y[3], (int)distance*(-1), s.color);
+    gsKit_prim_quad_texture(gsGlobal, tex,
+                            x[0],                   // x1
+                            y[0],                 // y1
+                            0.0f,                  // u1
+                            0.0f,                  // v1
+
+                            x[1],                   // x2
+                            y[1],   // y2
+                            0.0f,                  // u2
+                            16.0f,
+
+                            x[2],   // x3
+                            y[2],                // y3
+                            16.0f,            // u3
+                            0.0f,                  // v3
+
+                            x[3],   // x4
+                            y[3], // y4
+                            16.0f,            // u4
+                            16.0f,           // v4
+                            (int)distance*(1),TexCol);
 }
 
 struct cuboid
@@ -192,10 +214,10 @@ void createCuboid(struct cuboid* c, float x1, float y1, float z1, float x2, floa
     s6->color = Y;    
 }
 
-void drawCuboid(GSGLOBAL* gsGlobal, struct camera cam, struct cuboid* c)
+void drawCuboid(GSGLOBAL* gsGlobal, struct camera cam, struct cuboid* c, GSTEXTURE* tex)
 {
     int i;
-    for(i=0;i<6;i++)drawSquare(gsGlobal, cam, c->s[i]);
+    for(i=0;i<6;i++)drawSquare(gsGlobal, cam, c->s[i], tex);
 }
   
 int main(int argc, char *argv[])
@@ -216,7 +238,7 @@ int main(int argc, char *argv[])
     
     gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
     gsKit_clear(gsGlobal, White);
-    gsKit_mode_switch(gsGlobal, GS_ONESHOT);
+    //gsKit_mode_switch(gsGlobal, GS_ONESHOT);
     
     // controller setup
     static int padBuf[256] __attribute__((aligned(64)));
@@ -244,9 +266,16 @@ int main(int argc, char *argv[])
     setupCamera(&cam);
     struct cuboid c;
     createCuboid(&c, 100, 500, 10200, 1100, 1500, 11200);
+    GSTEXTURE tex;
+    gsGlobal->PSM = GS_PSM_CT24;
+    gsGlobal->PSMZ = GS_PSMZ_16S;
+    tex.Width=16;
+    tex.Height=16;
+    gsKit_texture_bmp(gsGlobal, &tex, "mass:dirt2.bmp");
+    
     while(1)
     {
-        drawCuboid(gsGlobal, cam, &c);
+        drawCuboid(gsGlobal, cam, &c, &tex);
         printf("cube\n");
 
         ret=padGetState(port, slot);
@@ -277,8 +306,14 @@ int main(int argc, char *argv[])
         //cam.pos[2]+=10;
         //cam.rot[1]+=0.01;
         // Flip before exec to take advantage of DMA execution double buffering.
+        
+        //while(1)
+        
         gsKit_sync_flip(gsGlobal);
-        gsKit_queue_exec(gsGlobal);        
+        gsKit_queue_exec(gsGlobal);
+            
+            
+        
     }
     return 0;
 }
