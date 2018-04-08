@@ -28,6 +28,29 @@ struct pipeList
     int gap;
 };
 
+struct bird
+{
+    int x, y;
+    float theta;
+    float vy;
+};
+
+int collision(struct bird* b, struct pipeList* pipes)
+{
+    
+    return 0;
+}
+
+void drawBird(GSGLOBAL* gsGlobal, struct bird* b)
+{
+    u64 red  = GS_SETREG_RGBAQ(0xFF,0x00,0x00,0x00,0x00);
+    gsKit_prim_quad(gsGlobal,
+                    b->x, b->y,
+                    b->x, b->y + 30,
+                    b->x + 30, b->y,
+                    b->x + 30, b->y + 30, 1, red);
+}
+
 void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps)
 {
     struct pipe* curr = ps->head;
@@ -140,7 +163,13 @@ int main(int argc, char* argv[])
         curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 50;
         curr = curr->next;
     }
-    
+
+    struct bird* b = malloc(sizeof(struct bird));
+    b->x = 200;
+    b->y = 200;
+    b->vy = 0;
+
+    int gravity = 0;
     while(1)
     {
         i=0;
@@ -159,7 +188,12 @@ int main(int argc, char* argv[])
             new_pad = paddata & ~old_pad;
             old_pad = paddata;
 
-            if(new_pad & PAD_CROSS)printf("button pressed\n");
+            if(new_pad & PAD_CROSS)
+            {
+                gravity = 1;
+                b->vy = -3;
+                printf("button pressed\n");
+            }
         }
 	//draw background
 	gsKit_prim_quad(gsGlobal,
@@ -183,7 +217,14 @@ int main(int argc, char* argv[])
 	//draw pipe
 	drawPipes(gsGlobal, pipes);
 	movePipes(pipes, 2);
-	//if(head->x < head->d*-1)head->x = width;//should also reset y to some random value
+
+        // draw bird
+        if(gravity)
+        {
+            b->vy += 0.2;
+            b->y += b->vy;
+        }
+        drawBird(gsGlobal, b);
 	
 	gsKit_sync_flip(gsGlobal);
 	gsKit_queue_exec(gsGlobal);
