@@ -7,4 +7,6 @@
 void loadModules();
 int waitPadReady(int port, int slot);
 int initializePad(int port, int slot);
+void padOpen(int port, int slot, int padBuf[256]);
+void stabilise(int port, int slot);
 #endif

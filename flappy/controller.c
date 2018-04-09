@@ -22,6 +22,35 @@ void loadModules()
     
 }
 
+void openPad(int port, int slot, int padBuf[256])
+{
+  int ret;
+  if((ret = padPortOpen(port, slot, padBuf)) == 0)
+    {
+        printf("padOpenPort failed: %d\n", ret);
+        SleepThread();
+    }
+    if(!initializePad(port, slot))
+    {
+        printf("pad initalization failed!\n");
+        SleepThread();
+    }
+}
+
+void stabilise(int port, int slot)
+{
+
+  int ret;
+  ret=padGetState(port, slot);
+  while((ret != PAD_STATE_STABLE) && (ret != PAD_STATE_FINDCTP1))
+    {
+      if(ret==PAD_STATE_DISCONN) printf("Pad(%d, %d) is disconnected\n", port, slot);
+      ret = padGetState(port, slot);
+    }
+  printf("Pad: OK!\n");
+
+}
+
 int waitPadReady(int port, int slot)
 {
     int state;
@@ -133,4 +162,5 @@ int initializePad(int port, int slot)
     waitPadReady(port, slot);
     return 1;
 }
+
 

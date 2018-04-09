@@ -129,16 +129,7 @@ int main(int argc, char* argv[])
     SifInitRpc(0);
     loadModules();
     padInit(0);
-    if((ret = padPortOpen(port, slot, padBuf)) == 0)
-    {
-        printf("padOpenPort failed: %d\n", ret);
-        SleepThread();
-    }
-    if(!initializePad(port, slot))
-    {
-        printf("pad initalization failed!\n");
-        SleepThread();
-    }
+    openPad(port,slot,padBuf);
 
     u64 red    = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
     u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
@@ -172,16 +163,8 @@ int main(int argc, char* argv[])
     int gravity = 0;
     while(1)
     {
-        i=0;
-        ret=padGetState(port, slot);
-        while((ret != PAD_STATE_STABLE) && (ret != PAD_STATE_FINDCTP1))
-        {
-            if(ret==PAD_STATE_DISCONN) printf("Pad(%d, %d) is disconnected\n", port, slot);
-            ret = padGetState(port, slot);
-        }
-        if(i==1) printf("Pad: OK!\n");
-        ret = padRead(port, slot, &buttons);
-        if(ret != 0)
+	stabilise(port,slot);
+        if(padRead(port, slot, &buttons) != 0)
         {
             paddata = 0xffff ^ buttons.btns;
 
