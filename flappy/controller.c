@@ -39,16 +39,14 @@ void openPad(int port, int slot, int padBuf[256])
 
 void stabilise(int port, int slot)
 {
-
   int ret;
   ret=padGetState(port, slot);
   while((ret != PAD_STATE_STABLE) && (ret != PAD_STATE_FINDCTP1))
-    {
+  {
       if(ret==PAD_STATE_DISCONN) printf("Pad(%d, %d) is disconnected\n", port, slot);
       ret = padGetState(port, slot);
-    }
-  printf("Pad: OK!\n");
-
+  }
+  //printf("Pad: OK!\n");
 }
 
 int waitPadReady(int port, int slot)

@@ -37,7 +37,12 @@ struct bird
 
 int collision(struct bird* b, struct pipeList* pipes)
 {
-    
+    struct pipe* curr = pipes->head;
+    while(curr!=NULL)
+    {
+        if(b->x+30 > curr->x && b->x < curr->x+curr->d && (b->y > curr->y+50 || b->y-30 < curr->y-50) )return 1;
+        curr = curr->next;
+    }
     return 0;
 }
 
@@ -46,9 +51,19 @@ void drawBird(GSGLOBAL* gsGlobal, struct bird* b)
     u64 red  = GS_SETREG_RGBAQ(0xFF,0x00,0x00,0x00,0x00);
     gsKit_prim_quad(gsGlobal,
                     b->x, b->y,
-                    b->x, b->y + 30,
+                    b->x, b->y - 30,
                     b->x + 30, b->y,
-                    b->x + 30, b->y + 30, 1, red);
+                    b->x + 30, b->y - 30, 3, red);
+}
+
+int birdTouchingGround(struct bird* b, int ground)
+{
+    
+    if(b->y > ground)
+    {
+        return 1;
+    }
+    return 0;
 }
 
 void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps)
@@ -74,7 +89,6 @@ void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps)
 
 void movePipes(struct pipeList* ps, int val)
 {
-    printf("head->x = %d\n", ps->head->x);
     struct pipe* curr = ps->head;
     u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
     int bottom = 400;
@@ -160,7 +174,7 @@ int main(int argc, char* argv[])
     b->y = 200;
     b->vy = 0;
 
-    int gravity = 0;
+    int gravity = 0, collided = 0;
     while(1)
     {
 	stabilise(port,slot);
@@ -171,12 +185,21 @@ int main(int argc, char* argv[])
             new_pad = paddata & ~old_pad;
             old_pad = paddata;
 
-            if(new_pad & PAD_CROSS)
+            if(!collided && new_pad & PAD_CROSS)
             {
                 gravity = 1;
                 b->vy = -3;
-                printf("button pressed\n");
+                
             }
+        }
+        if(birdTouchingGround(b, top))
+        {
+            printf("bird hit the ground");
+            while(1);
+        }
+        if(collision(b, pipes))
+        {
+            collided = 1;
         }
 	//draw background
 	gsKit_prim_quad(gsGlobal,
@@ -199,7 +222,7 @@ int main(int argc, char* argv[])
 
 	//draw pipe
 	drawPipes(gsGlobal, pipes);
-	movePipes(pipes, 2);
+	if(!collided)movePipes(pipes, 2);
 
         // draw bird
         if(gravity)
