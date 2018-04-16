@@ -6,6 +6,7 @@ void loadModules()
 {
     int ret=0;
     ret = SifLoadModule("rom:SIO2MAN", 0, NULL);
+    if (ret < 0)ret = SifLoadModule("host:SIO2MAN", 0, NULL);
     if (ret < 0)
     {
         printf("sifLoadModule sio failed: %d\n", ret);
@@ -13,6 +14,7 @@ void loadModules()
     }
    
     ret = SifLoadModule("rom:PADMAN", 0, NULL);
+    if(ret < 0)ret = SifLoadModule("host:PADMAN", 0, NULL);
     if (ret < 0)
     {
         printf("sifLoadModule pad failed: %d\n", ret);
