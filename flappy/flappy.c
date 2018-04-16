@@ -10,6 +10,8 @@
 #include <sifrpc.h>
 #include <loadfile.h>
 #include <libpad.h>
+#include <dmaKit.h>
+#include <gsToolkit.h>
 #include "controller.h"
 
 struct pipe
@@ -46,14 +48,22 @@ int collision(struct bird* b, struct pipeList* pipes)
     return 0;
 }
 
-void drawBird(GSGLOBAL* gsGlobal, struct bird* b)
+void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
 {
-    u64 red  = GS_SETREG_RGBAQ(0xFF,0x00,0x00,0x00,0x00);
-    gsKit_prim_quad(gsGlobal,
-                    b->x, b->y,
-                    b->x, b->y - 30,
-                    b->x + 30, b->y,
-                    b->x + 30, b->y - 30, 3, red);
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    gsKit_prim_quad_texture(gsGlobal, tex,
+                            b->x, b->y,     // x1, y1
+                            0.0f, 0.0f,     // u1, v1
+                            
+                            b->x, b->y+24,   // x2, y2
+                            0.0f, 12.0f,   // u2, v2
+                            
+                            b->x+34, b->y,   // x3, y3
+                            17.0f, 0.0f,   // u3, v3
+                            
+                            b->x+34, b->y+24, // x4, y4
+                            17.0f, 12.0f, // u4, v4
+                            3,TexCol);
 }
 
 int birdTouchingGround(struct bird* b, int ground)
@@ -70,7 +80,6 @@ void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps)
 {
     struct pipe* curr = ps->head;
     u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
-    int bottom = 400;
     while(curr!=NULL)
     {
         gsKit_prim_quad(gsGlobal,
@@ -90,8 +99,6 @@ void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps)
 void movePipes(struct pipeList* ps, int val)
 {
     struct pipe* curr = ps->head;
-    u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
-    int bottom = 400;
     int i;
     for(i=0;i<ps->length;i++)
     {
@@ -117,44 +124,19 @@ static int padBuf[256] __attribute__((aligned(64)));
 int main(int argc, char* argv[])
 {
     srand(time(NULL));
-    GSGLOBAL* gsGlobal = gsKit_init_global();
-
-    gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
-
-    dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
-                D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
-
-    //Initialize the DMAC
-    dmaKit_chan_init(DMA_CHANNEL_GIF);
-    gsKit_init_screen(gsGlobal);
-
-    u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
-    gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
-    gsKit_clear(gsGlobal, White);
-    gsKit_mode_switch(gsGlobal, GS_ONESHOT);
-    gsKit_queue_exec(gsGlobal);
-    gsKit_sync_flip(gsGlobal);
 
     //controller setup
     unsigned int old_pad = 0;
     unsigned int new_pad, paddata;
-    int i, ret, port=0, slot=0;
+    int i, port=0, slot=0;
     struct padButtonStatus buttons;
     SifInitRpc(0);
     loadModules();
     padInit(0);
     openPad(port,slot,padBuf);
 
-    u64 red    = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
-    u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
-    u64 blue   = GS_SETREG_RGBAQ(0x00,0x00,0xFF,0x00,0x00);
-    u64 yellow = GS_SETREG_RGBAQ(0xFF,0xFF,0x00,0x00,0x00);
-
-    //background dimensions
-    int width = 640, height = 448;
-
     //platform dimensions
-    int top = 380, bottom = 400;
+    int top = 380;
     struct pipeList* pipes = malloc(sizeof(struct pipeList));
     pipes->gap = 200;
     struct pipe* curr = malloc(sizeof(struct pipe));
@@ -175,6 +157,59 @@ int main(int argc, char* argv[])
     b->vy = 0;
 
     int gravity = 0, collided = 0;
+
+    GSGLOBAL* gsGlobal = gsKit_init_global();
+
+    GSTEXTURE bg;
+    bg.Width=320;
+    bg.Height=256;
+    bg.PSM = GS_PSM_CT24;
+
+    GSTEXTURE ground;
+    ground.Width = 320;
+    ground.Height = 56;
+    ground.PSM = GS_PSM_CT24;
+
+    GSTEXTURE brd;
+    brd.Width = 17;
+    brd.Height = 12;
+    brd.PSM = GS_PSM_CT24;
+    
+    u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    
+    gsGlobal->PSM = GS_PSM_CT24;
+    gsGlobal->PSMZ = GS_PSMZ_16S;
+
+    dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
+                D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
+
+    //Initialize the DMAC
+    dmaKit_chan_init(DMA_CHANNEL_GIF);
+    gsKit_init_screen(gsGlobal);
+    gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
+    gsKit_clear(gsGlobal, White);
+    gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
+    
+    gsKit_texture_bmp(gsGlobal, &bg, "mass:bg2.bmp");
+    gsKit_texture_bmp(gsGlobal, &ground, "mass:ground.bmp");
+    gsKit_texture_bmp(gsGlobal, &brd, "mass:brd.bmp");
+    
+    gsKit_prim_quad_texture(gsGlobal, &bg,
+                            0.0f, 0.0f,     // x1, y1
+                            0.0f, 0.0f,     // u1, v1
+                                    
+                            0.0f, 512.0f,   // x2, y2
+                            0.0f, 256.0f,   // u2, v2
+                                    
+                            640.0f, 0.0f,   // x3, y3
+                            320.0f, 0.0f,   // u3, v3
+                            
+                            640.0f, 512.0f, // x4, y4
+                            320.0f, 256.0f, // u4, v4
+                            0,TexCol);
+
+    gsKit_mode_switch(gsGlobal, GS_ONESHOT);
     while(1)
     {
 	stabilise(port,slot);
@@ -189,7 +224,6 @@ int main(int argc, char* argv[])
             {
                 gravity = 1;
                 b->vy = -3;
-                
             }
         }
         if(birdTouchingGround(b, top))
@@ -201,25 +235,22 @@ int main(int argc, char* argv[])
         {
             collided = 1;
         }
-	//draw background
-	gsKit_prim_quad(gsGlobal,
-			0, 0,
-			0, height,
-			width, 0,
-			width, height, 0, blue);
-	
-	//draw platform
-	gsKit_prim_quad(gsGlobal,
-			0, bottom,
-			0, height,
-			width, bottom,
-			width, height, 2, yellow);
-	gsKit_prim_quad(gsGlobal,
-			0, top,
-			0, bottom,
-			width, top,
-			width, bottom, 2, green);
 
+        //draw platform
+        gsKit_prim_quad_texture(gsGlobal, &ground,
+                                0.0f, 400.0f,     // x1, y1
+                                0.0f, 0.0f,     // u1, v1
+                                
+                                0.0f, 512.0f,   // x2, y2
+                                0.0f, 56.0f,   // u2, v2
+                                
+                                640.0f, 400.0f,   // x3, y3
+                                320.0f, 0.0f,   // u3, v3
+                                
+                                640.0f, 512.0f, // x4, y4
+                                320.0f, 56.0f, // u4, v4
+                                2,TexCol);
+        
 	//draw pipe
 	drawPipes(gsGlobal, pipes);
 	if(!collided)movePipes(pipes, 2);
@@ -230,7 +261,7 @@ int main(int argc, char* argv[])
             b->vy += 0.2;
             b->y += b->vy;
         }
-        drawBird(gsGlobal, b);
+        drawBird(gsGlobal, b, &brd);
 	
 	gsKit_sync_flip(gsGlobal);
 	gsKit_queue_exec(gsGlobal);
