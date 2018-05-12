@@ -42,7 +42,9 @@ int collision(struct bird* b, struct pipeList* pipes)
     struct pipe* curr = pipes->head;
     while(curr!=NULL)
     {
-        if(b->x+30 > curr->x && b->x < curr->x+curr->d && (b->y > curr->y+50 || b->y-30 < curr->y-50) )return 1;
+        char xCollision = b->x+30 > curr->x && b->x < curr->x+curr->d;
+        char yCollision = b->y - 24 > curr->y+50 || b->y < curr->y-50;
+        if(xCollision &&  yCollision)return 1;
         curr = curr->next;
     }
     return 0;
@@ -50,7 +52,7 @@ int collision(struct bird* b, struct pipeList* pipes)
 
 void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
 {
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    u64 Red = GS_SETREG_RGBAQ(0xFF,0x00,0x00,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, tex,
                             b->x, b->y,     // x1, y1
                             0.0f, 0.0f,     // u1, v1
@@ -63,12 +65,11 @@ void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
                             
                             b->x+34, b->y+24, // x4, y4
                             17.0f, 12.0f, // u4, v4
-                            3,TexCol);
+                            3, Red);
 }
 
 int birdTouchingGround(struct bird* b, int ground)
 {
-    
     if(b->y > ground)
     {
         return 1;
@@ -177,6 +178,7 @@ int main(int argc, char* argv[])
     
     u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    u64 Blue = GS_SETREG_RGBAQ(0x00,0x00,0xFF,0x80,0x00);
     
     gsGlobal->PSM = GS_PSM_CT24;
     gsGlobal->PSMZ = GS_PSMZ_16S;
@@ -191,9 +193,9 @@ int main(int argc, char* argv[])
     gsKit_clear(gsGlobal, White);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
     
-    gsKit_texture_bmp(gsGlobal, &bg, "mass:bg2.bmp");
-    gsKit_texture_bmp(gsGlobal, &ground, "mass:ground.bmp");
-    gsKit_texture_bmp(gsGlobal, &brd, "mass:brd.bmp");
+    //gsKit_texture_bmp(gsGlobal, &bg, "mass:bg2.bmp");
+    //gsKit_texture_bmp(gsGlobal, &ground, "mass:ground.bmp");
+    //gsKit_texture_bmp(gsGlobal, &brd, "mass:brd.bmp");
     
     gsKit_prim_quad_texture(gsGlobal, &bg,
                             0.0f, 0.0f,     // x1, y1
@@ -207,7 +209,7 @@ int main(int argc, char* argv[])
                             
                             640.0f, 512.0f, // x4, y4
                             320.0f, 256.0f, // u4, v4
-                            0,TexCol);
+                            0,Blue);
 
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
     while(1)
@@ -237,6 +239,7 @@ int main(int argc, char* argv[])
         }
 
         //draw platform
+        u64 Green = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x80,0x00);
         gsKit_prim_quad_texture(gsGlobal, &ground,
                                 0.0f, 400.0f,     // x1, y1
                                 0.0f, 0.0f,     // u1, v1
@@ -249,7 +252,7 @@ int main(int argc, char* argv[])
                                 
                                 640.0f, 512.0f, // x4, y4
                                 320.0f, 56.0f, // u4, v4
-                                2,TexCol);
+                                2, Green);
         
 	//draw pipe
 	drawPipes(gsGlobal, pipes);
