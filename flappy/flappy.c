@@ -12,6 +12,7 @@
 #include <libpad.h>
 #include <dmaKit.h>
 #include <gsToolkit.h>
+#include <malloc.h>
 #include "controller.h"
 
 struct pipe
@@ -52,7 +53,7 @@ int collision(struct bird* b, struct pipeList* pipes)
 
 void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
 {
-    u64 Red = GS_SETREG_RGBAQ(0xFF,0x00,0x00,0x80,0x00);
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, tex,
                             b->x, b->y,     // x1, y1
                             0.0f, 0.0f,     // u1, v1
@@ -65,7 +66,7 @@ void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
                             
                             b->x+34, b->y+24, // x4, y4
                             17.0f, 12.0f, // u4, v4
-                            3, Red);
+                            3, TexCol);
 }
 
 int birdTouchingGround(struct bird* b, int ground)
@@ -77,37 +78,64 @@ int birdTouchingGround(struct bird* b, int ground)
     return 0;
 }
 
-void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps)
+void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* lower)
 {
     struct pipe* curr = ps->head;
-    u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
+    //u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     while(curr!=NULL)
     {
-        gsKit_prim_quad(gsGlobal,
-                        curr->x, curr->y-562,
-                        curr->x, curr->y-50,
-                        curr->x+curr->d, curr->y-562,
-                        curr->x+curr->d, curr->y-50, 1, green);
-        gsKit_prim_quad(gsGlobal,
-                        curr->x, curr->y+50,
-                        curr->x, curr->y+562,
-                        curr->x+curr->d, curr->y+50,
-                        curr->x+curr->d, curr->y+562, 1, green);
+        //upper pipe
+        gsKit_prim_quad_texture(gsGlobal, lower,
+                                curr->x, curr->y-562,         // x1, y1
+                                26.0f, 0.0f,                  // u1, v1
+                                
+                                curr->x, curr->y-50,          // x2, y2
+                                26.0f, 256.0f,                // u2, v2
+                                
+                                curr->x+curr->d, curr->y-562, // x3, y3
+                                52.0f, 0.0f,                  // u3, v3
+                        
+                                curr->x+curr->d, curr->y-50,  // x4, y4
+                                52.0f, 256.0f,                // u4, v4
+                                1, TexCol);
+
+        gsKit_prim_quad_texture(gsGlobal, lower,
+                                curr->x, curr->y+50,          // x1, y1
+                                0.0f, 0.0f,                   // u1, v1
+                                    
+                                curr->x, curr->y+562,         // x2, y2
+                                0.0f, 256.0f,                 // u2, v2
+                                    
+                                curr->x+curr->d, curr->y+50,  // x3, y3
+                                26.0f, 0.0f,                  // u3, v3
+                            
+                                curr->x+curr->d, curr->y+562, // x4, y4
+                                26.0f, 256.0f,                // u4, v4
+                                1, TexCol);
         curr = curr->next;
     }
 }
 
-void movePipes(struct pipeList* ps, int val)
+void movePipes(struct pipeList* ps, int val, struct bird* b, int* score)
 {
     struct pipe* curr = ps->head;
     int i;
     for(i=0;i<ps->length;i++)
     {
+        if(b->x >= curr->x && b->x < curr->x+val)
+        {
+            *score++;
+            //FILE* f;
+            //f = fopen("mass:log.txt", "a");
+            //fprintf(f, "score:%d\n", *score);
+            //fclose(f);
+        }
         curr->x -= val;
         ps->tail = curr;
         curr = curr->next;
     }
-    if(ps->head->x < -50)
+    if(ps->head->x < -52)
     {
         ps->head->x = ps->tail->x+ps->gap;
         ps->head->y = rand() % 300 + 50;
@@ -117,6 +145,32 @@ void movePipes(struct pipeList* ps, int val)
         ps->tail = ps->head->prev;
         ps->tail->next = NULL;
         ps->head->prev = NULL;
+    }
+}
+
+void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
+{
+    int length;
+    int temp = score;
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    for(length=0; temp>0; temp/=10)length++;
+    if(score==0)length=1;
+    if(length == 1)
+    {
+        int curr = score;
+        gsKit_prim_quad_texture(gsGlobal, sprites,
+                                0.0f, 0.0f,             // x1, y1
+                                52.0f+(12*curr), 0.0f,  // u1, v1
+                                    
+                                0.0f, 18.0f,            // x2, y2
+                                52.0f+(12*curr), 18.0f, // u2, v2
+                                    
+                                12.0f, 0.0f,            // x3, y3
+                                64.0f+(12*curr), 0.0f,  // u3, v3
+                            
+                                12.0f, 18.0f,           // x4, y4
+                                64.0f+(12*curr), 18.0f, // u4, v4
+                                1, TexCol);
     }
 }
 
@@ -148,7 +202,7 @@ int main(int argc, char* argv[])
         struct pipe* p = malloc(sizeof(struct pipe));
         curr->next = p;
         p->prev = curr;
-        curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 50;
+        curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
         curr = curr->next;
     }
 
@@ -157,10 +211,15 @@ int main(int argc, char* argv[])
     b->y = 200;
     b->vy = 0;
 
-    int gravity = 0, collided = 0;
+    int gravity = 0, collided = 0, score = 0;
 
     GSGLOBAL* gsGlobal = gsKit_init_global();
+    //gsGlobal->Mode = GS_MODE_PAL;
+    //gsGlobal->Width=640;
+    //gsGlobal->Height=512;
+    //gsGlobal->ZBuffering = GS_SETTING_OFF;
 
+    
     GSTEXTURE bg;
     bg.Width=320;
     bg.Height=256;
@@ -175,13 +234,24 @@ int main(int argc, char* argv[])
     brd.Width = 17;
     brd.Height = 12;
     brd.PSM = GS_PSM_CT24;
+
+    GSTEXTURE lowerPipe;
+    lowerPipe.Width = 320;
+    lowerPipe.Height = 256;
+    lowerPipe.PSM = GS_PSM_CT24;
+
+    GSTEXTURE upperPipe;
+    upperPipe.Width = 26;
+    upperPipe.Height = 256;
+    upperPipe.PSM = GS_PSM_CT24;
     
     u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    u64 Blue = GS_SETREG_RGBAQ(0x00,0x00,0xFF,0x80,0x00);
+
+    gsGlobal->ZBuffering = GS_SETTING_OFF;
     
-    gsGlobal->PSM = GS_PSM_CT24;
-    gsGlobal->PSMZ = GS_PSMZ_16S;
+    //gsGlobal->PSM = GS_PSM_CT24;
+    //gsGlobal->PSMZ = GS_PSMZ_16S;
 
     dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
                 D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
@@ -193,9 +263,12 @@ int main(int argc, char* argv[])
     gsKit_clear(gsGlobal, White);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
     
-    //gsKit_texture_bmp(gsGlobal, &bg, "mass:bg2.bmp");
-    //gsKit_texture_bmp(gsGlobal, &ground, "mass:ground.bmp");
-    //gsKit_texture_bmp(gsGlobal, &brd, "mass:brd.bmp");
+    gsKit_texture_bmp(gsGlobal, &bg, "mass:bg2.bmp");
+    gsKit_texture_bmp(gsGlobal, &ground, "mass:ground.bmp");
+    gsKit_texture_bmp(gsGlobal, &brd, "mass:brd.bmp");
+    gsKit_texture_bmp(gsGlobal, &lowerPipe, "mass:lowerPipe.bmp");
+    //gsKit_texture_bmp(gsGlobal, &upperPipe, "mass:lowerPipe.bmp");
+    //gsKit_texture_bmp(gsGlobal, &sprites, "mass:bigtex.bmp");
     
     gsKit_prim_quad_texture(gsGlobal, &bg,
                             0.0f, 0.0f,     // x1, y1
@@ -209,7 +282,7 @@ int main(int argc, char* argv[])
                             
                             640.0f, 512.0f, // x4, y4
                             320.0f, 256.0f, // u4, v4
-                            0,Blue);
+                            0,TexCol);
 
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
     while(1)
@@ -238,26 +311,27 @@ int main(int argc, char* argv[])
             collided = 1;
         }
 
+        // draw pipe
+	drawPipes(gsGlobal, pipes, &lowerPipe);
+	if(!collided)movePipes(pipes, 2, b, &score);
+
         //draw platform
-        u64 Green = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x80,0x00);
+        //u64 Green = GS_SETREG_RGBAQ(0xFF,0x00,0x00,0x80,0x00);
         gsKit_prim_quad_texture(gsGlobal, &ground,
-                                0.0f, 400.0f,     // x1, y1
+                                0.0f, 400.0f,   // x1, y1
                                 0.0f, 0.0f,     // u1, v1
                                 
                                 0.0f, 512.0f,   // x2, y2
-                                0.0f, 56.0f,   // u2, v2
+                                0.0f, 56.0f,    // u2, v2
                                 
-                                640.0f, 400.0f,   // x3, y3
+                                640.0f, 400.0f, // x3, y3
                                 320.0f, 0.0f,   // u3, v3
                                 
                                 640.0f, 512.0f, // x4, y4
-                                320.0f, 56.0f, // u4, v4
-                                2, Green);
+                                320.0f, 56.0f,  // u4, v4
+                                2, TexCol);
         
-	//draw pipe
-	drawPipes(gsGlobal, pipes);
-	if(!collided)movePipes(pipes, 2);
-
+	
         // draw bird
         if(gravity)
         {
@@ -265,9 +339,10 @@ int main(int argc, char* argv[])
             b->y += b->vy;
         }
         drawBird(gsGlobal, b, &brd);
-	
-	gsKit_sync_flip(gsGlobal);
-	gsKit_queue_exec(gsGlobal);
+        printScore(gsGlobal, score, &lowerPipe);
+        
+        gsKit_queue_exec(gsGlobal);
+        gsKit_sync_flip(gsGlobal);
     }
     return 0;
 }
