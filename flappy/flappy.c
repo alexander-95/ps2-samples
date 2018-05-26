@@ -55,17 +55,17 @@ void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, tex,
-                            b->x, b->y,     // x1, y1
-                            0.0f, 0.0f,     // u1, v1
+                            b->x, b->y,       // x1, y1
+                            0.0f, 0.0f,       // u1, v1
                             
-                            b->x, b->y+24,   // x2, y2
-                            0.0f, 12.0f,   // u2, v2
+                            b->x, b->y+24,    // x2, y2
+                            0.0f, 12.0f,      // u2, v2
                             
-                            b->x+34, b->y,   // x3, y3
-                            17.0f, 0.0f,   // u3, v3
+                            b->x+34, b->y,    // x3, y3
+                            17.0f, 0.0f,      // u3, v3
                             
                             b->x+34, b->y+24, // x4, y4
-                            17.0f, 12.0f, // u4, v4
+                            17.0f, 12.0f,     // u4, v4
                             3, TexCol);
 }
 
@@ -81,7 +81,6 @@ int birdTouchingGround(struct bird* b, int ground)
 void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* lower)
 {
     struct pipe* curr = ps->head;
-    //u64 green  = GS_SETREG_RGBAQ(0x00,0xFF,0x00,0x00,0x00);
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     while(curr!=NULL)
     {
@@ -125,7 +124,8 @@ void movePipes(struct pipeList* ps, int val, struct bird* b, int* score)
     {
         if(b->x >= curr->x && b->x < curr->x+val)
         {
-            *score++;
+            (*score)++;
+            //printf("score:%d\n",*score);
             //FILE* f;
             //f = fopen("mass:log.txt", "a");
             //fprintf(f, "score:%d\n", *score);
@@ -150,14 +150,30 @@ void movePipes(struct pipeList* ps, int val, struct bird* b, int* score)
 
 void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
 {
-    int length;
+    int length, curr;
     int temp = score;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    
     for(length=0; temp>0; temp/=10)length++;
     if(score==0)length=1;
+    printf("score:%d ",score);
+    for(;length>0;length--)
+    {
+        curr = score%10;
+        printf("%d",curr);
+        score/=10;
+    }
+    printf("\n");
+    /* This if statement should be swapped out for a for loop.
+     * Need to print the letters backwards, decreasing the x coordinate accordingly
+     * To position the text correctly, the length of the number should be used to 
+     * center the text.
+     * Text should be at a fixed, predetermined height (y value)
+     */
     if(length == 1)
     {
-        int curr = score;
+        curr = score;
+        //printf("%d\n",*score);
         gsKit_prim_quad_texture(gsGlobal, sprites,
                                 0.0f, 0.0f,             // x1, y1
                                 52.0f+(12*curr), 0.0f,  // u1, v1
@@ -263,10 +279,10 @@ int main(int argc, char* argv[])
     gsKit_clear(gsGlobal, White);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
     
-    gsKit_texture_bmp(gsGlobal, &bg, "mass:bg2.bmp");
-    gsKit_texture_bmp(gsGlobal, &ground, "mass:ground.bmp");
-    gsKit_texture_bmp(gsGlobal, &brd, "mass:brd.bmp");
-    gsKit_texture_bmp(gsGlobal, &lowerPipe, "mass:lowerPipe.bmp");
+    gsKit_texture_bmp(gsGlobal, &bg, "mass:bg2.bmp"); // should be tiled
+    gsKit_texture_bmp(gsGlobal, &ground, "mass:ground.bmp"); // should be tiled
+    //gsKit_texture_bmp(gsGlobal, &brd, "mass:brd.bmp");
+    gsKit_texture_bmp(gsGlobal, &lowerPipe, "mass:lowerPipe.bmp"); // rename to spritesheet
     //gsKit_texture_bmp(gsGlobal, &upperPipe, "mass:lowerPipe.bmp");
     //gsKit_texture_bmp(gsGlobal, &sprites, "mass:bigtex.bmp");
     
@@ -316,7 +332,6 @@ int main(int argc, char* argv[])
 	if(!collided)movePipes(pipes, 2, b, &score);
 
         //draw platform
-        //u64 Green = GS_SETREG_RGBAQ(0xFF,0x00,0x00,0x80,0x00);
         gsKit_prim_quad_texture(gsGlobal, &ground,
                                 0.0f, 400.0f,   // x1, y1
                                 0.0f, 0.0f,     // u1, v1
@@ -330,8 +345,7 @@ int main(int argc, char* argv[])
                                 640.0f, 512.0f, // x4, y4
                                 320.0f, 56.0f,  // u4, v4
                                 2, TexCol);
-        
-	
+
         // draw bird
         if(gravity)
         {
