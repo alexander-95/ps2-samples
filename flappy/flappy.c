@@ -170,6 +170,7 @@ void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
      * center the text.
      * Text should be at a fixed, predetermined height (y value)
      */
+    
     if(length == 1)
     {
         curr = score;
@@ -188,14 +189,43 @@ void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
                                 64.0f+(12*curr), 18.0f, // u4, v4
                                 1, TexCol);
     }
+    else
+    {
+        int height = 18, width = 12, space = 10;
+        int totalWidth = (width * length) + (space * (length-1));
+        totalWidth /= 2;
+        totalWidth -= width;
+        int p = 320 + totalWidth;
+        int i;
+        while(score)
+        {
+            curr = score % 10;
+            //printSpriteCorners(p, 100, height, width);
+            gsKit_prim_quad_texture(gsGlobal, sprites,
+                                    p, 100.0f-height,       // x1, y1
+                                    52.0f+(12*curr), 0.0f,  // u1, v1
+                                    
+                                    p, 100.0f,              // x2, y2
+                                    52.0f+(12*curr), 18.0f, // u2, v2
+                                    
+                                    p+width, 100.0f-height, // x3, y3
+                                    64.0f+(12*curr), 0.0f,  // u3, v3
+                                    
+                                    p+width, 100.0f,        // x4, y4
+                                    64.0f+(12*curr), 18.0f, // u4, v4
+                                    1, TexCol);
+
+            printf("\n");
+            p -= width + space;
+            score/=10;
+        }
+    }
 }
 
 static int padBuf[256] __attribute__((aligned(64)));
 
 int main(int argc, char* argv[])
 {
-    srand(time(NULL));
-
     //controller setup
     unsigned int old_pad = 0;
     unsigned int new_pad, paddata;
@@ -301,6 +331,25 @@ int main(int argc, char* argv[])
                             0,TexCol);
 
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
+
+    int started = 0;
+    while(!started)
+    {
+        if(padRead(port, slot, &buttons) != 0)
+        {
+            paddata = 0xffff ^ buttons.btns;
+
+            new_pad = paddata & ~old_pad;
+            old_pad = paddata;
+
+            if(new_pad & PAD_CROSS)
+            {
+                started = 1;
+                srand(time(NULL));
+                // render the start screen
+            }
+    }
+    
     while(1)
     {
 	stabilise(port,slot);
