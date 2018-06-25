@@ -56,16 +56,16 @@ void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, tex,
                             b->x, b->y,       // x1, y1
-                            0.0f, 0.0f,       // u1, v1
+                            52.0f, 18.0f,       // u1, v1
                             
                             b->x, b->y+24,    // x2, y2
-                            0.0f, 12.0f,      // u2, v2
+                            52.0f, 30.0f,      // u2, v2
                             
                             b->x+34, b->y,    // x3, y3
-                            17.0f, 0.0f,      // u3, v3
+                            69.0f, 18.0f,      // u3, v3
                             
                             b->x+34, b->y+24, // x4, y4
-                            17.0f, 12.0f,     // u4, v4
+                            69.0f, 30.0f,     // u4, v4
                             3, TexCol);
 }
 
@@ -156,69 +156,32 @@ void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
     
     for(length=0; temp>0; temp/=10)length++;
     if(score==0)length=1;
-    printf("score:%d ",score);
-    for(;length>0;length--)
-    {
-        curr = score%10;
-        printf("%d",curr);
-        score/=10;
-    }
-    printf("\n");
-    /* This if statement should be swapped out for a for loop.
-     * Need to print the letters backwards, decreasing the x coordinate accordingly
-     * To position the text correctly, the length of the number should be used to 
-     * center the text.
-     * Text should be at a fixed, predetermined height (y value)
-     */
     
-    if(length == 1)
+    int height = 36, width = 24, space = 0;
+    int totalWidth = (width * length) + (space * (length-1));
+    totalWidth /= 2;
+    totalWidth -= width;
+    int p = 320 + totalWidth;
+    while(score)
     {
-        curr = score;
-        //printf("%d\n",*score);
+        curr = score % 10;
         gsKit_prim_quad_texture(gsGlobal, sprites,
-                                0.0f, 0.0f,             // x1, y1
+                                p, 100.0f-height,       // x1, y1
                                 52.0f+(12*curr), 0.0f,  // u1, v1
-                                    
-                                0.0f, 18.0f,            // x2, y2
+                                
+                                p, 100.0f,              // x2, y2
                                 52.0f+(12*curr), 18.0f, // u2, v2
-                                    
-                                12.0f, 0.0f,            // x3, y3
+                                
+                                p+width, 100.0f-height, // x3, y3
                                 64.0f+(12*curr), 0.0f,  // u3, v3
-                            
-                                12.0f, 18.0f,           // x4, y4
+                                
+                                p+width, 100.0f,        // x4, y4
                                 64.0f+(12*curr), 18.0f, // u4, v4
-                                1, TexCol);
-    }
-    else
-    {
-        int height = 18, width = 12, space = 10;
-        int totalWidth = (width * length) + (space * (length-1));
-        totalWidth /= 2;
-        totalWidth -= width;
-        int p = 320 + totalWidth;
-        int i;
-        while(score)
-        {
-            curr = score % 10;
-            //printSpriteCorners(p, 100, height, width);
-            gsKit_prim_quad_texture(gsGlobal, sprites,
-                                    p, 100.0f-height,       // x1, y1
-                                    52.0f+(12*curr), 0.0f,  // u1, v1
-                                    
-                                    p, 100.0f,              // x2, y2
-                                    52.0f+(12*curr), 18.0f, // u2, v2
-                                    
-                                    p+width, 100.0f-height, // x3, y3
-                                    64.0f+(12*curr), 0.0f,  // u3, v3
-                                    
-                                    p+width, 100.0f,        // x4, y4
-                                    64.0f+(12*curr), 18.0f, // u4, v4
-                                    1, TexCol);
-
-            printf("\n");
-            p -= width + space;
-            score/=10;
-        }
+                                3, TexCol);
+        
+        printf("\n");
+        p -= width + space;
+        score/=10;
     }
 }
 
@@ -276,21 +239,11 @@ int main(int argc, char* argv[])
     ground.Height = 56;
     ground.PSM = GS_PSM_CT24;
 
-    GSTEXTURE brd;
-    brd.Width = 17;
-    brd.Height = 12;
-    brd.PSM = GS_PSM_CT24;
+    GSTEXTURE spriteSheet;
+    spriteSheet.Width = 320;
+    spriteSheet.Height = 256;
+    spriteSheet.PSM = GS_PSM_CT24;
 
-    GSTEXTURE lowerPipe;
-    lowerPipe.Width = 320;
-    lowerPipe.Height = 256;
-    lowerPipe.PSM = GS_PSM_CT24;
-
-    GSTEXTURE upperPipe;
-    upperPipe.Width = 26;
-    upperPipe.Height = 256;
-    upperPipe.PSM = GS_PSM_CT24;
-    
     u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
 
@@ -311,10 +264,7 @@ int main(int argc, char* argv[])
     
     gsKit_texture_bmp(gsGlobal, &bg, "mass:bg2.bmp"); // should be tiled
     gsKit_texture_bmp(gsGlobal, &ground, "mass:ground.bmp"); // should be tiled
-    //gsKit_texture_bmp(gsGlobal, &brd, "mass:brd.bmp");
-    gsKit_texture_bmp(gsGlobal, &lowerPipe, "mass:lowerPipe.bmp"); // rename to spritesheet
-    //gsKit_texture_bmp(gsGlobal, &upperPipe, "mass:lowerPipe.bmp");
-    //gsKit_texture_bmp(gsGlobal, &sprites, "mass:bigtex.bmp");
+    gsKit_texture_bmp(gsGlobal, &spriteSheet, "mass:sprites.bmp");
     
     gsKit_prim_quad_texture(gsGlobal, &bg,
                             0.0f, 0.0f,     // x1, y1
@@ -347,7 +297,11 @@ int main(int argc, char* argv[])
                 started = 1;
                 srand(time(NULL));
                 // render the start screen
+                
             }
+        }
+        gsKit_queue_exec(gsGlobal);
+        gsKit_sync_flip(gsGlobal);
     }
     
     while(1)
@@ -377,7 +331,7 @@ int main(int argc, char* argv[])
         }
 
         // draw pipe
-	drawPipes(gsGlobal, pipes, &lowerPipe);
+	drawPipes(gsGlobal, pipes, &spriteSheet);
 	if(!collided)movePipes(pipes, 2, b, &score);
 
         //draw platform
@@ -401,8 +355,8 @@ int main(int argc, char* argv[])
             b->vy += 0.2;
             b->y += b->vy;
         }
-        drawBird(gsGlobal, b, &brd);
-        printScore(gsGlobal, score, &lowerPipe);
+        drawBird(gsGlobal, b, &spriteSheet);
+        printScore(gsGlobal, score, &spriteSheet);
         
         gsKit_queue_exec(gsGlobal);
         gsKit_sync_flip(gsGlobal);
