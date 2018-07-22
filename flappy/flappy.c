@@ -223,10 +223,13 @@ int main(int argc, char* argv[])
     int gravity = 0, collided = 0, score = 0;
 
     GSGLOBAL* gsGlobal = gsKit_init_global();
-    //gsGlobal->Mode = GS_MODE_PAL;
+    gsGlobal->Mode = GS_MODE_PAL;
     //gsGlobal->Width=640;
     //gsGlobal->Height=512;
-    //gsGlobal->ZBuffering = GS_SETTING_OFF;
+    gsGlobal->PSM = GS_PSM_CT32;
+    gsGlobal->PSMZ = GS_PSMZ_16S;
+    gsGlobal->ZBuffering = GS_SETTING_ON;
+    gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
 
     
     GSTEXTURE bg;
@@ -247,11 +250,6 @@ int main(int argc, char* argv[])
     u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
 
-    gsGlobal->ZBuffering = GS_SETTING_OFF;
-    
-    //gsGlobal->PSM = GS_PSM_CT24;
-    //gsGlobal->PSMZ = GS_PSMZ_16S;
-
     dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
                 D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
 
@@ -262,9 +260,9 @@ int main(int argc, char* argv[])
     gsKit_clear(gsGlobal, White);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
     
-    gsKit_texture_bmp(gsGlobal, &bg, "mass:bg2.bmp"); // should be tiled
-    gsKit_texture_bmp(gsGlobal, &ground, "mass:ground.bmp"); // should be tiled
-    gsKit_texture_bmp(gsGlobal, &spriteSheet, "mass:sprites.bmp");
+    gsKit_texture_png(gsGlobal, &bg, "mass:flappy/bg.png"); // should be tiled
+    gsKit_texture_png(gsGlobal, &spriteSheet, "mass:flappy/spritesheet.png");
+    gsKit_texture_png(gsGlobal, &ground, "mass:flappy/ground.png"); // should be tiled
     
     gsKit_prim_quad_texture(gsGlobal, &bg,
                             0.0f, 0.0f,     // x1, y1
@@ -358,8 +356,8 @@ int main(int argc, char* argv[])
         drawBird(gsGlobal, b, &spriteSheet);
         printScore(gsGlobal, score, &spriteSheet);
         
-        gsKit_queue_exec(gsGlobal);
         gsKit_sync_flip(gsGlobal);
+        gsKit_queue_exec(gsGlobal);
     }
     return 0;
 }
