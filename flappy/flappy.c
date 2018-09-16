@@ -51,6 +51,25 @@ int collision(struct bird* b, struct pipeList* pipes)
     return 0;
 }
 
+void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                0.0f, 400.0f,   // x1, y1
+                                0.0f, 200.0f,     // u1, v1
+                                
+                                0.0f, 512.0f,   // x2, y2
+                                0.0f, 256.0f,    // u2, v2
+                                
+                                640.0f, 400.0f, // x3, y3
+                                320.0f, 200.0f,   // u3, v3
+                                
+                                640.0f, 512.0f, // x4, y4
+                                320.0f, 256.0f,  // u4, v4
+                                2, TexCol);
+    return;
+}
+
 void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
@@ -67,6 +86,7 @@ void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
                             b->x+34, b->y+24, // x4, y4
                             69.0f, 30.0f,     // u4, v4
                             3, TexCol);
+    return;
 }
 
 int birdTouchingGround(struct bird* b, int ground)
@@ -114,6 +134,7 @@ void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* spriteSheet)
                                 1, TexCol);
         curr = curr->next;
     }
+    return;
 }
 
 void movePipes(struct pipeList* ps, int val, struct bird* b, int* score)
@@ -146,6 +167,7 @@ void movePipes(struct pipeList* ps, int val, struct bird* b, int* score)
         ps->tail->next = NULL;
         ps->head->prev = NULL;
     }
+    return;
 }
 
 void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
@@ -183,6 +205,7 @@ void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
         p -= width + space;
         score/=10;
     }
+    return;
 }
 
 static int padBuf[256] __attribute__((aligned(64)));
@@ -262,7 +285,6 @@ int main(int argc, char* argv[])
     
     gsKit_texture_png(gsGlobal, &bg, "mass:flappy/bg.png"); // should be tiled
     gsKit_texture_png(gsGlobal, &spriteSheet, "mass:flappy/spritesheet.png");
-    //gsKit_texture_png(gsGlobal, &ground, "mass:flappy/ground.png"); // should be tiled
     
     gsKit_prim_quad_texture(gsGlobal, &bg,
                             0.0f, 0.0f,     // x1, y1
@@ -298,6 +320,22 @@ int main(int argc, char* argv[])
                 
             }
         }
+        gsKit_prim_quad_texture(gsGlobal, &bg,
+                                0.0f, 0.0f,     // x1, y1
+                                0.0f, 0.0f,     // u1, v1
+                                    
+                                0.0f, 512.0f,   // x2, y2
+                                0.0f, 256.0f,   // u2, v2
+                                    
+                                640.0f, 0.0f,   // x3, y3
+                                320.0f, 0.0f,   // u3, v3
+                            
+                                640.0f, 512.0f, // x4, y4
+                                320.0f, 256.0f, // u4, v4
+                                0,TexCol);
+        drawBird(gsGlobal, b, &spriteSheet);
+        drawPlatform(gsGlobal, &spriteSheet);
+
         gsKit_queue_exec(gsGlobal);
         gsKit_sync_flip(gsGlobal);
     }
@@ -333,19 +371,8 @@ int main(int argc, char* argv[])
 	if(!collided)movePipes(pipes, 2, b, &score);
 
         //draw platform
-        gsKit_prim_quad_texture(gsGlobal, &spriteSheet,
-                                0.0f, 400.0f,   // x1, y1
-                                0.0f, 200.0f,     // u1, v1
-                                
-                                0.0f, 512.0f,   // x2, y2
-                                0.0f, 256.0f,    // u2, v2
-                                
-                                640.0f, 400.0f, // x3, y3
-                                320.0f, 200.0f,   // u3, v3
-                                
-                                640.0f, 512.0f, // x4, y4
-                                320.0f, 256.0f,  // u4, v4
-                                2, TexCol);
+        drawPlatform(gsGlobal, &spriteSheet);
+        
 
         // draw bird
         if(gravity)
