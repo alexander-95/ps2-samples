@@ -78,39 +78,39 @@ int birdTouchingGround(struct bird* b, int ground)
     return 0;
 }
 
-void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* lower)
+void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* spriteSheet)
 {
     struct pipe* curr = ps->head;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     while(curr!=NULL)
     {
         //upper pipe
-        gsKit_prim_quad_texture(gsGlobal, lower,
-                                curr->x, curr->y-562,         // x1, y1
+        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                curr->x, curr->y-450,         // x1, y1
                                 26.0f, 0.0f,                  // u1, v1
                                 
                                 curr->x, curr->y-50,          // x2, y2
-                                26.0f, 256.0f,                // u2, v2
+                                26.0f, 200.0f,                // u2, v2
                                 
-                                curr->x+curr->d, curr->y-562, // x3, y3
+                                curr->x+curr->d, curr->y-450, // x3, y3
                                 52.0f, 0.0f,                  // u3, v3
                         
                                 curr->x+curr->d, curr->y-50,  // x4, y4
-                                52.0f, 256.0f,                // u4, v4
+                                52.0f, 200.0f,                // u4, v4
                                 1, TexCol);
 
-        gsKit_prim_quad_texture(gsGlobal, lower,
+        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
                                 curr->x, curr->y+50,          // x1, y1
                                 0.0f, 0.0f,                   // u1, v1
                                     
-                                curr->x, curr->y+562,         // x2, y2
-                                0.0f, 256.0f,                 // u2, v2
+                                curr->x, curr->y+450,         // x2, y2
+                                0.0f, 200.0f,                 // u2, v2
                                     
                                 curr->x+curr->d, curr->y+50,  // x3, y3
                                 26.0f, 0.0f,                  // u3, v3
                             
-                                curr->x+curr->d, curr->y+562, // x4, y4
-                                26.0f, 256.0f,                // u4, v4
+                                curr->x+curr->d, curr->y+450, // x4, y4
+                                26.0f, 200.0f,                // u4, v4
                                 1, TexCol);
         curr = curr->next;
     }
@@ -262,7 +262,7 @@ int main(int argc, char* argv[])
     
     gsKit_texture_png(gsGlobal, &bg, "mass:flappy/bg.png"); // should be tiled
     gsKit_texture_png(gsGlobal, &spriteSheet, "mass:flappy/spritesheet.png");
-    gsKit_texture_png(gsGlobal, &ground, "mass:flappy/ground.png"); // should be tiled
+    //gsKit_texture_png(gsGlobal, &ground, "mass:flappy/ground.png"); // should be tiled
     
     gsKit_prim_quad_texture(gsGlobal, &bg,
                             0.0f, 0.0f,     // x1, y1
@@ -333,18 +333,18 @@ int main(int argc, char* argv[])
 	if(!collided)movePipes(pipes, 2, b, &score);
 
         //draw platform
-        gsKit_prim_quad_texture(gsGlobal, &ground,
+        gsKit_prim_quad_texture(gsGlobal, &spriteSheet,
                                 0.0f, 400.0f,   // x1, y1
-                                0.0f, 0.0f,     // u1, v1
+                                0.0f, 200.0f,     // u1, v1
                                 
                                 0.0f, 512.0f,   // x2, y2
-                                0.0f, 56.0f,    // u2, v2
+                                0.0f, 256.0f,    // u2, v2
                                 
                                 640.0f, 400.0f, // x3, y3
-                                320.0f, 0.0f,   // u3, v3
+                                320.0f, 200.0f,   // u3, v3
                                 
                                 640.0f, 512.0f, // x4, y4
-                                320.0f, 56.0f,  // u4, v4
+                                320.0f, 256.0f,  // u4, v4
                                 2, TexCol);
 
         // draw bird
