@@ -82,17 +82,17 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                0.0f, 0.0f,     // x1, y1
-                                146.0f, 143.0f, // u1, v1
+                                320.0f-112.0f, 256.0f-56.0f, // x1, y1
+                                146.0f, 143.0f,              // u1, v1
                                 
-                                0.0f, 112.0f,   // x2, y2
-                                146.0f, 199.0f, // u2, v2
+                                320.0f-112.0f, 256.0f+56.0f, // x2, y2
+                                146.0f, 200.0f,              // u2, v2
                                 
-                                224.0f, 0.0f,   // x3, y3
-                                258.0f, 143.0f, // u3, v3
+                                320.0f+112.0f, 256.0f-56.0f, // x3, y3
+                                259.0f, 143.0f,              // u3, v3
                                 
-                                224.0f, 112.0f, // x4, y4
-                                258.0f, 199.0f, // u4, v4
+                                320.0f+112.0f, 256.0f+56.0f, // x4, y4
+                                259.0f, 200.0f,              // u4, v4
                                 2, TexCol);
     return;
 }
