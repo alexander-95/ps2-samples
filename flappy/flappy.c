@@ -36,6 +36,7 @@ struct bird
     int x, y;
     float theta;
     float vy;
+    unsigned char cycle;
 };
 
 int collision(struct bird* b, struct pipeList* pipes)
@@ -70,30 +71,58 @@ void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
     return;
 }
 
-void drawStart(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    // draw "get ready" sprite
-    // draw "tap" message
-    return;
-}
-
-void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
+void drawGetReady(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                320.0f-112.0f, 256.0f-56.0f, // x1, y1
-                                146.0f, 143.0f,              // u1, v1
+                            320.0f-92.0f, 256.0f-91.0f, // x1, y1
+                            52.0f, 109.0f,              // u1, v1
                                 
-                                320.0f-112.0f, 256.0f+56.0f, // x2, y2
-                                146.0f, 200.0f,              // u2, v2
+                            320.0f-92.0f, 256.0f+91.0f, // x2, y2
+                            52.0f, 200.0f,              // u2, v2
                                 
-                                320.0f+112.0f, 256.0f-56.0f, // x3, y3
-                                259.0f, 143.0f,              // u3, v3
+                            320.0f+92.0f, 256.0f-91.0f, // x3, y3
+                            144.0f, 109.0f,              // u3, v3
                                 
-                                320.0f+112.0f, 256.0f+56.0f, // x4, y4
-                                259.0f, 200.0f,              // u4, v4
-                                2, TexCol);
+                            320.0f+92.0f, 256.0f+91.0f, // x4, y4
+                            144.0f, 200.0f,              // u4, v4
+                            2, TexCol); 
+    return;
+}
+
+void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                            320.0f-112.0f, 256.0f-56.0f, // x1, y1
+                            146.0f, 143.0f,              // u1, v1
+                            
+                            320.0f-112.0f, 256.0f+56.0f, // x2, y2
+                            146.0f, 200.0f,              // u2, v2
+                                
+                            320.0f+112.0f, 256.0f-56.0f, // x3, y3
+                            259.0f, 143.0f,              // u3, v3
+                                
+                            320.0f+112.0f, 256.0f+56.0f, // x4, y4
+                            259.0f, 200.0f,              // u4, v4
+                            2, TexCol);
+
+    // draw score
+    int curr = score % 10;
+    
+    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                            320.0f, 256.0f,       // x1, y1
+                            52.0f+(7*curr), 41.0f,  // u1, v1
+                                
+                            320.0f, 270.0f,              // x2, y2
+                            52.0f+(7*curr), 48.0f, // u2, v2
+                                
+                            332.0f, 256.0f, // x3, y3
+                            58.0f+(7*curr), 41.0f,  // u3, v3
+                                
+                            332.0f, 270.0f,        // x4, y4
+                            58.0f+(7*curr), 48.0f, // u4, v4
+                            3, TexCol);
     return;
 }
 
@@ -119,25 +148,31 @@ void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* bg)
 void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    float offset = 0;
+    if((b->cycle & 4) == 0)offset = 17.0f;
+    else if((b->cycle & 8) == 0)offset = 0.0f;
+    else offset = 34.0f;
+    
     gsKit_prim_quad_texture(gsGlobal, tex,
-                            b->x, b->y,       // x1, y1
-                            52.0f, 18.0f,       // u1, v1
+                            b->x, b->y,          // x1, y1
+                            52.0f+offset, 18.0f, // u1, v1
                             
-                            b->x, b->y+24,    // x2, y2
-                            52.0f, 30.0f,      // u2, v2
+                            b->x, b->y+24,       // x2, y2
+                            52.0f+offset, 30.0f, // u2, v2
                             
-                            b->x+34, b->y,    // x3, y3
-                            69.0f, 18.0f,      // u3, v3
+                            b->x+34, b->y,       // x3, y3
+                            69.0f+offset, 18.0f, // u3, v3
                             
-                            b->x+34, b->y+24, // x4, y4
-                            69.0f, 30.0f,     // u4, v4
+                            b->x+34, b->y+24,    // x4, y4
+                            69.0f+offset, 30.0f, // u4, v4
                             1, TexCol);
+    b->cycle++;
     return;
 }
 
 int birdTouchingGround(struct bird* b, int ground)
 {
-    if(b->y > ground)
+    if(b->y >= ground)
     {
         return 1;
     }
@@ -280,19 +315,19 @@ int main(int argc, char* argv[])
     b->x = 200;
     b->y = 200;
     b->vy = 0;
+    b->cycle = 0;
 
     int gravity = 0, collided = 0, score = 0;
 
     GSGLOBAL* gsGlobal = gsKit_init_global();
     gsGlobal->Mode = GS_MODE_PAL;
-    //gsGlobal->Width=640;
-    //gsGlobal->Height=512;
+    gsGlobal->Width=640;
+    gsGlobal->Height=512;
     //gsGlobal->PSM = GS_PSM_CT32;
     gsGlobal->PSMZ = GS_PSMZ_16S;
     gsGlobal->ZBuffering = GS_SETTING_ON;
     gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
     gsGlobal->DoubleBuffering = GS_SETTING_ON;
-
     
     GSTEXTURE bg;
     bg.Width=320;
@@ -304,7 +339,7 @@ int main(int argc, char* argv[])
     spriteSheet.Height = 256;
     spriteSheet.PSM = GS_PSM_CT32;
     
-    u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
+    //u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
     
     dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
                 D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
@@ -318,6 +353,8 @@ int main(int argc, char* argv[])
     gsKit_texture_png(gsGlobal, &spriteSheet, "mass:flappy/spritesheet.png");
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 
+    stabilise(port,slot);
+    
     // pre-game loop
     int started = 0;
     while(!started)
@@ -339,18 +376,19 @@ int main(int argc, char* argv[])
         drawBackground(gsGlobal, &bg);
         drawBird(gsGlobal, b, &spriteSheet);
         drawPlatform(gsGlobal, &spriteSheet);
+        drawGetReady(gsGlobal, &spriteSheet);
 
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
-        gsKit_clear(gsGlobal, White);
+        gsKit_clear(gsGlobal, 0);
     }
 
     // main game loop
     int game_ended = 0;
     while(!game_ended)
     {
-	stabilise(port,slot);
+
         if(padRead(port, slot, &buttons) != 0)
         {
             paddata = 0xffff ^ buttons.btns;
@@ -386,7 +424,8 @@ int main(int argc, char* argv[])
         if(gravity)
         {
             b->vy += 0.2;
-            b->y += b->vy;
+            if(b->y + b->vy <= 380 )b->y += b->vy;
+            else b->y=380;
         }
         drawBird(gsGlobal, b, &spriteSheet);
         printScore(gsGlobal, score, &spriteSheet);
@@ -394,7 +433,7 @@ int main(int argc, char* argv[])
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
-        gsKit_clear(gsGlobal, White);
+        gsKit_clear(gsGlobal, 0);
     }
 
     // post-game loop
@@ -417,12 +456,12 @@ int main(int argc, char* argv[])
         drawBackground(gsGlobal, &bg);
         drawBird(gsGlobal, b, &spriteSheet);
         drawPlatform(gsGlobal, &spriteSheet);
-        drawEnd(gsGlobal, &spriteSheet);
+        drawEnd(gsGlobal, &spriteSheet, score);
 
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
-        gsKit_clear(gsGlobal, White);
+        gsKit_clear(gsGlobal, 0);
     }
     return 0;
 }
