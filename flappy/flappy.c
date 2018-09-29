@@ -107,22 +107,51 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score)
                             259.0f, 200.0f,              // u4, v4
                             2, TexCol);
 
-    // draw score
-    int curr = score % 10;
+    int curr = 0, offset = 0;
     
-    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                            320.0f, 256.0f,       // x1, y1
-                            52.0f+(7*curr), 41.0f,  // u1, v1
+    // draw score
+    score = 12345;
+    while(score)
+    {
+        curr = score%10;
+        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                400.0f-offset, 236.0f,       // x1, y1
+                                52.0f+(7*curr), 41.0f,  // u1, v1
                                 
-                            320.0f, 270.0f,              // x2, y2
-                            52.0f+(7*curr), 48.0f, // u2, v2
+                                400.0f-offset, 250.0f,              // x2, y2
+                                52.0f+(7*curr), 48.0f, // u2, v2
                                 
-                            332.0f, 256.0f, // x3, y3
-                            58.0f+(7*curr), 41.0f,  // u3, v3
+                                412.0f-offset, 236.0f, // x3, y3
+                                58.0f+(7*curr), 41.0f,  // u3, v3
                                 
-                            332.0f, 270.0f,        // x4, y4
-                            58.0f+(7*curr), 48.0f, // u4, v4
-                            3, TexCol);
+                                412.0f-offset, 250.0f,        // x4, y4
+                                58.0f+(7*curr), 48.0f, // u4, v4
+                                3, TexCol);
+        offset+=14;
+        score/=10;
+    }
+    offset = 0;
+
+    int best = 12345;
+    while(best)
+    {
+        curr = best%10;
+        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                400.0f-offset, 276.0f,       // x1, y1
+                                52.0f+(7*curr), 41.0f,  // u1, v1
+                                
+                                400.0f-offset, 290.0f,              // x2, y2
+                                52.0f+(7*curr), 48.0f, // u2, v2
+                                
+                                412.0f-offset, 276.0f, // x3, y3
+                                58.0f+(7*curr), 41.0f,  // u3, v3
+                                
+                                412.0f-offset, 290.0f,        // x4, y4
+                                58.0f+(7*curr), 48.0f, // u4, v4
+                                3, TexCol);
+        offset+=14;
+        best/=10;
+    }
     return;
 }
 
@@ -454,6 +483,7 @@ int main(int argc, char* argv[])
         }
 
         drawBackground(gsGlobal, &bg);
+        drawPipes(gsGlobal, pipes, &spriteSheet);
         drawBird(gsGlobal, b, &spriteSheet);
         drawPlatform(gsGlobal, &spriteSheet);
         drawEnd(gsGlobal, &spriteSheet, score);
