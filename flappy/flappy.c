@@ -82,15 +82,59 @@ void drawGetReady(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
                             52.0f, 200.0f,              // u2, v2
                                 
                             320.0f+92.0f, 256.0f-91.0f, // x3, y3
-                            144.0f, 109.0f,              // u3, v3
+                            144.0f, 109.0f,             // u3, v3
                                 
                             320.0f+92.0f, 256.0f+91.0f, // x4, y4
-                            144.0f, 200.0f,              // u4, v4
+                            144.0f, 200.0f,             // u4, v4
                             2, TexCol); 
     return;
 }
 
-void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score)
+int getHighScore()
+{
+    FILE* savefile = fopen("mass:flappy/savefile.txt","r");
+    int score = 123;
+    //fscanf(savefile, "%d", &score);
+    fclose(savefile);
+    return score;
+}
+
+void setHighScore(int score)
+{
+    FILE* savefile;
+    savefile = fopen("mass:flappy/savefile.txt", "w");
+    fprintf(savefile, "%d", score);
+    fclose(savefile);
+}
+
+void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    int medal = 0;
+    if(score >=10 && score < 20)medal=0;
+    else if(score >= 20 && score <= 30)medal=1;
+    else if(score > 30 && score < 40)medal = 2;
+    else medal = 3;
+
+    if(score >= 10)
+    {
+        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                320.0f-23.0f, 266.0f-23.0f, // x1, y1
+                                53.0f+(23*medal), 55.0f,              // u1, v1
+                                
+                                320.0f-23.0f, 266.0f+23.0f, // x2, y2
+                                53.0f+(23*medal), 78.0f,              // u2, v2
+                                
+                                320.0f+23.0f, 266.0f-23.0f, // x3, y3
+                                76.0f+(23*medal), 55.0f,              // u3, v3
+                                
+                                320.0f+23.0f, 266.0f+23.0f, // x4, y4
+                                76.0f+(23*medal), 78.0f,              // u4, v4
+                                4, TexCol);
+    }
+}
+
+void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, spriteSheet,
@@ -108,49 +152,50 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score)
                             2, TexCol);
 
     int curr = 0, offset = 0;
+
+    score = 65719;
+    drawMedal(gsGlobal, spriteSheet, score, highScore);
     
     // draw score
-    score = 12345;
     while(score)
     {
         curr = score%10;
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
                                 400.0f-offset, 236.0f,       // x1, y1
-                                52.0f+(7*curr), 41.0f,  // u1, v1
+                                52.0f+(6*curr), 41.0f,  // u1, v1
                                 
                                 400.0f-offset, 250.0f,              // x2, y2
-                                52.0f+(7*curr), 48.0f, // u2, v2
+                                52.0f+(6*curr), 48.0f, // u2, v2
                                 
                                 412.0f-offset, 236.0f, // x3, y3
-                                58.0f+(7*curr), 41.0f,  // u3, v3
+                                58.0f+(6*curr), 41.0f,  // u3, v3
                                 
                                 412.0f-offset, 250.0f,        // x4, y4
-                                58.0f+(7*curr), 48.0f, // u4, v4
+                                58.0f+(6*curr), 48.0f, // u4, v4
                                 3, TexCol);
         offset+=14;
         score/=10;
     }
     offset = 0;
 
-    int best = 12345;
-    while(best)
+    while(highScore)
     {
-        curr = best%10;
+        curr = highScore%10;
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
                                 400.0f-offset, 276.0f,       // x1, y1
-                                52.0f+(7*curr), 41.0f,  // u1, v1
+                                52.5f+(6*curr), 41.5f,  // u1, v1
                                 
                                 400.0f-offset, 290.0f,              // x2, y2
-                                52.0f+(7*curr), 48.0f, // u2, v2
+                                52.5f+(6*curr), 48.5f, // u2, v2
                                 
                                 412.0f-offset, 276.0f, // x3, y3
-                                58.0f+(7*curr), 41.0f,  // u3, v3
+                                58.5f+(6*curr), 41.5f,  // u3, v3
                                 
                                 412.0f-offset, 290.0f,        // x4, y4
-                                58.0f+(7*curr), 48.0f, // u4, v4
+                                58.5f+(6*curr), 48.5f, // u4, v4
                                 3, TexCol);
         offset+=14;
-        best/=10;
+        highScore/=10;
     }
     return;
 }
@@ -302,8 +347,6 @@ void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
                                 p+width, 100.0f,        // x4, y4
                                 64.0f+(12*curr), 18.0f, // u4, v4
                                 3, TexCol);
-        
-        printf("\n");
         p -= width + space;
         score/=10;
     }
@@ -346,7 +389,7 @@ int main(int argc, char* argv[])
     b->vy = 0;
     b->cycle = 0;
 
-    int gravity = 0, collided = 0, score = 0;
+    int gravity = 0, collided = 0, score = 0, highScore = getHighScore();
 
     GSGLOBAL* gsGlobal = gsKit_init_global();
     gsGlobal->Mode = GS_MODE_PAL;
@@ -383,7 +426,7 @@ int main(int argc, char* argv[])
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 
     stabilise(port,slot);
-    
+
     // pre-game loop
     int started = 0;
     while(!started)
@@ -477,8 +520,8 @@ int main(int argc, char* argv[])
 
             if(new_pad & PAD_CROSS)
             {
-                started = 1;
-                srand(time(NULL));
+                setHighScore(83739);
+                return 0;
             }
         }
 
@@ -486,7 +529,7 @@ int main(int argc, char* argv[])
         drawPipes(gsGlobal, pipes, &spriteSheet);
         drawBird(gsGlobal, b, &spriteSheet);
         drawPlatform(gsGlobal, &spriteSheet);
-        drawEnd(gsGlobal, &spriteSheet, score);
+        drawEnd(gsGlobal, &spriteSheet, score, highScore);
 
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
