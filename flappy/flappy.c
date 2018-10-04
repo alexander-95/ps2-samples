@@ -110,6 +110,24 @@ void setHighScore(int score)
     fclose(savefile);
 }
 
+void drawSaveIcon(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                            320.0f-9.0f, 256.0f-12.0f, // x1, y1
+                            259.0f, 188.0f,              // u1, v1
+                                
+                            320.0f-9.0f, 256.0f+12.0f, // x2, y2
+                            259.0f, 200.0f,              // u2, v2
+                                
+                            320.0f+9.0f, 256.0f-12.0f, // x3, y3
+                            268.0f, 188.0f,              // u3, v3
+                                
+                            320.0f+9.0f, 256.0f+12.0f, // x4, y4
+                            268.0f, 200.0f,              // u4, v4
+                            5, TexCol);
+}
+
 void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
@@ -524,6 +542,18 @@ int main(int argc, char* argv[])
 
             if(new_pad & PAD_CROSS)
             {
+                drawBackground(gsGlobal, &bg);
+                drawPipes(gsGlobal, pipes, &spriteSheet);
+                drawBird(gsGlobal, b, &spriteSheet);
+                drawPlatform(gsGlobal, &spriteSheet);
+                drawEnd(gsGlobal, &spriteSheet, score, highScore);
+                drawSaveIcon(gsGlobal, &spriteSheet);
+                
+                gsKit_queue_exec(gsGlobal);
+                gsKit_sync_flip(gsGlobal);
+                gsKit_queue_reset(gsGlobal->Per_Queue);
+                gsKit_clear(gsGlobal, 0);
+                
                 setHighScore(83739);
                 return 0;
             }
