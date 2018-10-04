@@ -94,8 +94,11 @@ int getHighScore()
 {
     FILE* savefile = fopen("mass:flappy/savefile.txt","r");
     int score = 123;
-    //fscanf(savefile, "%d", &score);
-    fclose(savefile);
+    if(savefile)
+    {
+        fscanf(savefile,  "%d", &score);
+        fclose(savefile);
+    }
     return score;
 }
 
@@ -119,17 +122,17 @@ void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highSc
     if(score >= 10)
     {
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                320.0f-23.0f, 266.0f-23.0f, // x1, y1
-                                53.0f+(23*medal), 55.0f,              // u1, v1
+                                256.0f-22.0f, 264.0f-22.0f, // x1, y1
+                                53.0f+(22*medal), 55.0f,              // u1, v1
                                 
-                                320.0f-23.0f, 266.0f+23.0f, // x2, y2
-                                53.0f+(23*medal), 78.0f,              // u2, v2
+                                256.0f-22.0f, 264.0f+22.0f, // x2, y2
+                                53.0f+(22*medal), 78.0f,              // u2, v2
                                 
-                                320.0f+23.0f, 266.0f-23.0f, // x3, y3
-                                76.0f+(23*medal), 55.0f,              // u3, v3
+                                256.0f+22.0f, 264.0f-22.0f, // x3, y3
+                                75.0f+(22*medal), 55.0f,              // u3, v3
                                 
-                                320.0f+23.0f, 266.0f+23.0f, // x4, y4
-                                76.0f+(23*medal), 78.0f,              // u4, v4
+                                256.0f+22.0f, 264.0f+22.0f, // x4, y4
+                                75.0f+(22*medal), 78.0f,              // u4, v4
                                 4, TexCol);
     }
 }
@@ -389,7 +392,7 @@ int main(int argc, char* argv[])
     b->vy = 0;
     b->cycle = 0;
 
-    int gravity = 0, collided = 0, score = 0, highScore = getHighScore();
+    int gravity = 0, collided = 0, score = 0, highScore = 0;
 
     GSGLOBAL* gsGlobal = gsKit_init_global();
     gsGlobal->Mode = GS_MODE_PAL;
@@ -426,6 +429,7 @@ int main(int argc, char* argv[])
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 
     stabilise(port,slot);
+    highScore=getHighScore();
 
     // pre-game loop
     int started = 0;
