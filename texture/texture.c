@@ -8,15 +8,40 @@
 #include <dmaKit.h>
 #include <gsToolkit.h>
 
+void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex)
+{
+    u32 data[] = {0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000,
+                  0x00000000, 0x000000FF, 0x0000FF00, 0x00FF0000,
+                  0x00FF0000, 0x00000000, 0x000000FF, 0x0000FF00,
+                  0x0000FF00, 0x00FF0000, 0xFF000000, 0x000000FF};
+    
+    tex->Width = 4;
+    tex->Height = 4;
+    tex->PSM = GS_PSM_CT32;
+    tex->ClutPSM = 0;
+    tex->TBW = 1;
+    tex->Mem = data;
+    tex->Clut = NULL;
+    u32 VramTextureSize = gsKit_texture_size(tex->Width, tex->Height, tex->PSM);
+    tex->Vram = gsKit_vram_alloc(gsGlobal, VramTextureSize, GSKIT_ALLOC_USERBUFFER);;
+    tex->VramClut = 0;
+    tex->Filter = GS_FILTER_NEAREST;
+    tex->Delayed = 0;
+
+    gsKit_texture_upload(gsGlobal, tex);
+}
+
 int main(int argc, char *argv[])
 {
     GSGLOBAL *gsGlobal = gsKit_init_global();
     GSTEXTURE tex;
     u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);
+    u64 Cyan = GS_SETREG_RGBAQ(0x00,0xFF,0xFF,0x00,0x00);
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
 
     gsGlobal->PSM = GS_PSM_CT24;
     gsGlobal->PSMZ = GS_PSMZ_16S;
+    gsGlobal->PrimAlphaEnable = GS_SETTING_ON;;
     
     dmaKit_init(D_CTRL_RELE_OFF,D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
                 D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
@@ -25,30 +50,40 @@ int main(int argc, char *argv[])
     dmaKit_chan_init(DMA_CHANNEL_GIF);
     gsKit_init_screen(gsGlobal);
     gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
-    gsKit_clear(gsGlobal, White);
+    gsKit_clear(gsGlobal, Cyan);
 
-    gsKit_texture_bmp(gsGlobal, &tex, "mass:dirt2.bmp");
+    //gsKit_texture_bmp(gsGlobal, &tex, "mass:texture/test.bmp");
+    gsKit_texture_abgr(gsGlobal, &tex);
+
+    FILE* file = fopen("mass:texture/log.txt", "w");
+    fprintf(file, "Width:   0x%x\n", tex.Width);
+    fprintf(file, "Height:  0x%x\n", tex.Height);
+    fprintf(file, "PSM:     0x%x\n", tex.PSM);
+    fprintf(file, "ClutPSM: 0x%x\n", tex.ClutPSM);
+    fprintf(file, "TBW:     0x%x\n", tex.TBW);
+    fprintf(file, "Mem: 0x%x\n", tex.Mem);
+    fprintf(file, "Clut: 0x%x\n", tex.Clut);
+    fprintf(file, "Vram: 0x%x\n", tex.Vram);
+    fprintf(file, "VramClut: 0x%x\n", tex.VramClut);
+    fprintf(file, "Filter: 0x%x\n", tex.Filter);
+    fprintf(file, "Delayed: 0x%x\n", tex.Delayed);
+
+    
+    
+    fclose(file);
         
     gsKit_prim_quad_texture(gsGlobal, &tex,
-                            310.0f,                   // x1
-                            50.0f,                 // y1
-                            0.0f,                  // u1
-                            0.0f,                  // v1
+                            0.0f, 0.0f,     // x1, y1
+                            0.0f, 0.0f,     // u1, v1
                             
-                            310.0f,                   // x2
-                            250.0f,   // y2
-                            0.0f,                  // u2
-                            16.0f,
+                            0.0f, 100.0f,   // x2, y2
+                            0.0f, 4.0f,     // u2, y2
 
-                            510.0f,   // x3
-                            50.0f,                // y3
-                            16.0f,            // u3
-                            0.0f,                  // v3
+                            100.0f, 0.0f,   // x3, y3
+                            4.0f, 0.0f,     // u3, v3
                             
-                            510.0f,   // x4
-                            250.0f, // y4
-                            16.0f,            // u4
-                            16.0f,           // v4
+                            100.0f, 100.0f, // x4, y4
+                            4.0f, 4.0f,     // u4, v4
                             2,TexCol);
     while(1)
     {
