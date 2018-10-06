@@ -7,28 +7,38 @@
 #include <gsKit.h>
 #include <dmaKit.h>
 #include <gsToolkit.h>
+#include "spritesheet.h"
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex)
 {
-    u32 data[] = {0x000000FF, 0x0000FF00, 0x00FF0000, 0x00000000,
-                  0x00000000, 0x000000FF, 0x0000FF00, 0x00FF0000,
-                  0x00FF0000, 0x00000000, 0x000000FF, 0x0000FF00,
-                  0x0000FF00, 0x00FF0000, 0xFF000000, 0x000000FF};
-    
     tex->Width = 4;
     tex->Height = 4;
     tex->PSM = GS_PSM_CT32;
     tex->ClutPSM = 0;
     tex->TBW = 1;
-    tex->Mem = data;
+    tex->Mem = spritesheet;
     tex->Clut = NULL;
     u32 VramTextureSize = gsKit_texture_size(tex->Width, tex->Height, tex->PSM);
-    tex->Vram = gsKit_vram_alloc(gsGlobal, VramTextureSize, GSKIT_ALLOC_USERBUFFER);;
+    tex->Vram = gsKit_vram_alloc(gsGlobal, VramTextureSize, GSKIT_ALLOC_USERBUFFER);
     tex->VramClut = 0;
     tex->Filter = GS_FILTER_NEAREST;
     tex->Delayed = 0;
-
     gsKit_texture_upload(gsGlobal, tex);
+}
+
+void printTexture(GSTEXTURE* tex)
+{
+    printf("Width:    0x%x\n", tex->Width);
+    printf("Height:   0x%x\n", tex->Height);
+    printf("PSM:      0x%x\n", tex->PSM);
+    printf("ClutPSM:  0x%x\n", tex->ClutPSM);
+    printf("TBW:      0x%x\n", tex->TBW);
+    printf("Mem:      0x%x\n", tex->Mem);
+    printf("Clut:     0x%x\n", tex->Clut);
+    printf("Vram:     0x%x\n", tex->Vram);
+    printf("VramClut: 0x%x\n", tex->VramClut);
+    printf("Filter:   0x%x\n", tex->Filter);
+    printf("Delayed:  0x%x\n", tex->Delayed);
 }
 
 int main(int argc, char *argv[])
@@ -36,7 +46,6 @@ int main(int argc, char *argv[])
     GSGLOBAL *gsGlobal = gsKit_init_global();
     GSTEXTURE tex;
     u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);
-    u64 Cyan = GS_SETREG_RGBAQ(0x00,0xFF,0xFF,0x00,0x00);
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
 
     gsGlobal->PSM = GS_PSM_CT24;
@@ -50,10 +59,11 @@ int main(int argc, char *argv[])
     dmaKit_chan_init(DMA_CHANNEL_GIF);
     gsKit_init_screen(gsGlobal);
     gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
-    gsKit_clear(gsGlobal, Cyan);
+    gsKit_clear(gsGlobal, White);
 
     //gsKit_texture_bmp(gsGlobal, &tex, "mass:texture/test.bmp");
     gsKit_texture_abgr(gsGlobal, &tex);
+    printTexture(&tex);
 
     FILE* file = fopen("mass:texture/log.txt", "w");
     fprintf(file, "Width:   0x%x\n", tex.Width);
@@ -67,9 +77,6 @@ int main(int argc, char *argv[])
     fprintf(file, "VramClut: 0x%x\n", tex.VramClut);
     fprintf(file, "Filter: 0x%x\n", tex.Filter);
     fprintf(file, "Delayed: 0x%x\n", tex.Delayed);
-
-    
-    
     fclose(file);
         
     gsKit_prim_quad_texture(gsGlobal, &tex,
