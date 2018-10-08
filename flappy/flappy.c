@@ -43,6 +43,8 @@ struct bird
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
+    u32 VramTextureSize = gsKit_texture_size(width, height, GS_PSM_CT32);
+    
     tex->Width = width;
     tex->Height = height;
     tex->PSM = GS_PSM_CT32;
@@ -50,11 +52,11 @@ void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width,
     tex->TBW = 1;
     tex->Mem = arr;
     tex->Clut = NULL;
-    u32 VramTextureSize = gsKit_texture_size(tex->Width, tex->Height, tex->PSM);
     tex->Vram = gsKit_vram_alloc(gsGlobal, VramTextureSize, GSKIT_ALLOC_USERBUFFER);
     tex->VramClut = 0;
     tex->Filter = GS_FILTER_NEAREST;
     tex->Delayed = 0;
+    
     gsKit_texture_upload(gsGlobal, tex);
 }
 
@@ -460,9 +462,6 @@ int main(int argc, char* argv[])
     dmaKit_chan_init(DMA_CHANNEL_GIF);
     gsKit_init_screen(gsGlobal);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
-    
-    //gsKit_texture_png(gsGlobal, &bg, "mass:flappy/bg.png"); // should be tiled
-    //gsKit_texture_png(gsGlobal, &spriteSheet, "mass:flappy/spritesheet.png");
     gsKit_texture_abgr(gsGlobal, &bg, &bg_array, 320, 256 );
     gsKit_texture_abgr(gsGlobal, &spriteSheet, &spritesheet_array, 320, 256 );
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
