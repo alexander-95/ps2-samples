@@ -92,6 +92,26 @@ void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
     return;
 }
 
+// incomplete function
+void drawGameOver(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                            320.0f-96.0f, 166.0f-21.0f, // x1, y1
+                            52.0f, 87.0f,              // u1, v1
+                                
+                            320.0f-96.0f, 166.0f+21.0f, // x2, y2
+                            52.0f, 108.0f,              // u2, v2
+                                
+                            320.0f+96.0f, 166.0f-21.0f, // x3, y3
+                            148.0f, 87.0f,             // u3, v3
+                                
+                            320.0f+96.0f, 166.0f+21.0f, // x4, y4
+                            148.0f, 108.0f,             // u4, v4
+                            5, TexCol); 
+    return;
+}
+
 void drawGetReady(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
@@ -239,6 +259,7 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScor
         offset+=14;
         highScore/=10;
     }
+    drawGameOver(gsGlobal, spriteSheet);
     return;
 }
 
