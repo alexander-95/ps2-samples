@@ -92,7 +92,7 @@ void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
     return;
 }
 
-// incomplete function
+
 void drawGameOver(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
@@ -108,7 +108,7 @@ void drawGameOver(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
                                 
                             320.0f+96.0f, 166.0f+21.0f, // x4, y4
                             148.0f, 108.0f,             // u4, v4
-                            5, TexCol); 
+                            3, TexCol); 
     return;
 }
 
@@ -192,8 +192,27 @@ void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highSc
                                 
                                 256.0f+22.0f, 264.0f+22.0f, // x4, y4
                                 75.0f+(22*medal), 78.0f,              // u4, v4
-                                4, TexCol);
+                                3, TexCol);
     }
+    drawNewLabel(gsGlobal, spriteSheet);
+}
+
+void drawNewLabel(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                262.0f-16.0f, 248.0f-7.0f, // x1, y1
+                                141.0f, 55.0f,              // u1, v1
+                                
+                                262.0f-16.0f, 248.0f+7.0f, // x2, y2
+                                141.0f, 62.0f,              // u2, v2
+                                
+                                262.0f+16.0f, 248.0f-7.0f, // x3, y3
+                                157.0f, 55.0f,              // u3, v3
+                                
+                                262.0f+16.0f, 248.0f+7.0f, // x4, y4
+                                157.0f, 62.0f,              // u4, v4
+                                4, TexCol);
 }
 
 void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore)
@@ -504,6 +523,8 @@ int main(int argc, char* argv[])
             if(new_pad & PAD_CROSS)
             {
                 started = 1;
+                gravity = 1;
+                b->vy = -3;
                 srand(time(NULL));
             }
         }
@@ -531,11 +552,7 @@ int main(int argc, char* argv[])
             new_pad = paddata & ~old_pad;
             old_pad = paddata;
 
-            if(!collided && new_pad & PAD_CROSS)
-            {
-                gravity = 1;
-                b->vy = -3;
-            }
+            if(!collided && new_pad & PAD_CROSS)b->vy = -3;
         }
         if(birdTouchingGround(b, top))
         {
