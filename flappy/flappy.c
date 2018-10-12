@@ -530,7 +530,7 @@ int main(int argc, char* argv[])
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 
     stabilise(port,slot);
-    highScore=getHighScore();
+    highScore = getHighScore();
 
     // pre-game loop
     int game_started = 0, game_ended = 0;
@@ -595,7 +595,6 @@ int main(int argc, char* argv[])
 	drawPipes(gsGlobal, pipes, &spriteSheet);
 	if(!collided)movePipes(pipes, 2, b, &score);
 
-
         drawPlatform(gsGlobal, &spriteSheet);
 
         // draw bird
@@ -638,6 +637,7 @@ int main(int argc, char* argv[])
                 gsKit_queue_reset(gsGlobal->Per_Queue);
                 gsKit_clear(gsGlobal, 0);
 
+                if(score > highScore)highScore = score;
                 setHighScore(highScore);
 
                 game_ended = 0;
