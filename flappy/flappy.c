@@ -175,11 +175,27 @@ void drawSaveIcon(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
 void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    int medal = 0;
-    if(score >=10 && score < 20)medal=0;
-    else if(score >= 20 && score <= 30)medal=1;
-    else if(score > 30 && score < 40)medal = 2;
-    else medal = 3;
+    int medal = 0, new_medal = 0;
+    if(score >=10 && score < 20)
+    {
+        medal=0;
+        if(highScore < 10) new_medal = 1;
+    }
+    else if(score >= 20 && score <= 30)
+    {
+        medal=1;
+        if(highScore < 20) new_medal = 1;
+    }
+    else if(score > 30 && score < 40)
+    {
+        medal = 2;
+        if(highScore <= 30) new_medal = 1;
+    }
+    else
+    {
+        medal = 3;
+        new_medal = 1;
+    }
 
     if(score >= 10)
     {
@@ -197,10 +213,7 @@ void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highSc
                                 75.0f+(22*medal), 78.0f,              // u4, v4
                                 3, TexCol);
     }
-    if(score >=10 && score < 20 && highScore < 10)drawNewLabel(gsGlobal, spriteSheet);
-    else if(score >= 20 && score <= 30 && highScore < 20)drawNewLabel(gsGlobal, spriteSheet);
-    else if(score > 30 && score < 40 && highScore <= 30 )drawNewLabel(gsGlobal, spriteSheet);
-    else if(score >= 40 && highScore < 40)drawNewLabel(gsGlobal, spriteSheet);
+    if(new_medal)drawNewLabel(gsGlobal, spriteSheet);
 }
 
 void drawNewLabel(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
@@ -241,9 +254,10 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScor
     int curr = 0, offset = 0;
 
     drawMedal(gsGlobal, spriteSheet, score, highScore);
+    if(score > highScore)highScore = score;
 
     // draw score
-    while(score)
+    do
     {
         curr = score%10;
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
@@ -262,9 +276,10 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScor
         offset+=14;
         score/=10;
     }
+    while(score);
     offset = 0;
 
-    while(highScore)
+    do
     {
         curr = highScore%10;
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
@@ -283,6 +298,7 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScor
         offset+=14;
         highScore/=10;
     }
+    while(highScore);
     drawGameOver(gsGlobal, spriteSheet);
     return;
 }
