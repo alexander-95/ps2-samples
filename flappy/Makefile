@@ -31,7 +31,7 @@ all:
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c bg.c -o bg.o
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c spritesheet.c -o spritesheet.o
 	ee-gcc -D_EE -O2 -G0 -Wall -DHAVE_LIBJPEG -DHAVE_LIBTIFF -DHAVE_LIBPNG -DHAVE_ZLIB -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -I$(LIBPNG_INCLUDES) -I$(LIBTIFF_INCLUDES) -I$(LIBJPEG_INCLUDES) -I$(ZLIB_INCLUDES) -c flappy.c -o flappy.o
-	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(LIBJPEG) -L$(LIBTIFF) -L$(ZLIB) -L$(LIBPNG) -L$(GSKIT_LIB) -L$(EE_LIB) -o flappy.elf $(CRT) flappy.o controller.o bg.o spritesheet.o -Xlinker --start-group  -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lkernel -lpng -ljpeg -ltiff -lz -lm -lfileXio -ldebug -Xlinker --end-group
+	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(LIBJPEG) -L$(LIBTIFF) -L$(ZLIB) -L$(LIBPNG) -L$(GSKIT_LIB) -L$(EE_LIB) -o flappy.elf $(CRT) flappy.o controller.o bg.o spritesheet.o -Xlinker --start-group  -laudsrv -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lkernel -lpng -ljpeg -ltiff -lz -lm -lfileXio -ldebug -Xlinker --end-group
 
 clean:
 	rm -f $(EE_BIN) $(EE_OBJS)

@@ -17,6 +17,12 @@
 #include "bg.h"
 #include "spritesheet.h"
 
+#include <string.h>
+#include <loadfile.h>
+#include <tamtypes.h>
+#include <audsrv.h>
+
+
 struct pipe
 {
     int x, y;
@@ -492,6 +498,55 @@ int main(int argc, char* argv[])
     padInit(0);
     openPad(port,slot,padBuf);
 
+
+    int ret;
+    int played;
+    int err;
+    char chunk[2048];
+    FILE *wav;
+    struct audsrv_fmt_t format;
+
+    //SifInitRpc(0);
+
+    printf("sample: kicking IRXs\n");
+    ret = SifLoadModule("rom:LIBSD", 0, NULL);
+    printf("libsd loadmodule %d\n", ret);
+
+    printf("sample: loading audsrv\n");
+    ret = SifLoadModule("host:audsrv.irx", 0, NULL);
+    //ret = SifLoadModule("mass:flappy/audsrv.irx", 0, NULL);
+    printf("audsrv loadmodule %d\n", ret);
+
+    ret = audsrv_init();
+    if (ret != 0)
+    {
+        printf("sample: failed to initialize audsrv\n");
+        printf("audsrv returned error string: %s\n", audsrv_get_error_string());
+        return 1;
+    }
+
+    format.bits = 16;
+    format.freq = 22050;
+    format.channels = 2;
+    err = audsrv_set_format(&format);
+/*
+    printf("set format returned %d\n", err);
+    printf("audsrv returned error string: %s\n", audsrv_get_error_string());
+*/        
+    audsrv_set_volume(MAX_VOLUME);
+
+    wav = fopen("host:sfx_point.wav", "rb");
+    //wav = fopen("mass:flappy/sfx_point.wav", "rb");
+    if (wav == NULL)
+    {
+        printf("failed to open wav file\n");
+        audsrv_quit();
+        return 1;
+    }
+
+    fseek(wav, 0x30, SEEK_SET);
+
+
     //platform dimensions
     int top = 380;
     struct pipeList* pipes = malloc(sizeof(struct pipeList));
@@ -583,6 +638,8 @@ int main(int argc, char* argv[])
         gsKit_clear(gsGlobal, 0);
     }
 
+    int play_point_audio;
+    
     // main game loop
     while(!game_ended)
     {
@@ -609,7 +666,28 @@ int main(int argc, char* argv[])
         drawBackground(gsGlobal, &bg);
 
 	drawPipes(gsGlobal, pipes, &spriteSheet);
+        int oldScore = score;
 	if(!collided)movePipes(pipes, 2, b, &score);
+
+        if(score!=oldScore)
+        {
+            printf("playing audio\n");
+            play_point_audio = 1;            
+        }
+        if(play_point_audio)
+        {
+            ret = fread(chunk, 1, sizeof(chunk), wav);
+            if (ret > 0)
+            {
+                audsrv_wait_audio(ret);
+                audsrv_play_audio(chunk, ret);
+            }
+            else
+            {
+                play_point_audio = 0;
+                fseek(wav, 0x30, SEEK_SET);
+            }
+        }
 
         drawPlatform(gsGlobal, &spriteSheet);
 
@@ -628,6 +706,7 @@ int main(int argc, char* argv[])
         gsKit_queue_reset(gsGlobal->Per_Queue);
         gsKit_clear(gsGlobal, 0);
     }
+    audsrv_stop_audio();
 
     // post-game loop
     while(game_ended)
