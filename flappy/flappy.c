@@ -498,14 +498,12 @@ int main(int argc, char* argv[])
     padInit(0);
     openPad(port,slot,padBuf);
 
-
     int ret;
-    int played;
-    int err;
-    char chunk[2048];
-    FILE *wav;
-    struct audsrv_fmt_t format;
-
+    FILE* adpcm;
+    audsrv_adpcm_t sample;
+    int size;
+    u8* buffer;
+    
     //SifInitRpc(0);
 
     printf("sample: kicking IRXs\n");
@@ -525,26 +523,23 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    format.bits = 16;
-    format.freq = 22050;
-    format.channels = 2;
-    err = audsrv_set_format(&format);
-/*
-    printf("set format returned %d\n", err);
-    printf("audsrv returned error string: %s\n", audsrv_get_error_string());
-*/        
-    audsrv_set_volume(MAX_VOLUME);
-
-    wav = fopen("host:sfx_point.wav", "rb");
+    adpcm = fopen("host:sfx_point.adp", "rb");
     //wav = fopen("mass:flappy/sfx_point.wav", "rb");
-    if (wav == NULL)
+    if (adpcm == NULL)
     {
-        printf("failed to open wav file\n");
+        printf("failed to open adpcm file\n");
         audsrv_quit();
         return 1;
     }
 
-    fseek(wav, 0x30, SEEK_SET);
+    fseek(adpcm, 0, SEEK_END);
+    size = ftell(adpcm);
+    fseek(adpcm, 0, SEEK_SET);
+
+    buffer = malloc(size);
+    
+    fread(buffer, 1, size, adpcm);
+    fclose(adpcm);
 
 
     //platform dimensions
@@ -637,8 +632,6 @@ int main(int argc, char* argv[])
         gsKit_queue_reset(gsGlobal->Per_Queue);
         gsKit_clear(gsGlobal, 0);
     }
-
-    int play_point_audio;
     
     // main game loop
     while(!game_ended)
@@ -672,21 +665,10 @@ int main(int argc, char* argv[])
         if(score!=oldScore)
         {
             printf("playing audio\n");
-            play_point_audio = 1;            
-        }
-        if(play_point_audio)
-        {
-            ret = fread(chunk, 1, sizeof(chunk), wav);
-            if (ret > 0)
-            {
-                audsrv_wait_audio(ret);
-                audsrv_play_audio(chunk, ret);
-            }
-            else
-            {
-                play_point_audio = 0;
-                fseek(wav, 0x30, SEEK_SET);
-            }
+            audsrv_adpcm_init();
+            audsrv_set_volume(MAX_VOLUME);
+            audsrv_load_adpcm(&sample, buffer, size);
+            audsrv_play_adpcm(&sample);
         }
 
         drawPlatform(gsGlobal, &spriteSheet);
