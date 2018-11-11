@@ -499,12 +499,29 @@ int main(int argc, char* argv[])
     openPad(port,slot,padBuf);
 
     int ret;
-    FILE* adpcm;
-    audsrv_adpcm_t sample;
-    int size;
-    u8* buffer;
-    
-    //SifInitRpc(0);
+    FILE* adpcm_point;
+    FILE* adpcm_die;
+    FILE* adpcm_hit;
+    FILE* adpcm_swooshing;
+    FILE* adpcm_wing;
+
+    audsrv_adpcm_t point_sound;
+    audsrv_adpcm_t die_sound;
+    audsrv_adpcm_t hit_sound;
+    audsrv_adpcm_t swooshing_sound;
+    audsrv_adpcm_t wing_sound;
+
+    int point_size;
+    int wing_size;
+    int die_size;
+    int swooshing_size;
+    int hit_size;
+
+    u8* point_buffer;
+    u8* wing_buffer;
+    u8* die_buffer;
+    u8* hit_buffer;
+    u8* swooshing_buffer;
 
     printf("sample: kicking IRXs\n");
     ret = SifLoadModule("rom:LIBSD", 0, NULL);
@@ -523,24 +540,54 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    adpcm = fopen("host:sfx_point.adp", "rb");
+    adpcm_point = fopen("host:sfx_point.adp", "rb");
     //wav = fopen("mass:flappy/sfx_point.wav", "rb");
-    if (adpcm == NULL)
+    if (adpcm_point == NULL)
     {
         printf("failed to open adpcm file\n");
         audsrv_quit();
         return 1;
     }
-
-    fseek(adpcm, 0, SEEK_END);
-    size = ftell(adpcm);
-    fseek(adpcm, 0, SEEK_SET);
-
-    buffer = malloc(size);
+    adpcm_die = fopen("host:sfx_die.adp", "rb");
+    adpcm_hit = fopen("host:sfx_hit.adp", "rb");
+    adpcm_swooshing = fopen("host:sfx_swooshing.adp", "rb");
+    adpcm_wing = fopen("host:sfx_wing.adp", "rb");
     
-    fread(buffer, 1, size, adpcm);
-    fclose(adpcm);
 
+    fseek(adpcm_point, 0, SEEK_END);
+    point_size = ftell(adpcm_point);
+    fseek(adpcm_point, 0, SEEK_SET);
+    point_buffer = malloc(point_size);
+    fread(point_buffer, 1, point_size, adpcm_point);
+    fclose(adpcm_point);
+
+    fseek(adpcm_wing, 0, SEEK_END);
+    wing_size = ftell(adpcm_wing);
+    fseek(adpcm_wing, 0, SEEK_SET);
+    wing_buffer = malloc(wing_size);
+    fread(wing_buffer, 1, wing_size, adpcm_wing);
+    fclose(adpcm_wing);
+
+    fseek(adpcm_hit, 0, SEEK_END);
+    hit_size = ftell(adpcm_hit);
+    fseek(adpcm_hit, 0, SEEK_SET);
+    hit_buffer = malloc(hit_size);
+    fread(hit_buffer, 1, hit_size, adpcm_hit);
+    fclose(adpcm_hit);
+
+    fseek(adpcm_die, 0, SEEK_END);
+    die_size = ftell(adpcm_die);
+    fseek(adpcm_die, 0, SEEK_SET);
+    die_buffer = malloc(die_size);
+    fread(die_buffer, 1, die_size, adpcm_die);
+    fclose(adpcm_die);
+
+    fseek(adpcm_swooshing, 0, SEEK_END);
+    swooshing_size = ftell(adpcm_swooshing);
+    fseek(adpcm_swooshing, 0, SEEK_SET);
+    swooshing_buffer = malloc(swooshing_size);
+    fread(swooshing_buffer, 1, swooshing_size, adpcm_swooshing);
+    fclose(adpcm_swooshing);
 
     //platform dimensions
     int top = 380;
@@ -581,6 +628,14 @@ int main(int argc, char* argv[])
     spriteSheet.Width = 320;
     spriteSheet.Height = 256;
     spriteSheet.PSM = GS_PSM_CT32;
+
+    audsrv_adpcm_init();
+    audsrv_set_volume(MAX_VOLUME);
+    audsrv_load_adpcm(&point_sound, point_buffer, point_size);
+    audsrv_load_adpcm(&wing_sound, wing_buffer, wing_size);
+    audsrv_load_adpcm(&hit_sound, hit_buffer, hit_size);
+    audsrv_load_adpcm(&die_sound, die_buffer, die_size);
+    audsrv_load_adpcm(&swooshing_sound, swooshing_buffer, swooshing_size);
 
     //u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
 
@@ -644,7 +699,14 @@ int main(int argc, char* argv[])
             new_pad = paddata & ~old_pad;
             old_pad = paddata;
 
-            if(!collided && new_pad & PAD_CROSS)b->vy = -3;
+            if(!collided && new_pad & PAD_CROSS)
+            {
+                b->vy = -3;
+                //audsrv_adpcm_init();
+                //audsrv_set_volume(MAX_VOLUME);
+                //audsrv_load_adpcm(&wing_sound, wing_buffer, wing_size);
+                audsrv_play_adpcm(&wing_sound);
+            }
         }
         if(birdTouchingGround(b, top))
         {
@@ -664,11 +726,10 @@ int main(int argc, char* argv[])
 
         if(score!=oldScore)
         {
-            printf("playing audio\n");
-            audsrv_adpcm_init();
-            audsrv_set_volume(MAX_VOLUME);
-            audsrv_load_adpcm(&sample, buffer, size);
-            audsrv_play_adpcm(&sample);
+            //audsrv_adpcm_init();
+            //audsrv_set_volume(MAX_VOLUME);
+            //audsrv_load_adpcm(&point_sound, point_buffer, point_size);
+            audsrv_play_adpcm(&point_sound);
         }
 
         drawPlatform(gsGlobal, &spriteSheet);
@@ -719,6 +780,16 @@ int main(int argc, char* argv[])
 
                 game_ended = 0;
                 game_started = 0;
+
+                free(point_buffer);
+                free(wing_buffer);
+                free(hit_buffer);
+                free(die_buffer);
+                free(swooshing_buffer);
+                // bug: need to traverse the linked list and free all pipes!
+                free(pipes);
+                free(curr);
+                free(b);
             }
         }
 
