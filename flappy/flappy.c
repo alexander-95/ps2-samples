@@ -72,7 +72,7 @@ int collision(struct bird* b, struct pipeList* pipes)
     while(curr!=NULL)
     {
         char xCollision = b->x+30 > curr->x && b->x < curr->x+curr->d;
-        char yCollision = b->y - 24 > curr->y+50 || b->y < curr->y-50;
+        char yCollision = b->y + 24 > curr->y+50 || b->y < curr->y-50;
         if(xCollision &&  yCollision)return 1;
         curr = curr->next;
     }
@@ -523,13 +523,15 @@ int main(int argc, char* argv[])
     u8* hit_buffer;
     u8* swooshing_buffer;
 
+    u8 PCSX2 = 0;
+ 
     printf("sample: kicking IRXs\n");
     ret = SifLoadModule("rom:LIBSD", 0, NULL);
     printf("libsd loadmodule %d\n", ret);
 
     printf("sample: loading audsrv\n");
-    ret = SifLoadModule("host:audsrv.irx", 0, NULL);
-    //ret = SifLoadModule("mass:flappy/audsrv.irx", 0, NULL);
+    if(PCSX2) ret = SifLoadModule("host:audsrv.irx", 0, NULL);
+    else ret = SifLoadModule("mass:flappy/audsrv.irx", 0, NULL);
     printf("audsrv loadmodule %d\n", ret);
 
     ret = audsrv_init();
@@ -540,19 +542,28 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    adpcm_point = fopen("host:sfx_point.adp", "rb");
-    //wav = fopen("mass:flappy/sfx_point.wav", "rb");
-    if (adpcm_point == NULL)
+    if(PCSX2) adpcm_point = fopen("host:sfx_point.adp", "rb");
+    else adpcm_point = fopen("mass:flappy/sfx_point.adp", "rb");
+    if(adpcm_point == NULL)
     {
         printf("failed to open adpcm file\n");
         audsrv_quit();
         return 1;
     }
-    adpcm_die = fopen("host:sfx_die.adp", "rb");
-    adpcm_hit = fopen("host:sfx_hit.adp", "rb");
-    adpcm_swooshing = fopen("host:sfx_swooshing.adp", "rb");
-    adpcm_wing = fopen("host:sfx_wing.adp", "rb");
-    
+    if(PCSX2)
+    {
+        adpcm_die = fopen("host:sfx_die.adp", "rb");
+        adpcm_hit = fopen("host:sfx_hit.adp", "rb");
+        adpcm_swooshing = fopen("host:sfx_swooshing.adp", "rb");
+        adpcm_wing = fopen("host:sfx_wing.adp", "rb");
+    }
+    else
+    {
+        adpcm_die = fopen("mass:flappy/sfx_die.adp", "rb");
+        adpcm_hit = fopen("mass:flappy/sfx_hit.adp", "rb");
+        adpcm_swooshing = fopen("mass:flappy/sfx_swooshing.adp", "rb");
+        adpcm_wing = fopen("mass:flappy/sfx_wing.adp", "rb");
+    }
 
     fseek(adpcm_point, 0, SEEK_END);
     point_size = ftell(adpcm_point);
@@ -634,8 +645,8 @@ int main(int argc, char* argv[])
     audsrv_load_adpcm(&point_sound, point_buffer, point_size);
     audsrv_load_adpcm(&wing_sound, wing_buffer, wing_size);
     audsrv_load_adpcm(&hit_sound, hit_buffer, hit_size);
-    audsrv_load_adpcm(&die_sound, die_buffer, die_size);
-    audsrv_load_adpcm(&swooshing_sound, swooshing_buffer, swooshing_size);
+    //audsrv_load_adpcm(&die_sound, die_buffer, die_size);
+    //audsrv_load_adpcm(&swooshing_sound, swooshing_buffer, swooshing_size);
 
     //u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
 
@@ -702,9 +713,6 @@ int main(int argc, char* argv[])
             if(!collided && new_pad & PAD_CROSS)
             {
                 b->vy = -3;
-                //audsrv_adpcm_init();
-                //audsrv_set_volume(MAX_VOLUME);
-                //audsrv_load_adpcm(&wing_sound, wing_buffer, wing_size);
                 audsrv_play_adpcm(&wing_sound);
             }
         }
@@ -715,7 +723,9 @@ int main(int argc, char* argv[])
         }
         if(collision(b, pipes))
         {
+            if(!collided)audsrv_play_adpcm(&hit_sound);
             collided = 1;
+            
         }
 
         drawBackground(gsGlobal, &bg);
@@ -780,6 +790,7 @@ int main(int argc, char* argv[])
 
                 game_ended = 0;
                 game_started = 0;
+                collided = 0;
 
                 free(point_buffer);
                 free(wing_buffer);
