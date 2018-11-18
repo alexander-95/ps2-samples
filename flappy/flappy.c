@@ -330,11 +330,13 @@ void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* bg)
 
 void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
 {
+    int color = 0; // 0 = red, 1 = yellow, 2 = blue
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     float offset = 0;
     if((b->cycle & 4) == 0)offset = 17.0f;
     else if((b->cycle & 8) == 0)offset = 0.0f;
     else offset = 34.0f;
+    offset += (color*51);
 
     gsKit_prim_quad_texture(gsGlobal, tex,
                             b->x, b->y,          // x1, y1
@@ -380,32 +382,32 @@ void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* spriteSheet)
     {
         //upper pipe
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                curr->x, curr->y-450,          // x1, y1
-                                0.0f+offset, 200.0f,                   // u1, v1
+                                curr->x, curr->y-450,         // x1, y1
+                                0.0f+offset, 200.0f,          // u1, v1
 
-                                curr->x, curr->y-50,         // x2, y2
-                                0.0f+offset, 0.0f,                 // u2, v2
+                                curr->x, curr->y-50,          // x2, y2
+                                0.0f+offset, 0.0f,            // u2, v2
 
-                                curr->x+curr->d, curr->y-450,  // x3, y3
-                                26.0f+offset, 200.0f,                  // u3, v3
+                                curr->x+curr->d, curr->y-450, // x3, y3
+                                26.0f+offset, 200.0f,         // u3, v3
 
-                                curr->x+curr->d, curr->y-50, // x4, y4
-                                26.0f+offset, 0.0f,                // u4, v4
+                                curr->x+curr->d, curr->y-50,  // x4, y4
+                                26.0f+offset, 0.0f,           // u4, v4
                                 1, TexCol);
         
         // lower pipe
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
                                 curr->x, curr->y+50,          // x1, y1
-                                0.0f+offset, 0.0f,                   // u1, v1
+                                0.0f+offset, 0.0f,            // u1, v1
 
                                 curr->x, curr->y+450,         // x2, y2
-                                0.0f+offset, 200.0f,                 // u2, v2
+                                0.0f+offset, 200.0f,          // u2, v2
 
                                 curr->x+curr->d, curr->y+50,  // x3, y3
-                                26.0f+offset, 0.0f,                  // u3, v3
+                                26.0f+offset, 0.0f,           // u3, v3
 
                                 curr->x+curr->d, curr->y+450, // x4, y4
-                                26.0f+offset, 200.0f,                // u4, v4
+                                26.0f+offset, 200.0f,         // u4, v4
                                 1, TexCol);
         curr = curr->next;
     }
