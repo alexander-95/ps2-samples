@@ -3,7 +3,7 @@
 # |     ___|   |____
 
 EE_BIN = flappy.elf
-EE_OBJS = flappy.o
+EE_OBJS = flappy.o bg.o spritesheet.o controller.o
 
 EE_INCLUDES    = /usr/local/ps2dev/ps2sdk/ee/include
 GSKIT_INCLUDES = /usr/local/ps2dev/gsKit/include

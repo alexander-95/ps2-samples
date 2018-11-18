@@ -372,37 +372,40 @@ int birdTouchingGround(struct bird* b, int ground)
 
 void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* spriteSheet)
 {
+    int daytime = 0, offset = 0;
+    if(daytime)offset = 26;
     struct pipe* curr = ps->head;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     while(curr!=NULL)
     {
         //upper pipe
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                curr->x, curr->y-450,         // x1, y1
-                                26.0f, 0.0f,                  // u1, v1
+                                curr->x, curr->y-450,          // x1, y1
+                                0.0f+offset, 200.0f,                   // u1, v1
 
-                                curr->x, curr->y-50,          // x2, y2
-                                26.0f, 200.0f,                // u2, v2
+                                curr->x, curr->y-50,         // x2, y2
+                                0.0f+offset, 0.0f,                 // u2, v2
 
-                                curr->x+curr->d, curr->y-450, // x3, y3
-                                52.0f, 0.0f,                  // u3, v3
+                                curr->x+curr->d, curr->y-450,  // x3, y3
+                                26.0f+offset, 200.0f,                  // u3, v3
 
-                                curr->x+curr->d, curr->y-50,  // x4, y4
-                                52.0f, 200.0f,                // u4, v4
+                                curr->x+curr->d, curr->y-50, // x4, y4
+                                26.0f+offset, 0.0f,                // u4, v4
                                 1, TexCol);
-
+        
+        // lower pipe
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
                                 curr->x, curr->y+50,          // x1, y1
-                                0.0f, 0.0f,                   // u1, v1
+                                0.0f+offset, 0.0f,                   // u1, v1
 
                                 curr->x, curr->y+450,         // x2, y2
-                                0.0f, 200.0f,                 // u2, v2
+                                0.0f+offset, 200.0f,                 // u2, v2
 
                                 curr->x+curr->d, curr->y+50,  // x3, y3
-                                26.0f, 0.0f,                  // u3, v3
+                                26.0f+offset, 0.0f,                  // u3, v3
 
                                 curr->x+curr->d, curr->y+450, // x4, y4
-                                26.0f, 200.0f,                // u4, v4
+                                26.0f+offset, 200.0f,                // u4, v4
                                 1, TexCol);
         curr = curr->next;
     }
@@ -523,7 +526,7 @@ int main(int argc, char* argv[])
     u8* hit_buffer;
     u8* swooshing_buffer;
 
-    u8 PCSX2 = 0;
+    u8 PCSX2 = 1;
  
     printf("sample: kicking IRXs\n");
     ret = SifLoadModule("rom:LIBSD", 0, NULL);
