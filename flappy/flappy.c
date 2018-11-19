@@ -504,6 +504,77 @@ int main(int argc, char* argv[])
     openPad(port,slot,padBuf);
 
     int ret;
+    
+    //platform dimensions
+    int top = 380;
+    struct pipeList* pipes = malloc(sizeof(struct pipeList));
+    pipes->gap = 200;
+    struct pipe* curr = malloc(sizeof(struct pipe));
+    pipes->head = curr;
+    pipes->length = 4;
+    for(i=0;i<pipes->length;i++)
+    {
+        struct pipe* p = malloc(sizeof(struct pipe));
+        curr->next = p;
+        p->prev = curr;
+        curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
+        curr = curr->next;
+    }
+
+    struct bird* b = malloc(sizeof(struct bird));
+
+    int gravity = 0, collided = 0, score = 0, highScore = 0;
+
+    GSGLOBAL* gsGlobal = gsKit_init_global();
+    gsGlobal->Mode = GS_MODE_PAL;
+    gsGlobal->Width=640;
+    gsGlobal->Height=512;
+    //gsGlobal->PSM = GS_PSM_CT32;
+    gsGlobal->PSMZ = GS_PSMZ_16S;
+    gsGlobal->ZBuffering = GS_SETTING_ON;
+    gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
+    gsGlobal->DoubleBuffering = GS_SETTING_ON;
+
+    GSTEXTURE bg;
+    bg.Width=320;
+    bg.Height=256;
+    bg.PSM = GS_PSM_CT24;
+
+    GSTEXTURE spriteSheet;
+    spriteSheet.Width = 320;
+    spriteSheet.Height = 256;
+    spriteSheet.PSM = GS_PSM_CT32;
+
+    //u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
+    u64 TexCol = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);
+    dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
+                D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
+
+    //Initialize the DMAC
+    dmaKit_chan_init(DMA_CHANNEL_GIF);
+    gsKit_init_screen(gsGlobal);
+    gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
+    gsKit_texture_abgr(gsGlobal, &bg, &bg_array, 320, 256 );
+    gsKit_texture_abgr(gsGlobal, &spriteSheet, &spritesheet_array, 320, 256 );
+    gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
+
+    //loading screen
+    gsKit_prim_quad_texture(gsGlobal, &spriteSheet,
+                            320.0f-66.0f, 256.0f-16.0f,  // x1, y1
+                            172.0f, 0.0f,              // u1, v1
+
+                            320.0f-66.0f, 256.0f+16.0f, // x2, y2
+                            172.0f, 17.0f,              // u2, v2
+
+                            320.0f+66.0f, 256.0f-16.0f, // x3, y3
+                            238.0f, 0.0f,             // u3, v3
+
+                            320.0f+66.0f, 256.0f+16.0f, // x4, y4
+                            238.0f, 17.0f,             // u4, v4
+                            3, TexCol);
+    gsKit_queue_exec(gsGlobal);
+    gsKit_sync_flip(gsGlobal);
+    
     FILE* adpcm_point;
     FILE* adpcm_die;
     FILE* adpcm_hit;
@@ -604,47 +675,7 @@ int main(int argc, char* argv[])
     swooshing_buffer = malloc(swooshing_size);
     fread(swooshing_buffer, 1, swooshing_size, adpcm_swooshing);
     fclose(adpcm_swooshing);
-
-    //platform dimensions
-    int top = 380;
-    struct pipeList* pipes = malloc(sizeof(struct pipeList));
-    pipes->gap = 200;
-    struct pipe* curr = malloc(sizeof(struct pipe));
-    pipes->head = curr;
-    pipes->length = 4;
-    for(i=0;i<pipes->length;i++)
-    {
-        struct pipe* p = malloc(sizeof(struct pipe));
-        curr->next = p;
-        p->prev = curr;
-        curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
-        curr = curr->next;
-    }
-
-    struct bird* b = malloc(sizeof(struct bird));
-
-    int gravity = 0, collided = 0, score = 0, highScore = 0;
-
-    GSGLOBAL* gsGlobal = gsKit_init_global();
-    gsGlobal->Mode = GS_MODE_PAL;
-    gsGlobal->Width=640;
-    gsGlobal->Height=512;
-    //gsGlobal->PSM = GS_PSM_CT32;
-    gsGlobal->PSMZ = GS_PSMZ_16S;
-    gsGlobal->ZBuffering = GS_SETTING_ON;
-    gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
-    gsGlobal->DoubleBuffering = GS_SETTING_ON;
-
-    GSTEXTURE bg;
-    bg.Width=320;
-    bg.Height=256;
-    bg.PSM = GS_PSM_CT24;
-
-    GSTEXTURE spriteSheet;
-    spriteSheet.Width = 320;
-    spriteSheet.Height = 256;
-    spriteSheet.PSM = GS_PSM_CT32;
-
+    
     audsrv_adpcm_init();
     audsrv_set_volume(MAX_VOLUME);
     audsrv_load_adpcm(&point_sound, point_buffer, point_size);
@@ -653,21 +684,9 @@ int main(int argc, char* argv[])
     //audsrv_load_adpcm(&die_sound, die_buffer, die_size);
     //audsrv_load_adpcm(&swooshing_sound, swooshing_buffer, swooshing_size);
 
-    //u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
-
-    dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
-                D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
-
-    //Initialize the DMAC
-    dmaKit_chan_init(DMA_CHANNEL_GIF);
-    gsKit_init_screen(gsGlobal);
-    gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
-    gsKit_texture_abgr(gsGlobal, &bg, &bg_array, 320, 256 );
-    gsKit_texture_abgr(gsGlobal, &spriteSheet, &spritesheet_array, 320, 256 );
-    gsKit_mode_switch(gsGlobal, GS_ONESHOT);
-
     stabilise(port,slot);
     highScore = getHighScore();
+    gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 
     // pre-game loop
     int game_started = 0, game_ended = 0;
@@ -717,7 +736,7 @@ int main(int argc, char* argv[])
 
             if(!collided && new_pad & PAD_CROSS)
             {
-                b->vy = -3;
+                b->vy = -5;
                 audsrv_play_adpcm(&wing_sound);
             }
         }
@@ -752,7 +771,7 @@ int main(int argc, char* argv[])
         // draw bird
         if(gravity)
         {
-            b->vy += 0.2;
+            b->vy += 0.3;
             if(b->y + b->vy <= 380 )b->y += b->vy;
             else b->y=380;
         }
