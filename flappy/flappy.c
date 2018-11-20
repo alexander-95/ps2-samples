@@ -22,7 +22,6 @@
 #include <tamtypes.h>
 #include <audsrv.h>
 
-
 struct pipe
 {
     int x, y;
@@ -178,6 +177,24 @@ void drawSaveIcon(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
                             5, TexCol);
 }
 
+void drawNewLabel(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                262.0f-16.0f, 248.0f-7.0f, // x1, y1
+                                141.0f, 55.0f,              // u1, v1
+
+                                262.0f-16.0f, 248.0f+7.0f, // x2, y2
+                                141.0f, 62.0f,              // u2, v2
+
+                                262.0f+16.0f, 248.0f-7.0f, // x3, y3
+                                157.0f, 55.0f,              // u3, v3
+
+                                262.0f+16.0f, 248.0f+7.0f, // x4, y4
+                                157.0f, 62.0f,              // u4, v4
+                                4, TexCol);
+}
+
 void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
@@ -220,24 +237,6 @@ void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highSc
                                 3, TexCol);
     }
     if(new_medal)drawNewLabel(gsGlobal, spriteSheet);
-}
-
-void drawNewLabel(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                262.0f-16.0f, 248.0f-7.0f, // x1, y1
-                                141.0f, 55.0f,              // u1, v1
-
-                                262.0f-16.0f, 248.0f+7.0f, // x2, y2
-                                141.0f, 62.0f,              // u2, v2
-
-                                262.0f+16.0f, 248.0f-7.0f, // x3, y3
-                                157.0f, 55.0f,              // u3, v3
-
-                                262.0f+16.0f, 248.0f+7.0f, // x4, y4
-                                157.0f, 62.0f,              // u4, v4
-                                4, TexCol);
 }
 
 void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore)
@@ -447,9 +446,6 @@ void resetPipes(struct pipeList* pipes)
     {
         curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
         curr = curr->next;
-
-                
-        
     }
 }
 
@@ -493,6 +489,7 @@ static int padBuf[256] __attribute__((aligned(64)));
 
 int main(int argc, char* argv[])
 {
+    int ret;
     //controller setup
     unsigned int old_pad = 0;
     unsigned int new_pad, paddata;
@@ -503,8 +500,6 @@ int main(int argc, char* argv[])
     padInit(0);
     openPad(port,slot,padBuf);
 
-    int ret;
-    
     //platform dimensions
     int top = 380;
     struct pipeList* pipes = malloc(sizeof(struct pipeList));
@@ -520,10 +515,6 @@ int main(int argc, char* argv[])
         curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
         curr = curr->next;
     }
-
-    struct bird* b = malloc(sizeof(struct bird));
-
-    int gravity = 0, collided = 0, score = 0, highScore = 0;
 
     GSGLOBAL* gsGlobal = gsKit_init_global();
     gsGlobal->Mode = GS_MODE_PAL;
@@ -574,7 +565,11 @@ int main(int argc, char* argv[])
                             3, TexCol);
     gsKit_queue_exec(gsGlobal);
     gsKit_sync_flip(gsGlobal);
-    
+
+    struct bird* b = malloc(sizeof(struct bird));
+
+    int gravity = 0, collided = 0, score = 0, highScore = 0;
+
     FILE* adpcm_point;
     FILE* adpcm_die;
     FILE* adpcm_hit;
@@ -611,7 +606,7 @@ int main(int argc, char* argv[])
     printf("audsrv loadmodule %d\n", ret);
 
     ret = audsrv_init();
-    if (ret != 0)
+    if(ret != 0)
     {
         printf("sample: failed to initialize audsrv\n");
         printf("audsrv returned error string: %s\n", audsrv_get_error_string());
@@ -760,9 +755,6 @@ int main(int argc, char* argv[])
 
         if(score!=oldScore)
         {
-            //audsrv_adpcm_init();
-            //audsrv_set_volume(MAX_VOLUME);
-            //audsrv_load_adpcm(&point_sound, point_buffer, point_size);
             audsrv_play_adpcm(&point_sound);
         }
 
