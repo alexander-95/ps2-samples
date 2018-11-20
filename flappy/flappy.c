@@ -46,6 +46,14 @@ struct bird
     unsigned char cycle;
 };
 
+struct sound
+{
+    FILE* adpcm;
+    audsrv_adpcm_t s;
+    int size;
+    u8* buffer;
+};
+
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
     u32 VramTextureSize = gsKit_texture_size(width, height, GS_PSM_CT32);
@@ -570,30 +578,8 @@ int main(int argc, char* argv[])
 
     int gravity = 0, collided = 0, score = 0, highScore = 0;
 
-    FILE* adpcm_point;
-    FILE* adpcm_die;
-    FILE* adpcm_hit;
-    FILE* adpcm_swooshing;
-    FILE* adpcm_wing;
-
-    audsrv_adpcm_t point_sound;
-    audsrv_adpcm_t die_sound;
-    audsrv_adpcm_t hit_sound;
-    audsrv_adpcm_t swooshing_sound;
-    audsrv_adpcm_t wing_sound;
-
-    int point_size;
-    int wing_size;
-    int die_size;
-    int swooshing_size;
-    int hit_size;
-
-    u8* point_buffer;
-    u8* wing_buffer;
-    u8* die_buffer;
-    u8* hit_buffer;
-    u8* swooshing_buffer;
-
+    struct sound point, die, hit, swooshing, wing;
+    
     u8 PCSX2 = 1;
  
     printf("sample: kicking IRXs\n");
@@ -613,9 +599,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if(PCSX2) adpcm_point = fopen("host:sfx_point.adp", "rb");
-    else adpcm_point = fopen("mass:flappy/sfx_point.adp", "rb");
-    if(adpcm_point == NULL)
+    if(PCSX2) point.adpcm = fopen("host:sfx_point.adp", "rb");
+    else point.adpcm = fopen("mass:flappy/sfx_point.adp", "rb");
+    if(point.adpcm == NULL)
     {
         printf("failed to open adpcm file\n");
         audsrv_quit();
@@ -623,59 +609,59 @@ int main(int argc, char* argv[])
     }
     if(PCSX2)
     {
-        adpcm_die = fopen("host:sfx_die.adp", "rb");
-        adpcm_hit = fopen("host:sfx_hit.adp", "rb");
-        adpcm_swooshing = fopen("host:sfx_swooshing.adp", "rb");
-        adpcm_wing = fopen("host:sfx_wing.adp", "rb");
+        die.adpcm = fopen("host:sfx_die.adp", "rb");
+        hit.adpcm = fopen("host:sfx_hit.adp", "rb");
+        swooshing.adpcm = fopen("host:sfx_swooshing.adp", "rb");
+        wing.adpcm = fopen("host:sfx_wing.adp", "rb");
     }
     else
     {
-        adpcm_die = fopen("mass:flappy/sfx_die.adp", "rb");
-        adpcm_hit = fopen("mass:flappy/sfx_hit.adp", "rb");
-        adpcm_swooshing = fopen("mass:flappy/sfx_swooshing.adp", "rb");
-        adpcm_wing = fopen("mass:flappy/sfx_wing.adp", "rb");
+        die.adpcm = fopen("mass:flappy/sfx_die.adp", "rb");
+        hit.adpcm = fopen("mass:flappy/sfx_hit.adp", "rb");
+        swooshing.adpcm = fopen("mass:flappy/sfx_swooshing.adp", "rb");
+        wing.adpcm = fopen("mass:flappy/sfx_wing.adp", "rb");
     }
 
-    fseek(adpcm_point, 0, SEEK_END);
-    point_size = ftell(adpcm_point);
-    fseek(adpcm_point, 0, SEEK_SET);
-    point_buffer = malloc(point_size);
-    fread(point_buffer, 1, point_size, adpcm_point);
-    fclose(adpcm_point);
+    fseek(point.adpcm, 0, SEEK_END);
+    point.size = ftell(point.adpcm);
+    fseek(point.adpcm, 0, SEEK_SET);
+    point.buffer = malloc(point.size);
+    fread(point.buffer, 1, point.size, point.adpcm);
+    fclose(point.adpcm);
 
-    fseek(adpcm_wing, 0, SEEK_END);
-    wing_size = ftell(adpcm_wing);
-    fseek(adpcm_wing, 0, SEEK_SET);
-    wing_buffer = malloc(wing_size);
-    fread(wing_buffer, 1, wing_size, adpcm_wing);
-    fclose(adpcm_wing);
+    fseek(wing.adpcm, 0, SEEK_END);
+    wing.size = ftell(wing.adpcm);
+    fseek(wing.adpcm, 0, SEEK_SET);
+    wing.buffer = malloc(wing.size);
+    fread(wing.buffer, 1, wing.size, wing.adpcm);
+    fclose(wing.adpcm);
 
-    fseek(adpcm_hit, 0, SEEK_END);
-    hit_size = ftell(adpcm_hit);
-    fseek(adpcm_hit, 0, SEEK_SET);
-    hit_buffer = malloc(hit_size);
-    fread(hit_buffer, 1, hit_size, adpcm_hit);
-    fclose(adpcm_hit);
+    fseek(hit.adpcm, 0, SEEK_END);
+    hit.size = ftell(hit.adpcm);
+    fseek(hit.adpcm, 0, SEEK_SET);
+    hit.buffer = malloc(hit.size);
+    fread(hit.buffer, 1, hit.size, hit.adpcm);
+    fclose(hit.adpcm);
 
-    fseek(adpcm_die, 0, SEEK_END);
-    die_size = ftell(adpcm_die);
-    fseek(adpcm_die, 0, SEEK_SET);
-    die_buffer = malloc(die_size);
-    fread(die_buffer, 1, die_size, adpcm_die);
-    fclose(adpcm_die);
+    fseek(die.adpcm, 0, SEEK_END);
+    die.size = ftell(die.adpcm);
+    fseek(die.adpcm, 0, SEEK_SET);
+    die.buffer = malloc(die.size);
+    fread(die.buffer, 1, die.size, die.adpcm);
+    fclose(die.adpcm);
 
-    fseek(adpcm_swooshing, 0, SEEK_END);
-    swooshing_size = ftell(adpcm_swooshing);
-    fseek(adpcm_swooshing, 0, SEEK_SET);
-    swooshing_buffer = malloc(swooshing_size);
-    fread(swooshing_buffer, 1, swooshing_size, adpcm_swooshing);
-    fclose(adpcm_swooshing);
+    fseek(swooshing.adpcm, 0, SEEK_END);
+    swooshing.size = ftell(swooshing.adpcm);
+    fseek(swooshing.adpcm, 0, SEEK_SET);
+    swooshing.buffer = malloc(swooshing.size);
+    fread(swooshing.buffer, 1, swooshing.size, swooshing.adpcm);
+    fclose(swooshing.adpcm);
     
     audsrv_adpcm_init();
     audsrv_set_volume(MAX_VOLUME);
-    audsrv_load_adpcm(&point_sound, point_buffer, point_size);
-    audsrv_load_adpcm(&wing_sound, wing_buffer, wing_size);
-    audsrv_load_adpcm(&hit_sound, hit_buffer, hit_size);
+    audsrv_load_adpcm(&point.s, point.buffer, point.size);
+    audsrv_load_adpcm(&wing.s, wing.buffer, wing.size);
+    audsrv_load_adpcm(&hit.s, hit.buffer, hit.size);
     //audsrv_load_adpcm(&die_sound, die_buffer, die_size);
     //audsrv_load_adpcm(&swooshing_sound, swooshing_buffer, swooshing_size);
 
@@ -732,7 +718,7 @@ int main(int argc, char* argv[])
             if(!collided && new_pad & PAD_CROSS)
             {
                 b->vy = -5;
-                audsrv_play_adpcm(&wing_sound);
+                audsrv_play_adpcm(&wing.s);
             }
         }
         if(birdTouchingGround(b, top))
@@ -742,7 +728,7 @@ int main(int argc, char* argv[])
         }
         if(collision(b, pipes))
         {
-            if(!collided)audsrv_play_adpcm(&hit_sound);
+            if(!collided)audsrv_play_adpcm(&hit.s);
             collided = 1;
             
         }
@@ -755,7 +741,7 @@ int main(int argc, char* argv[])
 
         if(score!=oldScore)
         {
-            audsrv_play_adpcm(&point_sound);
+            audsrv_play_adpcm(&point.s);
         }
 
         drawPlatform(gsGlobal, &spriteSheet);
@@ -808,11 +794,11 @@ int main(int argc, char* argv[])
                 game_started = 0;
                 collided = 0;
 
-                free(point_buffer);
-                free(wing_buffer);
-                free(hit_buffer);
-                free(die_buffer);
-                free(swooshing_buffer);
+                free(point.buffer);
+                free(wing.buffer);
+                free(hit.buffer);
+                free(die.buffer);
+                free(swooshing.buffer);
                 // bug: need to traverse the linked list and free all pipes!
                 free(pipes);
                 free(curr);
