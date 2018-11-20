@@ -497,17 +497,7 @@ static int padBuf[256] __attribute__((aligned(64)));
 
 int main(int argc, char* argv[])
 {
-    int ret;
-    //controller setup
-    unsigned int old_pad = 0;
-    unsigned int new_pad, paddata;
-    int i, port=0, slot=0;
-    struct padButtonStatus buttons;
-    SifInitRpc(0);
-    loadModules();
-    padInit(0);
-    openPad(port,slot,padBuf);
-
+    int i,ret;
     //platform dimensions
     int top = 380;
     struct pipeList* pipes = malloc(sizeof(struct pipeList));
@@ -574,6 +564,18 @@ int main(int argc, char* argv[])
     gsKit_queue_exec(gsGlobal);
     gsKit_sync_flip(gsGlobal);
 
+    //controller setup
+    unsigned int old_pad = 0;
+    unsigned int new_pad, paddata;
+    int port=0, slot=0;
+    struct padButtonStatus buttons;
+    SifInitRpc(0);
+    loadModules();
+    padInit(0);
+    openPad(port,slot,padBuf);
+
+    
+    
     struct bird* b = malloc(sizeof(struct bird));
 
     int gravity = 0, collided = 0, score = 0, highScore = 0;
@@ -660,10 +662,15 @@ int main(int argc, char* argv[])
     audsrv_adpcm_init();
     audsrv_set_volume(MAX_VOLUME);
     audsrv_load_adpcm(&point.s, point.buffer, point.size);
+    free(point.buffer);
     audsrv_load_adpcm(&wing.s, wing.buffer, wing.size);
+    free(wing.buffer);
     audsrv_load_adpcm(&hit.s, hit.buffer, hit.size);
-    //audsrv_load_adpcm(&die_sound, die_buffer, die_size);
-    //audsrv_load_adpcm(&swooshing_sound, swooshing_buffer, swooshing_size);
+    free(hit.buffer);
+    //audsrv_load_adpcm(&die.s, die.buffer, die.size);
+    free(die.buffer);
+    //audsrv_load_adpcm(&swooshing.s, swooshing.buffer, swooshing.size);
+    free(swooshing.buffer);
 
     stabilise(port,slot);
     highScore = getHighScore();
@@ -794,11 +801,6 @@ int main(int argc, char* argv[])
                 game_started = 0;
                 collided = 0;
 
-                free(point.buffer);
-                free(wing.buffer);
-                free(hit.buffer);
-                free(die.buffer);
-                free(swooshing.buffer);
                 // bug: need to traverse the linked list and free all pipes!
                 free(pipes);
                 free(curr);
