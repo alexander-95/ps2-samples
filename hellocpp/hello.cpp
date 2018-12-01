@@ -3,14 +3,7 @@
 // |     ___|   |____
 
 #include <stdio.h>
-
-class hello
-{
-public:
-    hello();
-    ~hello();
-    void print();
-};
+#include "hello.h"
 
 hello::hello()
 {
@@ -25,11 +18,4 @@ hello::~hello()
 void hello::print()
 {
     printf("hello world\n");
-}
-
-int main()
-{
-    hello h;
-    h.print();
-    return 1;
 }

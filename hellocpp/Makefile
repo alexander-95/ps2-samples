@@ -16,7 +16,8 @@ IOP            = /usr/local/ps2dev/ps2sdk/iop/include
 
 all:
 	ee-g++ -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c hello.cpp -o hello.o
-	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(EE_LIB) -o hello.elf $(CRT) hello.o -Xlinker --start-group -lpad -lc -lkernel -lm -lfileXio -ldebug -Xlinker --end-group
+	ee-g++ -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c main.cpp -o main.o
+	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(EE_LIB) -o hello.elf $(CRT) hello.o main.o -Xlinker --start-group -lpad -lc -lkernel -lm -lfileXio -ldebug -Xlinker -lstdc++ --end-group
 
 clean:
 	rm -f $(EE_BIN) $(EE_OBJS)
