@@ -26,10 +26,5 @@ all:
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c tiled.cpp -o tiled.o
 	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(GSKIT_LIB) -L$(EE_LIB) -o $(EE_BIN) $(CRT) $(EE_OBJS) -Xlinker --start-group  -laudsrv -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lkernel -lfileXio -lstdc++ --end-group
 
-	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c test.cpp -o test.o
-	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(GSKIT_LIB) -L$(EE_LIB) -o test.elf $(CRT) test.o spritesheet.o -Xlinker --start-group  -laudsrv -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lkernel -lfileXio -lstdc++ --end-group
-
-#ee-gcc -T$(LINKFILE) -mno-crt0 -L$(EE_LIB) -o $(EE_BIN) $(CRT) $(EE_OBJS) -Xlinker --start-group -lc -lkernel -lstdc++ --end-group
-
 clean:
 	rm -f $(EE_BIN) $(EE_OBJS) $(TEXTURE_SRC)
