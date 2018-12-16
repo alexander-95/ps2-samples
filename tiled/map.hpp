@@ -11,5 +11,6 @@ public:
     ~map();
     int width;
     int height;
-    u8 data[3360];
+    int tile_width;
+    int tile_height;
 };
