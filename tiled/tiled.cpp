@@ -49,16 +49,44 @@ void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map*
                             0,TexCol);
 }
 
+void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, int x, int y, u8* map_data)
+{
+    // figure out the tile to draw
+    int tile_x = x / level->tile_width;
+    int tile_y = y / level->tile_height;
+        
+    // where do we start in the tile
+    int point_x = x % level->tile_width;
+    int point_y = y % level->tile_height;
+
+    // position of the top left corner of the current tile
+    int start_x = 0 - point_x;
+    int start_y = 0 - point_y;
+
+    printf("starting point: (%d,%d)\n",start_x, start_y);
+    
+    while(start_y < gsGlobal->Height && tile_y < level->height)
+    {
+        while(start_x < gsGlobal->Width && tile_x < level->width)
+        {
+            int index = tile_y * level->width + tile_x;
+            int value = map_data[index];
+            drawTile(gsGlobal, spritesheet, scale_factor, level, start_x, start_y, value);
+            start_x += level->tile_width;
+            tile_x++;
+        }
+        start_x = 0 - point_x;
+        tile_x = x / level->tile_width;
+        start_y += level->tile_height;
+        tile_y++;
+    }
+}
+
 int main()
 {
     // place the top corner of the screen at this location of the map and render the first tile.
-    int x = 0, y=0;
-    int tile_x, tile_y;
-    int index;
-    int point_x, point_y; 
-    
-    int start_x, start_y; //top left corner of current tile
-    int scale_factor; 
+    int x = 0, y=0; // top left corner of the screen
+    int scale_factor = 2; 
     u8 value; // value being read from map array
 
     static int padBuf[256] __attribute__((aligned(64)));
@@ -108,32 +136,9 @@ int main()
         if(pad.right())x+=2;
         if(pad.up())y-=2;
         if(pad.down())y+=2;
-        // figure out the tile to draw
-        tile_x = x / level1.tile_width;
-        tile_y = y / level1.tile_height;
+
+        drawScreen(gsGlobal, &spritesheet, scale_factor, &level1, x, y, map_data);
         
-        // where do we start in the tile
-        point_x = x % level1.tile_width;
-        point_y = y % level1.tile_height;
-        
-        start_x = 0 - point_x, start_y = 0 - point_y;
-        scale_factor = 2;
-        while(start_y < 512 && tile_y < level1.height)
-        {
-            while(start_x < 640 && tile_x < level1.width)
-            {
-                index = tile_y * level1.width + tile_x;
-                value = map_data[index];
-                drawTile(gsGlobal, &spritesheet, scale_factor, &level1, start_x, start_y, value);
-                start_x += level1.tile_width;
-                tile_x++;
-            }
-            start_x = 0 - point_x;
-            tile_x = x / level1.tile_width;
-            start_y += level1.tile_height;
-            tile_y++;
-                
-        }
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
