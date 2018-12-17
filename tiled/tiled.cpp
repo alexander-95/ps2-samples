@@ -127,6 +127,13 @@ int main()
     mario.spritesheet.Height = 16;
     mario.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &mario.spritesheet, mario_array, mario.spritesheet.Width, mario.spritesheet.Height );
+
+    u8 solid[32] = {0,1,0,0,0,0,0,0,
+                    0,0,0,1,1,1,0,0,
+                    1,1,0,0,0,0,0,0,
+                    1,1,0,0,0,0,0,0};
+    mario.vy = 0;
+    int gravity = 1;
     
     while(1)
     {
@@ -135,20 +142,59 @@ int main()
         
         if(pad.left())
         {
-            if(mario.x > (gsGlobal->Width/2))mario.x-=2;
-            else if(x > 0)x-=2;
-            else if(mario.x > 0)mario.x-=2;
+            if(mario.x > (gsGlobal->Width/2))
+            {
+                if(mario.canMoveLeft(&level1,map_data, solid,scale_factor, x, y))mario.x-=2;
+            }
+            else if(x > 0)
+            {
+                if(mario.canMoveLeft(&level1,map_data, solid,scale_factor, x, y))x-=2;
+            }
+            else if(mario.x > 0)
+            {
+                if(mario.canMoveLeft(&level1,map_data, solid,scale_factor, x, y))mario.x-=2;
+            }
         }
         if(pad.right())
         {
-            if(mario.x < (gsGlobal->Width/2))mario.x+=2;
-            else if(x < (level1.width*level1.tile_width)-(gsGlobal->Width/2))x+=2;
-            else if(mario.x < (level1.width*level1.tile_width)-16)mario.x+=2;
+            if(mario.x < (gsGlobal->Width/2))
+            {
+                if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y))mario.x+=2;
+            }
+            else if(x+(gsGlobal->Width/scale_factor) < (level1.width*level1.tile_width))
+            {
+                if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y))x+=2;
+            }
+            else if(mario.x+(16*scale_factor) < (level1.width*level1.tile_width))
+            {
+                if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y))mario.x+=2;
+            }
         }
-        if(pad.up())mario.y-=2;
-        if(pad.down())mario.y+=2;
-        
-        
+        if(pad.up())
+        {
+            if(mario.y > 0)
+            {
+                if(mario.canMoveUp(&level1,map_data, solid,scale_factor, x, y) &&
+                   !mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y))mario.vy = -20;//mario.y-=2;
+            }
+        }
+        if(pad.down())
+        {
+            if(mario.y+(16*scale_factor) < level1.height*level1.tile_height*scale_factor)
+            {
+                if(mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y))mario.y+=2;
+            }
+        }
+
+        mario.y += mario.vy;
+        if(mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y))
+        {
+            mario.vy += gravity;
+        }
+        else
+        {
+            mario.vy = 0;
+        }
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data);
         mario.draw(gsGlobal);
         gsKit_sync_flip(gsGlobal);
