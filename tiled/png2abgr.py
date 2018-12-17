@@ -68,5 +68,5 @@ for i in range(img.height):
         
     
 abgr += '}'
-c.write('u32 '+filename+'_array[] = '+abgr+';\n')
+c.write('u32 '+filename+'_array[] __attribute__((aligned(16))) = '+abgr+';\n')
 c.close()

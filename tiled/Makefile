@@ -4,7 +4,7 @@
 
 EE_BIN =  tiled.elf
 EE_OBJS = tiled.o spritesheet.o controller.o map.o map_data.o character.o mario.o
-#TEXTURE_SRC = spritesheet.c spritesheet.h mario.c mario.h
+TEXTURE_SRC = spritesheet.c spritesheet.h mario.c mario.h
 
 EE_INCLUDES    = /usr/local/ps2dev/ps2sdk/ee/include
 SDK_COMMON     = /usr/local/ps2dev/ps2sdk/common/include
@@ -16,8 +16,8 @@ GSKIT_INCLUDES = /usr/local/ps2dev/gsKit/include
 GSKIT_LIB      = /usr/local/ps2dev/gsKit/lib
 
 all:
-#	python png2abgr.py spritesheet.png
-#	python png2abgr.py mario.png
+	python png2abgr.py spritesheet.png
+	python png2abgr.py mario.png
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c spritesheet.c -o spritesheet.o
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c map_data.c -o map_data.o
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c mario.c -o mario.o
