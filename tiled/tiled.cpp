@@ -5,9 +5,11 @@
 #include <gsKit.h>
 
 #include "spritesheet.h"
+#include "mario.h"
 #include "controller.hpp"
 #include "map.hpp"
 #include "map_data.h"
+#include "character.hpp"
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
@@ -54,7 +56,7 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
     // figure out the tile to draw
     int tile_x = x / level->tile_width;
     int tile_y = y / level->tile_height;
-        
+
     // where do we start in the tile
     int point_x = x % level->tile_width;
     int point_y = y % level->tile_height;
@@ -62,8 +64,6 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
     // position of the top left corner of the current tile
     int start_x = 0 - point_x;
     int start_y = 0 - point_y;
-
-    printf("starting point: (%d,%d)\n",start_x, start_y);
     
     while(start_y < gsGlobal->Height && tile_y < level->height)
     {
@@ -83,16 +83,7 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
 }
 
 int main()
-{
-    // place the top corner of the screen at this location of the map and render the first tile.
-    int x = 0, y=0; // top left corner of the screen
-    int scale_factor = 2; 
-    u8 value; // value being read from map array
-
-    static int padBuf[256] __attribute__((aligned(64)));
-
-    map level1;
-
+{   
     GSGLOBAL* gsGlobal = gsKit_init_global();
     gsGlobal->Mode = GS_MODE_PAL;
     gsGlobal->Width=640;
@@ -112,33 +103,48 @@ int main()
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
     
-    GSTEXTURE spritesheet;
-    spritesheet.Width = 128;
-    spritesheet.Height = 64;
-    spritesheet.PSM = GS_PSM_CT32;
-
-    u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
-        
-    gsKit_texture_abgr(gsGlobal, &spritesheet, spritesheet_array, spritesheet.Width, spritesheet.Height );
-
     //controller setup
+    static int padBuf[256] __attribute__((aligned(64)));
     int port=0, slot=0;    
     controller pad;
     pad.loadModules();
     padInit(0);
     pad.openPad(port,slot, padBuf);
+
+    // place the top corner of the screen at this location of the map and render the first tile.
+    int x = 0, y=0; // top left corner of the screen
+    int scale_factor = 2; 
+    u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
+    
+    map level1;
+    level1.spritesheet.Width = 128;
+    level1.spritesheet.Height = 64;
+    level1.spritesheet.PSM = GS_PSM_CT32;
+    gsKit_texture_abgr(gsGlobal, &level1.spritesheet, spritesheet_array, level1.spritesheet.Width, level1.spritesheet.Height );
+    
+    character mario;
+    mario.spritesheet.Width = 256;
+    mario.spritesheet.Height = 16;
+    mario.spritesheet.PSM = GS_PSM_CT32;
+    gsKit_texture_abgr(gsGlobal, &mario.spritesheet, mario_array, mario.spritesheet.Width, mario.spritesheet.Height );
     
     while(1)
     {
         gsKit_clear(gsGlobal, bg_color);
         pad.read();
-        if(pad.left())x-=2;
+        if(pad.left() && x > 0)x-=2;
         if(pad.right())x+=2;
-        if(pad.up())y-=2;
+        if(pad.up() && y > 0)y-=2;
         if(pad.down())y+=2;
 
-        drawScreen(gsGlobal, &spritesheet, scale_factor, &level1, x, y, map_data);
+        //if(pad.left())mario.x-=2;
+        //if(pad.right())mario.x+=2;
+        //if(pad.up())mario.y-=2;
+        //if(pad.down())mario.y+=2;
         
+        
+        drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data);
+        mario.draw(gsGlobal);
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);

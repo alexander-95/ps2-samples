@@ -4,14 +4,14 @@
 
 #include <gsKit.h>
 
-class map
+class character
 {
 public:
-    map();
-    ~map();
-    int width;
-    int height;
-    int tile_width;
-    int tile_height;
+    character();
+    ~character();
+    void draw(GSGLOBAL* gsGlobal);
+    int x;
+    int y;
+    int sprite;
     GSTEXTURE spritesheet;
 };
