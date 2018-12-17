@@ -132,15 +132,21 @@ int main()
     {
         gsKit_clear(gsGlobal, bg_color);
         pad.read();
-        if(pad.left() && x > 0)x-=2;
-        if(pad.right())x+=2;
-        if(pad.up() && y > 0)y-=2;
-        if(pad.down())y+=2;
-
-        //if(pad.left())mario.x-=2;
-        //if(pad.right())mario.x+=2;
-        //if(pad.up())mario.y-=2;
-        //if(pad.down())mario.y+=2;
+        
+        if(pad.left())
+        {
+            if(mario.x > (gsGlobal->Width/2))mario.x-=2;
+            else if(x > 0)x-=2;
+            else if(mario.x > 0)mario.x-=2;
+        }
+        if(pad.right())
+        {
+            if(mario.x < (gsGlobal->Width/2))mario.x+=2;
+            else if(x < (level1.width*level1.tile_width)-(gsGlobal->Width/2))x+=2;
+            else if(mario.x < (level1.width*level1.tile_width)-16)mario.x+=2;
+        }
+        if(pad.up())mario.y-=2;
+        if(pad.down())mario.y+=2;
         
         
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data);
