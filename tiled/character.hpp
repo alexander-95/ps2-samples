@@ -18,6 +18,7 @@ public:
     int x;
     int y;
     int vy;
-    int sprite;
+    int sprite; // sprite number to draw
+    u8 hflip; // horizontal flip for sprite
     GSTEXTURE spritesheet;
 };

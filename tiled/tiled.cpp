@@ -142,6 +142,7 @@ int main()
         
         if(pad.left())
         {
+            mario.hflip = 1;
             if(mario.x > (gsGlobal->Width/2))
             {
                 if(mario.canMoveLeft(&level1,map_data, solid,scale_factor, x, y, 2))mario.x-=4;
@@ -157,6 +158,7 @@ int main()
         }
         if(pad.right())
         {
+            mario.hflip = 0;
             if(mario.x < (gsGlobal->Width/2))
             {
                 if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y, 2))mario.x+=4;
@@ -170,7 +172,7 @@ int main()
                 if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y, 2))mario.x+=4;
             }
         }
-        if(pad.up())
+        if(pad.up() || pad.x())
         {
             if(mario.y > 0)
             {

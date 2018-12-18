@@ -31,4 +31,5 @@ public:
     int down();
     int left();
     int right();
+    int x();
 };

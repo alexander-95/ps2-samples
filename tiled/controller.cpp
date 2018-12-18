@@ -209,3 +209,8 @@ int controller::down()
 {
     return old_pad & PAD_DOWN;
 }
+
+int controller::x()
+{
+    return old_pad & PAD_CROSS;
+}
