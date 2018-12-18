@@ -35,33 +35,13 @@ void character::draw(GSGLOBAL* gsGlobal)
                             1, TexCol);
 }
 
-int character::canMoveDown(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y )
+int character::canMoveDown(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
 {
-    int x1 = x+screen_x*scale_factor, y1 = y+32+screen_y*scale_factor, x2 = x+30+screen_x*scale_factor, y2 = y+32+screen_y*scale_factor;
-    // figure out which tile mario is running into
-    int tile_x1 = (x1 / level->tile_width) / scale_factor;
-    int tile_y1 = (y1 / level->tile_height) / scale_factor;
-    int index1 = tile_y1 * level->width + tile_x1;
-    int value1 = map_data[index1];
-                
-    int tile_x2 = (x2 / level->tile_width) / scale_factor;
-    int tile_y2 = (y2 / level->tile_height) / scale_factor;
-    int index2 = tile_y2 * level->width + tile_x2;
-    int value2 = map_data[index2];
-
-    //printf("screen: %d, %d\n", screen_x, screen_y);
-
-    //printf("mario's x: %d\n", x1);
-    //printf("tile %d, %d\n", tile_x1, tile_y1);
-    //printf("blocks below mario: %d, %d\n", value1, value2);
-
-    if(!solid[value1] && !solid[value2]) return 1;
-    else return 0;
-}
-
-int character::canMoveUp(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y )
-{
-    int x1 = x+screen_x*scale_factor, y1 = (y-2)+screen_y*scale_factor, x2 = x+30+screen_x*scale_factor, y2 = (y-2)+screen_y*scale_factor;
+    int x1 = x+screen_x*scale_factor;
+    int y1 = y+n+(15*scale_factor)+screen_y*scale_factor;
+    int x2 = x+(15*scale_factor)+screen_x*scale_factor;
+    int y2 = y+n+(15*scale_factor)+screen_y*scale_factor;
+    
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width) / scale_factor;
     int tile_y1 = (y1 / level->tile_height) / scale_factor;
@@ -77,9 +57,13 @@ int character::canMoveUp(map* level, u8* map_data, u8* solid, int scale_factor, 
     else return 0;
 }
 
-int character::canMoveRight(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y )
+int character::canMoveUp(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
 {
-    int x1 = (x+32)+screen_x*scale_factor, y1 = y+screen_y*scale_factor, x2 = (x+32)+screen_x*scale_factor, y2 = (y+30)+screen_y*scale_factor;
+    int x1 = x+screen_x*scale_factor;
+    int y1 = (y-n)+screen_y*scale_factor;
+    int x2 = x+(15*scale_factor)+screen_x*scale_factor;
+    int y2 = (y-n)+screen_y*scale_factor;
+    
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width) / scale_factor;
     int tile_y1 = (y1 / level->tile_height) / scale_factor;
@@ -95,9 +79,35 @@ int character::canMoveRight(map* level, u8* map_data, u8* solid, int scale_facto
     else return 0;
 }
 
-int character::canMoveLeft(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y )
+int character::canMoveRight(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
 {
-    int x1 = (x-2)+screen_x*scale_factor, y1 = y+screen_y*scale_factor, x2 = (x-2)+screen_x*scale_factor, y2 = (y+30)+screen_y*scale_factor;
+    int x1 = (x+n+(15*scale_factor))+screen_x*scale_factor;
+    int y1 = y+screen_y*scale_factor;
+    int x2 = (x+n+(15*scale_factor))+screen_x*scale_factor;
+    int y2 = (y+(15*scale_factor))+screen_y*scale_factor;
+    
+    // figure out which tile mario is running into
+    int tile_x1 = (x1 / level->tile_width) / scale_factor;
+    int tile_y1 = (y1 / level->tile_height) / scale_factor;
+    int index1 = tile_y1 * level->width + tile_x1;
+    int value1 = map_data[index1];
+
+    int tile_x2 = (x2 / level->tile_width) / scale_factor;
+    int tile_y2 = (y2 / level->tile_height) / scale_factor;
+    int index2 = tile_y2 * level->width + tile_x2;
+    int value2 = map_data[index2];
+
+    if(!solid[value1] && !solid[value2]) return 1;
+    else return 0;
+}
+
+int character::canMoveLeft(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
+{
+    int x1 = (x-n)+screen_x*scale_factor;
+    int y1 = y+screen_y*scale_factor;
+    int x2 = (x-n)+screen_x*scale_factor;
+    int y2 = (y+(15*scale_factor))+screen_y*scale_factor;
+    
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width) / scale_factor;
     int tile_y1 = (y1 / level->tile_height) / scale_factor;
