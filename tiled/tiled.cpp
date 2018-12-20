@@ -159,6 +159,18 @@ int main()
         if(pad.right())
         {
             mario.hflip = 0;
+            mario.gate++;
+            mario.gate &= 1;
+            if(!mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 2))
+            {
+                if(mario.gate  == 0)
+                {
+                    mario.sprite++;
+                    mario.sprite %= 3;
+                    mario.sprite++;
+                }
+            }
+            printf("gate:%d\n", mario.gate);
             if(mario.x < (gsGlobal->Width/2))
             {
                 if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y, 2))mario.x+=4;
@@ -174,40 +186,44 @@ int main()
         }
         if(pad.up() || pad.x())
         {
+            mario.sprite = 5;
             if(mario.y > 0)
             {
                 if(mario.canMoveUp(&level1,map_data, solid,scale_factor, x, y, 2) &&
                    !mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 2))mario.vy = -16;//mario.y-=2;
             }
         }
-        if(pad.down())
+        if(pad.down()) //redundant thanks to gravity
         {
             if(mario.y+(16*scale_factor) < level1.height*level1.tile_height*scale_factor)
             {
-                if(mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 2))mario.y+=2;
+                if(mario.canMoveDown(&level1, map_data, solid,scale_factor, x, y, 2))mario.y+=2;
             }
         }
 
         // dealing with gravity
-        if(mario.vy >= 0)
+        if(mario.vy > 0)
         {
-            if(mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, mario.vy))
+            if(mario.canMoveDown(&level1, map_data, solid,scale_factor, x, y, mario.vy))
             {
                 mario.y += mario.vy;
                 mario.vy += gravity;
             }
             else
             {
-                while(mario.vy >= 0 && !mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, mario.vy))mario.vy--;
+                while(mario.vy > 0 && !mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, mario.vy))mario.vy--;
                 mario.y += mario.vy;
+                mario.vy = 0;
+                printf("resetting sprite\n");
+                mario.sprite = 0;
             }
         }
-        else
+        else if(mario.vy < 0 || mario.canMoveDown(&level1, map_data, solid,scale_factor, x, y, 1)) // jumping
         {
             printf("jumping\n");
             if(mario.canMoveUp(&level1,map_data, solid,scale_factor, x, y, mario.vy*(-1)))
             {
-                printf("jumping %d\n", mario.vy);
+                //printf("jumping %d\n", mario.vy);
                 mario.y += mario.vy;
                 mario.vy += gravity;
             }
