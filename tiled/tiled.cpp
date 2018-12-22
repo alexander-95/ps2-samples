@@ -134,15 +134,28 @@ int main()
                     1,1,0,0,0,0,0,0};
     mario.vy = 0;
     int gravity = 1;
-    
+    u8 tick = 0;
     while(1)
     {
         gsKit_clear(gsGlobal, bg_color);
         pad.read();
+        if(!mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 1))mario.sprite = 0;
+        else mario.sprite = 5;
         
         if(pad.left())
         {
             mario.hflip = 1;
+            if(tick)mario.gate++;
+            mario.gate &= 3;
+            if(!mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 2))
+            {
+                if(mario.gate & 1)mario.sprite = 2;
+                else
+                {
+                    if(!mario.gate) mario.sprite = 1;
+                    else mario.sprite = 3;
+                }
+            }
             if(mario.x > (gsGlobal->Width/2))
             {
                 if(mario.canMoveLeft(&level1,map_data, solid,scale_factor, x, y, 2))mario.x-=4;
@@ -159,18 +172,17 @@ int main()
         if(pad.right())
         {
             mario.hflip = 0;
-            mario.gate++;
-            mario.gate &= 1;
+            if(tick)mario.gate++;
+            mario.gate &= 3;
             if(!mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 2))
             {
-                if(mario.gate  == 0)
+                if(mario.gate & 1)mario.sprite = 2;
+                else
                 {
-                    mario.sprite++;
-                    mario.sprite %= 3;
-                    mario.sprite++;
+                    if(!mario.gate) mario.sprite = 1;
+                    else mario.sprite = 3;
                 }
             }
-            printf("gate:%d\n", mario.gate);
             if(mario.x < (gsGlobal->Width/2))
             {
                 if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y, 2))mario.x+=4;
@@ -240,6 +252,8 @@ int main()
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
         gsKit_clear(gsGlobal, 0);
+        tick++;
+        tick&=1;
     }
     return 0;
 }
