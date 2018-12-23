@@ -244,7 +244,9 @@ int main()
                 while(mario.vy < 0 && !mario.canMoveUp(&level1, solid,scale_factor, x, y, mario.vy*(-1)))mario.vy++;
                 if(mario.vy == 0)
                 {
-                    printf("hit the roof\n");
+                    int index = level1.get_index(mario.x/scale_factor + x + 8, mario.y/scale_factor + y - 1);
+                    printf("hit box %d\n", level1.data[index]);
+                    if(level1.data[index] == 11)level1.data[index]++;
                 }
                 mario.y += mario.vy;
             }

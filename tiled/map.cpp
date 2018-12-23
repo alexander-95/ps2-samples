@@ -16,3 +16,19 @@ map::~map()
 {
     
 }
+
+int map::get_box(int x, int y)
+{
+    int index_x = x / tile_width;
+    int index_y = y / tile_height;
+    int index = get_index(x, y);//(index_y*width)+index_x;
+    return data[index];
+}
+
+
+int map::get_index(int x, int y)
+{
+    int index_x = x / tile_width;
+    int index_y = y / tile_height;
+    return (index_y*width)+index_x;
+}

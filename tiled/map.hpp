@@ -12,6 +12,8 @@ class map
 public:
     map();
     ~map();
+    int get_box(int x, int y);
+    int get_index(int x, int y);
     int width; //map width in tiles
     int height;
     int tile_width;
