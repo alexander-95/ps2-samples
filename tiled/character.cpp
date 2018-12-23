@@ -43,7 +43,7 @@ void character::draw(GSGLOBAL* gsGlobal)
                             1, TexCol);
 }
 
-int character::canMoveDown(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
+int character::canMoveDown(map* level, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
 {
     int x1 = x+screen_x*scale_factor;
     int y1 = y+n+(15*scale_factor)+screen_y*scale_factor;
@@ -54,18 +54,18 @@ int character::canMoveDown(map* level, u8* map_data, u8* solid, int scale_factor
     int tile_x1 = (x1 / level->tile_width) / scale_factor;
     int tile_y1 = (y1 / level->tile_height) / scale_factor;
     int index1 = tile_y1 * level->width + tile_x1;
-    int value1 = map_data[index1];
+    int value1 = level->data[index1];
 
     int tile_x2 = (x2 / level->tile_width) / scale_factor;
     int tile_y2 = (y2 / level->tile_height) / scale_factor;
     int index2 = tile_y2 * level->width + tile_x2;
-    int value2 = map_data[index2];
+    int value2 = level->data[index2];
 
     if(!solid[value1] && !solid[value2]) return 1;
     else return 0;
 }
 
-int character::canMoveUp(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
+int character::canMoveUp(map* level, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
 {
     int x1 = x+screen_x*scale_factor;
     int y1 = (y-n)+screen_y*scale_factor;
@@ -76,18 +76,18 @@ int character::canMoveUp(map* level, u8* map_data, u8* solid, int scale_factor, 
     int tile_x1 = (x1 / level->tile_width) / scale_factor;
     int tile_y1 = (y1 / level->tile_height) / scale_factor;
     int index1 = tile_y1 * level->width + tile_x1;
-    int value1 = map_data[index1];
+    int value1 = level->data[index1];
 
     int tile_x2 = (x2 / level->tile_width) / scale_factor;
     int tile_y2 = (y2 / level->tile_height) / scale_factor;
     int index2 = tile_y2 * level->width + tile_x2;
-    int value2 = map_data[index2];
+    int value2 = level->data[index2];
 
     if(!solid[value1] && !solid[value2]) return 1;
     else return 0;
 }
 
-int character::canMoveRight(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
+int character::canMoveRight(map* level, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
 {
     int x1 = (x+n+(15*scale_factor))+screen_x*scale_factor;
     int y1 = y+screen_y*scale_factor;
@@ -98,18 +98,18 @@ int character::canMoveRight(map* level, u8* map_data, u8* solid, int scale_facto
     int tile_x1 = (x1 / level->tile_width) / scale_factor;
     int tile_y1 = (y1 / level->tile_height) / scale_factor;
     int index1 = tile_y1 * level->width + tile_x1;
-    int value1 = map_data[index1];
+    int value1 = level->data[index1];
 
     int tile_x2 = (x2 / level->tile_width) / scale_factor;
     int tile_y2 = (y2 / level->tile_height) / scale_factor;
     int index2 = tile_y2 * level->width + tile_x2;
-    int value2 = map_data[index2];
+    int value2 = level->data[index2];
 
     if(!solid[value1] && !solid[value2]) return 1;
     else return 0;
 }
 
-int character::canMoveLeft(map* level, u8* map_data, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
+int character::canMoveLeft(map* level, u8* solid, int scale_factor, int screen_x, int screen_y, int n )
 {
     int x1 = (x-n)+screen_x*scale_factor;
     int y1 = y+screen_y*scale_factor;
@@ -120,12 +120,12 @@ int character::canMoveLeft(map* level, u8* map_data, u8* solid, int scale_factor
     int tile_x1 = (x1 / level->tile_width) / scale_factor;
     int tile_y1 = (y1 / level->tile_height) / scale_factor;
     int index1 = tile_y1 * level->width + tile_x1;
-    int value1 = map_data[index1];
+    int value1 = level->data[index1];
 
     int tile_x2 = (x2 / level->tile_width) / scale_factor;
     int tile_y2 = (y2 / level->tile_height) / scale_factor;
     int index2 = tile_y2 * level->width + tile_x2;
-    int value2 = map_data[index2];
+    int value2 = level->data[index2];
 
     if(!solid[value1] && !solid[value2]) return 1;
     else return 0;

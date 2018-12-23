@@ -121,6 +121,7 @@ int main()
     level1.spritesheet.Height = 64;
     level1.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &level1.spritesheet, spritesheet_array, level1.spritesheet.Width, level1.spritesheet.Height );
+    level1.data = map_data;
     
     character mario;
     mario.spritesheet.Width = 256;
@@ -139,15 +140,15 @@ int main()
     {
         gsKit_clear(gsGlobal, bg_color);
         pad.read();
-        if(!mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 1))mario.sprite = 0;
+        if(!mario.canMoveDown(&level1, solid,scale_factor, x, y, 1))mario.sprite = 0;
         else mario.sprite = 5;
         
         if(pad.left())
         {
             mario.hflip = 1;
-            if(tick)mario.gate++;
+            if(tick&1)mario.gate++;
             mario.gate &= 3;
-            if(!mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 2))
+            if(!mario.canMoveDown(&level1, solid,scale_factor, x, y, 2))
             {
                 if(mario.gate & 1)mario.sprite = 2;
                 else
@@ -158,15 +159,15 @@ int main()
             }
             if(mario.x > (gsGlobal->Width/2))
             {
-                if(mario.canMoveLeft(&level1,map_data, solid,scale_factor, x, y, 2))mario.x-=4;
+                if(mario.canMoveLeft(&level1, solid,scale_factor, x, y, 2))mario.x-=4;
             }
             else if(x > 0)
             {
-                if(mario.canMoveLeft(&level1,map_data, solid,scale_factor, x, y, 2))x-=2;
+                if(mario.canMoveLeft(&level1, solid,scale_factor, x, y, 2))x-=2;
             }
             else if(mario.x > 0)
             {
-                if(mario.canMoveLeft(&level1,map_data, solid,scale_factor, x, y, 2))mario.x-=4;
+                if(mario.canMoveLeft(&level1, solid,scale_factor, x, y, 2))mario.x-=4;
             }
         }
         if(pad.right())
@@ -174,7 +175,7 @@ int main()
             mario.hflip = 0;
             if(tick)mario.gate++;
             mario.gate &= 3;
-            if(!mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 2))
+            if(!mario.canMoveDown(&level1, solid,scale_factor, x, y, 2))
             {
                 if(mario.gate & 1)mario.sprite = 2;
                 else
@@ -185,15 +186,15 @@ int main()
             }
             if(mario.x < (gsGlobal->Width/2))
             {
-                if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y, 2))mario.x+=4;
+                if(mario.canMoveRight(&level1, solid,scale_factor, x, y, 2))mario.x+=4;
             }
             else if(x+(gsGlobal->Width/scale_factor) < (level1.width*level1.tile_width))
             {
-                if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y, 2))x+=2;
+                if(mario.canMoveRight(&level1, solid,scale_factor, x, y, 2))x+=2;
             }
             else if(mario.x+(16*scale_factor) < (level1.width*level1.tile_width))
             {
-                if(mario.canMoveRight(&level1,map_data, solid,scale_factor, x, y, 2))mario.x+=4;
+                if(mario.canMoveRight(&level1, solid,scale_factor, x, y, 2))mario.x+=4;
             }
         }
         if(pad.up() || pad.x())
@@ -201,39 +202,38 @@ int main()
             mario.sprite = 5;
             if(mario.y > 0)
             {
-                if(mario.canMoveUp(&level1,map_data, solid,scale_factor, x, y, 2) &&
-                   !mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, 2))mario.vy = -16;//mario.y-=2;
+                if(mario.canMoveUp(&level1, solid,scale_factor, x, y, 2) &&
+                   !mario.canMoveDown(&level1, solid,scale_factor, x, y, 2))mario.vy = -16;//mario.y-=2;
             }
         }
         if(pad.down()) //redundant thanks to gravity
         {
             if(mario.y+(16*scale_factor) < level1.height*level1.tile_height*scale_factor)
             {
-                if(mario.canMoveDown(&level1, map_data, solid,scale_factor, x, y, 2))mario.y+=2;
+                if(mario.canMoveDown(&level1, solid,scale_factor, x, y, 2))mario.y+=2;
             }
         }
 
         // dealing with gravity
         if(mario.vy > 0)
         {
-            if(mario.canMoveDown(&level1, map_data, solid,scale_factor, x, y, mario.vy))
+            if(mario.canMoveDown(&level1, solid,scale_factor, x, y, mario.vy))
             {
                 mario.y += mario.vy;
                 mario.vy += gravity;
             }
             else
             {
-                while(mario.vy > 0 && !mario.canMoveDown(&level1,map_data, solid,scale_factor, x, y, mario.vy))mario.vy--;
+                while(mario.vy > 0 && !mario.canMoveDown(&level1, solid,scale_factor, x, y, mario.vy))mario.vy--;
                 mario.y += mario.vy;
                 mario.vy = 0;
-                printf("resetting sprite\n");
                 mario.sprite = 0;
             }
         }
-        else if(mario.vy < 0 || mario.canMoveDown(&level1, map_data, solid,scale_factor, x, y, 1)) // jumping
+        else if(mario.vy < 0 || mario.canMoveDown(&level1, solid,scale_factor, x, y, 1)) // jumping
         {
-            printf("jumping\n");
-            if(mario.canMoveUp(&level1,map_data, solid,scale_factor, x, y, mario.vy*(-1)))
+            //printf("jumping\n");
+            if(mario.canMoveUp(&level1, solid,scale_factor, x, y, mario.vy*(-1)))
             {
                 //printf("jumping %d\n", mario.vy);
                 mario.y += mario.vy;
@@ -241,7 +241,11 @@ int main()
             }
             else
             {
-                while(mario.vy < 0 && !mario.canMoveUp(&level1,map_data, solid,scale_factor, x, y, mario.vy*(-1)))mario.vy++;
+                while(mario.vy < 0 && !mario.canMoveUp(&level1, solid,scale_factor, x, y, mario.vy*(-1)))mario.vy++;
+                if(mario.vy == 0)
+                {
+                    printf("hit the roof\n");
+                }
                 mario.y += mario.vy;
             }
         }
@@ -253,7 +257,7 @@ int main()
         gsKit_queue_reset(gsGlobal->Per_Queue);
         gsKit_clear(gsGlobal, 0);
         tick++;
-        tick&=1;
+        tick&=15;
     }
     return 0;
 }

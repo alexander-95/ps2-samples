@@ -17,6 +17,7 @@ public:
     int tile_width;
     int tile_height;
     GSTEXTURE spritesheet;
+    u8* data;
 };
 
 #endif
