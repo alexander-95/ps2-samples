@@ -10,6 +10,7 @@
 #include "map.hpp"
 #include "map_data.h"
 #include "character.hpp"
+#include "block.hpp"
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
@@ -105,7 +106,7 @@ int main()
     
     //controller setup
     static int padBuf[256] __attribute__((aligned(64)));
-    int port=0, slot=0;    
+    int port=0, slot=0;
     controller pad;
     pad.loadModules();
     padInit(0);
@@ -113,7 +114,7 @@ int main()
 
     // place the top corner of the screen at this location of the map and render the first tile.
     int x = 0, y=0; // top left corner of the screen
-    int scale_factor = 2; 
+    int scale_factor = 2;
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
     
     map level1;
@@ -129,6 +130,8 @@ int main()
     mario.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &mario.spritesheet, mario_array, mario.spritesheet.Width, mario.spritesheet.Height );
 
+    block* box;
+    
     u8 solid[32] = {0,1,0,0,0,0,0,0,
                     0,0,0,1,1,1,0,0,
                     1,1,0,0,0,0,0,0,
@@ -157,12 +160,11 @@ int main()
                     else mario.sprite = 3;
                 }
             }
-            if(mario.canMoveLeft(&level1, solid, 2))mario.x-=2;
-            if(x > 0)
+            if(mario.canMoveLeft(&level1, solid, 2))
             {
-                if(mario.canMoveLeft(&level1, solid, 2))x-=2;
+                mario.x-=2;
+                if(x > 0)x-=2;
             }
-            
         }
         if(pad.right())
         {
@@ -178,11 +180,11 @@ int main()
                     else mario.sprite = 3;
                 }
             }
-            if(mario.canMoveRight(&level1, solid, 2))mario.x+=2;
-            if(x+(gsGlobal->Width/(2*scale_factor)) < (level1.width*level1.tile_width) &&
-               mario.x > (gsGlobal->Width/(2*scale_factor)))
+            if(mario.canMoveRight(&level1, solid, 2))
             {
-                if(mario.canMoveRight(&level1, solid, 2))x+=2;
+                mario.x+=2;
+                if(x+(gsGlobal->Width/(2*scale_factor)) < (level1.width*level1.tile_width) &&
+                   mario.x > (gsGlobal->Width/(2*scale_factor))) x+=2;
             }
         }
         if(pad.up() || pad.x())
@@ -220,10 +222,8 @@ int main()
         }
         else if(mario.vy < 0 || mario.canMoveDown(&level1, solid, 1)) // jumping
         {
-            //printf("jumping\n");
             if(mario.canMoveUp(&level1, solid, mario.vy*(-1)))
             {
-                //printf("jumping %d\n", mario.vy);
                 mario.y += mario.vy;
                 mario.vy += gravity;
             }
@@ -234,7 +234,16 @@ int main()
                 {
                     int index = level1.get_index(mario.x + 8, mario.y - 1);
                     printf("hit box %d\n", level1.data[index]);
-                    if(level1.data[index] == 11)level1.data[index]++;
+                    if(level1.data[index] == 11)
+                    {
+                        block block1;
+                        block1.sprite = 1;
+                        block1.x = ((mario.x + 8) >> 4)<<4;
+                        block1.y = ((mario.y - 1) >> 4)<<4;
+                        block1.spritesheet = level1.spritesheet;
+                        level1.data[index] = 0;
+                        box = &block1;
+                    }
                 }
                 mario.y += mario.vy;
             }
@@ -242,6 +251,20 @@ int main()
         
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data);
         mario.draw(gsGlobal, x, y);
+        if(box)
+        {
+            box->draw(gsGlobal, x, y);
+            if(tick&1)
+            {
+                if(box->update())
+                {
+                    int index_x = box->x / level1.tile_width;
+                    int index_y = box->y / level1.tile_height;
+                    level1.data[(index_y*level1.width)+index_x] = 1;
+                }
+            }
+        }
+        
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);

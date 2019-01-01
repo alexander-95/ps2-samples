@@ -3,7 +3,7 @@
 # |     ___|   |____
 
 EE_BIN =  tiled.elf
-EE_OBJS = tiled.o spritesheet.o controller.o map.o map_data.o character.o mario.o
+EE_OBJS = tiled.o spritesheet.o controller.o map.o map_data.o character.o mario.o block.o
 TEXTURE_SRC = spritesheet.c spritesheet.h mario.c mario.h
 
 EE_INCLUDES    = /usr/local/ps2dev/ps2sdk/ee/include
@@ -25,6 +25,7 @@ all:
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c controller.cpp -o controller.o
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c map.cpp -o map.o
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c character.cpp -o character.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c block.cpp -o block.o
 
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c tiled.cpp -o tiled.o
 	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(GSKIT_LIB) -L$(EE_LIB) -o $(EE_BIN) $(CRT) $(EE_OBJS) -Xlinker --start-group  -laudsrv -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lkernel -lfileXio -lstdc++ --end-group
