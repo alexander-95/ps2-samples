@@ -32,4 +32,7 @@ public:
     int left();
     int right();
     int x();
+    int square();
+    int circle();
+    int triangle();
 };

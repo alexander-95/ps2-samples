@@ -11,6 +11,8 @@ character::character()
     y = 0;
     sprite = 0;
     hflip = 0;
+    width = 16;
+    height = 16;
 }
 
 character::~character()
@@ -21,7 +23,7 @@ character::~character()
 void character::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
-    int u1 = 16*sprite, v1 = 0, u2 = 16*(sprite+1), v2 = 16;
+    int u1 = width*sprite, v1 = 0, u2 = width*(sprite+1), v2 = height;
     int x1 = x*2 - screen_x*2, y1 = y*2 - screen_y*2;
     if(hflip)
     {
@@ -33,13 +35,13 @@ void character::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
                             x1,y1,         // x1, y1
                             u1, v1,         // u1, v1
 
-                            x1,y1+32,         // x2, y2
+                            x1,y1+(2*height),         // x2, y2
                             u1, v2,         // u2, v2
 
-                            x1+32,y1,         // x3, y3
+                            x1+(2*width),y1,         // x3, y3
                             u2, v1,         // u3, v3
 
-                            x1+32,y1+32,         // x4, y4
+                            x1+(2*width),y1+(2*height),         // x4, y4
                             u2, v2,         // u4, v4
                             1, TexCol);
 }
@@ -47,9 +49,9 @@ void character::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
 int character::canMoveDown(map* level, u8* solid, int n )
 {
     int x1 = x;
-    int y1 = y+n+15;
-    int x2 = x+15;
-    int y2 = y+n+15;
+    int y1 = y+n+(height-1);
+    int x2 = x+(width-1);
+    int y2 = y+n+(height-1);
     
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width);
@@ -70,7 +72,7 @@ int character::canMoveUp(map* level, u8* solid, int n )
 {
     int x1 = x;
     int y1 = y-n;
-    int x2 = x+15;
+    int x2 = x+(width-1);
     int y2 = y-n;
     
     // figure out which tile mario is running into
@@ -90,10 +92,10 @@ int character::canMoveUp(map* level, u8* solid, int n )
 
 int character::canMoveRight(map* level, u8* solid, int n )
 {
-    int x1 = x+n+15;
+    int x1 = x+n+(width-1);
     int y1 = y;
-    int x2 = x+n+15;
-    int y2 = y+15;
+    int x2 = x+n+(width-1);
+    int y2 = y+(height-1);
     
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width);
@@ -117,7 +119,7 @@ int character::canMoveLeft(map* level, u8* solid, int n )
     int x1 = x-n;
     int y1 = y;
     int x2 = x-n;
-    int y2 = y+15;
+    int y2 = y+(height-1);
     
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width);

@@ -125,8 +125,8 @@ int main()
     level1.data = map_data;
     
     character mario;
-    mario.spritesheet.Width = 256;
-    mario.spritesheet.Height = 16;
+    mario.spritesheet.Width = 512;
+    mario.spritesheet.Height = 32;
     mario.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &mario.spritesheet, mario_array, mario.spritesheet.Width, mario.spritesheet.Height );
 
@@ -139,6 +139,7 @@ int main()
     mario.vy = 0;
     int gravity = 1;
     u8 tick = 0;
+    u8 superMario = 0;
     while(1)
     {
         gsKit_clear(gsGlobal, bg_color);
@@ -203,6 +204,23 @@ int main()
                 if(mario.canMoveDown(&level1, solid, 2))mario.y+=2;
             }
         }
+        if(pad.triangle() && (tick & 8))
+        {
+            if(superMario)
+            {
+                superMario = 0;
+                mario.height = 16;
+                mario.width = 16;
+                mario.y+=16;
+            }
+            else
+            {
+                superMario = 1;
+                mario.height = 32;
+                mario.width = 18;
+                mario.y -= 16;
+            }
+        }
 
         // dealing with gravity
         if(mario.vy > 0)
@@ -217,6 +235,7 @@ int main()
                 while(mario.vy > 0 && !mario.canMoveDown(&level1, solid, mario.vy))mario.vy--;
                 mario.y += mario.vy;
                 mario.vy = 0;
+                
                 mario.sprite = 0;
             }
         }
@@ -248,7 +267,7 @@ int main()
                 mario.y += mario.vy;
             }
         }
-        
+        if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data);
         mario.draw(gsGlobal, x, y);
         if(box)

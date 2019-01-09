@@ -214,3 +214,18 @@ int controller::x()
 {
     return old_pad & PAD_CROSS;
 }
+
+int controller::square()
+{
+    return old_pad & PAD_SQUARE;
+}
+
+int controller::circle()
+{
+    return old_pad & PAD_CIRCLE;
+}
+
+int controller::triangle()
+{
+    return old_pad & PAD_TRIANGLE;
+}

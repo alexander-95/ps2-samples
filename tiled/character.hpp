@@ -21,5 +21,7 @@ public:
     int sprite; // sprite number to draw
     u8 hflip; // horizontal flip for sprite
     u8 gate;
+    u8 width;
+    u8 height;
     GSTEXTURE spritesheet;
 };
