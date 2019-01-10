@@ -194,7 +194,7 @@ int main()
             if(mario.y > 0)
             {
                 if(mario.canMoveUp(&level1, solid, 2) &&
-                   !mario.canMoveDown(&level1, solid, 2))mario.vy = -11;//mario.y-=2;
+                   !mario.canMoveDown(&level1, solid, 2))mario.vy = -6;//mario.y-=2;
             }
         }
         if(pad.down()) //redundant thanks to gravity
@@ -228,7 +228,7 @@ int main()
             if(mario.canMoveDown(&level1, solid, mario.vy))
             {
                 mario.y += mario.vy;
-                mario.vy += gravity;
+                if((tick & 3) == 0)mario.vy += gravity;
             }
             else
             {
@@ -244,7 +244,7 @@ int main()
             if(mario.canMoveUp(&level1, solid, mario.vy*(-1)))
             {
                 mario.y += mario.vy;
-                mario.vy += gravity;
+                if((tick & 3) == 0)mario.vy += gravity;
             }
             else
             {
