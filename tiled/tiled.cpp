@@ -6,6 +6,7 @@
 
 #include "spritesheet.h"
 #include "mario.h"
+#include "goomba.h"
 #include "controller.hpp"
 #include "map.hpp"
 #include "map_data.h"
@@ -130,6 +131,16 @@ int main()
     mario.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &mario.spritesheet, mario_array, mario.spritesheet.Width, mario.spritesheet.Height );
 
+    character goomba;
+    goomba.spritesheet.Width = 64;
+    goomba.spritesheet.Height = 32;
+    goomba.spritesheet.PSM = GS_PSM_CT32;
+    gsKit_texture_abgr(gsGlobal, &goomba.spritesheet, goomba_array, goomba.spritesheet.Width, goomba.spritesheet.Height );
+    goomba.x = 512;
+    goomba.y = 192;
+    goomba.direction = 1;
+    
+    
     block* box;
     
     u8 solid[32] = {0,1,0,0,0,0,0,0,
@@ -270,6 +281,7 @@ int main()
         if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data);
         mario.draw(gsGlobal, x, y);
+        goomba.draw(gsGlobal, x, y);
         if(box)
         {
             box->draw(gsGlobal, x, y);
@@ -288,6 +300,14 @@ int main()
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
         gsKit_clear(gsGlobal, 0);
+        if((tick&3) == 0)
+        {
+            if((tick&7) == 0)
+            {
+                goomba.hflip^=1;
+            }
+            goomba.traverse(&level1, solid);
+        }
         tick++;
         tick&=15;
     }

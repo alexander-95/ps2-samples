@@ -135,3 +135,17 @@ int character::canMoveLeft(map* level, u8* solid, int n )
     if(!solid[value1] && !solid[value2]) return 1;
     else return 0;
 }
+
+int character::traverse(map* level, u8* solid)
+{
+    if(direction)
+    {
+        if(canMoveRight(level,solid, 1))x++;
+        else direction = 0;
+    }
+    else
+    {
+        if(canMoveLeft(level, solid,1))x--;
+        else direction = 1;
+    }
+}
