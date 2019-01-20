@@ -134,8 +134,8 @@ int main()
     character goomba[16];
     for(int i = 0; i < 16; i++)
     {
-        goomba[i].spritesheet.Width = 64;
-        goomba[i].spritesheet.Height = 32;
+        goomba[i].spritesheet.Width = 32;
+        goomba[i].spritesheet.Height = 16;
         goomba[i].spritesheet.PSM = GS_PSM_CT32;
     }
     gsKit_texture_abgr(gsGlobal, &goomba[0].spritesheet, goomba_array, goomba[0].spritesheet.Width, goomba[0].spritesheet.Height );
