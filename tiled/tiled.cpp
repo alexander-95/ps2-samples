@@ -131,15 +131,53 @@ int main()
     mario.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &mario.spritesheet, mario_array, mario.spritesheet.Width, mario.spritesheet.Height );
 
-    character goomba;
-    goomba.spritesheet.Width = 64;
-    goomba.spritesheet.Height = 32;
-    goomba.spritesheet.PSM = GS_PSM_CT32;
-    gsKit_texture_abgr(gsGlobal, &goomba.spritesheet, goomba_array, goomba.spritesheet.Width, goomba.spritesheet.Height );
-    goomba.x = 512;
-    goomba.y = 192;
-    goomba.direction = 1;
-    
+    character goomba[16];
+    for(int i = 0; i < 16; i++)
+    {
+        goomba[i].spritesheet.Width = 64;
+        goomba[i].spritesheet.Height = 32;
+        goomba[i].spritesheet.PSM = GS_PSM_CT32;
+    }
+    gsKit_texture_abgr(gsGlobal, &goomba[0].spritesheet, goomba_array, goomba[0].spritesheet.Width, goomba[0].spritesheet.Height );
+    goomba[0].x = 352;
+    goomba[0].y = 192;
+    goomba[0].direction = 0;
+
+    goomba[1].x = 640;
+    goomba[1].y = 192;
+    goomba[1].direction = 1;
+    goomba[1].spritesheet = goomba[0].spritesheet;
+
+    goomba[2].x = 816;
+    goomba[2].y = 192;
+    goomba[2].direction = 1;
+    goomba[2].spritesheet = goomba[0].spritesheet;
+
+    goomba[3].x = 848;
+    goomba[3].y = 192;
+    goomba[3].direction = 1;
+    goomba[3].spritesheet = goomba[0].spritesheet;
+
+    goomba[4].x = 1280;
+    goomba[4].y = 64;
+    goomba[4].direction = 1;
+    goomba[4].spritesheet = goomba[0].spritesheet;
+
+    goomba[5].x = 1312;
+    goomba[5].y = 64;
+    goomba[5].direction = 1;
+    goomba[5].spritesheet = goomba[0].spritesheet;
+
+    goomba[6].x = 1552;
+    goomba[6].y = 192;
+    goomba[6].direction = 1;
+    goomba[6].spritesheet = goomba[0].spritesheet;
+
+    goomba[7].x = 1576;
+    goomba[7].y = 192;
+    goomba[7].direction = 1;
+    goomba[7].spritesheet = goomba[0].spritesheet;
+
     
     block* box;
     
@@ -281,7 +319,11 @@ int main()
         if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data);
         mario.draw(gsGlobal, x, y);
-        goomba.draw(gsGlobal, x, y);
+        for(int i = 0;i < 8; i++)
+        {
+            if(goomba[i].x > x && goomba[i].x < x + 320)goomba[i].draw(gsGlobal, x, y);
+        }
+
         if(box)
         {
             box->draw(gsGlobal, x, y);
@@ -304,9 +346,15 @@ int main()
         {
             if((tick&7) == 0)
             {
-                goomba.hflip^=1;
+                for(int i = 0; i < 8; i++)
+                {
+                    if(goomba[i].x > x && goomba[i].x < x + 320)goomba[i].hflip^=1;
+                }
             }
-            goomba.traverse(&level1, solid);
+            for(int i = 0; i < 8; i++)
+            {
+                if(goomba[i].x > x && goomba[i].x < x + 320)goomba[i].traverse(&level1, solid);
+            }
         }
         tick++;
         tick&=15;

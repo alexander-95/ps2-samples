@@ -13,6 +13,7 @@ character::character()
     hflip = 0;
     width = 16;
     height = 16;
+    printf("character spawned\n");
 }
 
 character::~character()
@@ -132,7 +133,7 @@ int character::canMoveLeft(map* level, u8* solid, int n )
     int index2 = tile_y2 * level->width + tile_x2;
     int value2 = level->data[index2];
 
-    if(!solid[value1] && !solid[value2]) return 1;
+    if(!solid[value1] && !solid[value2] && x-n >= 0) return 1;
     else return 0;
 }
 
