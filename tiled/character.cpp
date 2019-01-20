@@ -150,3 +150,34 @@ int character::traverse(map* level, u8* solid)
         else direction = 1;
     }
 }
+
+int character::gravity(map* level, u8* solid, u8 tick, int gravity )
+{
+    if(vy > 0)
+    {
+        if(canMoveDown(level, solid, vy))
+        {
+            y += vy;
+            if((tick & 3) == 0)vy += gravity;
+        }
+        else
+        {
+            while(vy > 0 && !canMoveDown(level, solid, vy))vy--;
+            y += vy;
+            vy = 0;
+        }
+    }
+    else if(vy < 0 || canMoveDown(level, solid, 1)) // jumping
+    {
+        if(canMoveUp(level, solid, vy*(-1)))
+        {
+            y += vy;
+            if((tick & 3) == 0)vy += gravity;
+        }
+        else
+        {
+            while(vy < 0 && !canMoveUp(level, solid, vy*(-1)))vy++;
+            y += vy;
+        }
+    }
+}

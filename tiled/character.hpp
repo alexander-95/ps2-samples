@@ -16,7 +16,7 @@ public:
     int canMoveLeft(map* level, u8* solid, int n);
     int canMoveRight(map* level, u8* solid, int n);
     int traverse(map* level, u8* solid);
-    int gravity();
+    int gravity(map* level, u8* solid, u8 tick, int gravity);
     int x;
     int y;
     int vy;

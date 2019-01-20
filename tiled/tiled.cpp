@@ -353,7 +353,11 @@ int main()
             }
             for(int i = 0; i < 8; i++)
             {
-                if(goomba[i].x > x && goomba[i].x < x + 320)goomba[i].traverse(&level1, solid);
+                if(goomba[i].x > x && goomba[i].x < x + 320)
+                {
+                    goomba[i].traverse(&level1, solid);
+                    goomba[i].gravity(&level1, solid, tick, gravity);
+                }
             }
         }
         tick++;
