@@ -1,5 +1,12 @@
 ### Super Mario
 ![screenshot](images/screenshot.png "screenshot")
 
-#### Spritesheet
+#### Sprite Sheet
 ![spritesheet](images/spritesheet.png "spritesheet")
+
+#### Mario
+![spritesheet](images/mario.png "mario")
+
+#### Goomba
+![spritesheet](images/goomba.png "goomba")
+
