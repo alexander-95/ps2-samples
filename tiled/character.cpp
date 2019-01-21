@@ -181,3 +181,9 @@ int character::gravity(map* level, u8* solid, u8 tick, int gravity )
         }
     }
 }
+
+int character::isOnScreen(int screen_x)
+{
+    if(x > screen_x && x < screen_x + 320)return 1;
+    else return 0;
+}

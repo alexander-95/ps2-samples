@@ -17,6 +17,7 @@ public:
     int canMoveRight(map* level, u8* solid, int n);
     int traverse(map* level, u8* solid);
     int gravity(map* level, u8* solid, u8 tick, int gravity);
+    int isOnScreen(int screen_x);
     int x;
     int y;
     int vy;

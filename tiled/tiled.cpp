@@ -274,6 +274,7 @@ int main()
         // dealing with gravity
         if(mario.vy > 0)
         {
+            printf("moving down\n");
             if(mario.canMoveDown(&level1, solid, mario.vy))
             {
                 mario.y += mario.vy;
@@ -321,7 +322,7 @@ int main()
         mario.draw(gsGlobal, x, y);
         for(int i = 0;i < 8; i++)
         {
-            if(goomba[i].x > x && goomba[i].x < x + 320)goomba[i].draw(gsGlobal, x, y);
+            if(goomba[i].isOnScreen(x))goomba[i].draw(gsGlobal, x, y);
         }
 
         if(box)
