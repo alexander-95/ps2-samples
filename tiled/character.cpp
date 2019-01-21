@@ -187,3 +187,12 @@ int character::isOnScreen(int screen_x)
     if(x > screen_x && x < screen_x + 320)return 1;
     else return 0;
 }
+
+int character::isTouching(character* c)
+{
+    u8 collision_x = 0, collision_y = 0;
+    if(c->x > x - c->width && c->x < x + width) collision_x = 1;
+    if(c->y > y - c->height && c->y < y + height) collision_y = 1;
+    if(collision_x && collision_y) return 1;
+    else return 0;
+}

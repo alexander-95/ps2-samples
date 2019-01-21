@@ -274,7 +274,16 @@ int main()
         // dealing with gravity
         if(mario.vy > 0)
         {
-            printf("moving down\n");
+            // did mario stomp any goombas?
+            for(int i = 0; i < 8; i++)
+            {
+                if(goomba[i].isOnScreen(x) && mario.isTouching(&goomba[i]))
+                {
+                    goomba[i].sprite = 1;
+                    mario.vy = -6;
+                }
+            }
+            
             if(mario.canMoveDown(&level1, solid, mario.vy))
             {
                 mario.y += mario.vy;
