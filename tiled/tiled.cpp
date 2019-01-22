@@ -178,6 +178,45 @@ int main()
     goomba[7].direction = 1;
     goomba[7].spritesheet = goomba[0].spritesheet;
 
+    goomba[8].x = 1824;
+    goomba[8].y = 192;
+    goomba[8].direction = 1;
+    goomba[8].spritesheet = goomba[0].spritesheet;
+    
+    goomba[9].x = 1848;
+    goomba[9].y = 192;
+    goomba[9].direction = 1;
+    goomba[9].spritesheet = goomba[0].spritesheet;
+
+    goomba[10].x = 1984;
+    goomba[10].y = 192;
+    goomba[10].direction = 1;
+    goomba[10].spritesheet = goomba[0].spritesheet;
+
+    goomba[11].x = 2008;
+    goomba[11].y = 192;
+    goomba[11].direction = 1;
+    goomba[11].spritesheet = goomba[0].spritesheet;
+
+    goomba[12].x = 2048;
+    goomba[12].y = 192;
+    goomba[12].direction = 1;
+    goomba[12].spritesheet = goomba[0].spritesheet;
+
+    goomba[13].x = 2072;
+    goomba[13].y = 192;
+    goomba[13].direction = 1;
+    goomba[13].spritesheet = goomba[0].spritesheet;
+
+    goomba[14].x = 2784;
+    goomba[14].y = 192;
+    goomba[14].direction = 1;
+    goomba[14].spritesheet = goomba[0].spritesheet;
+
+    goomba[15].x = 2808;
+    goomba[15].y = 192;
+    goomba[15].direction = 1;
+    goomba[15].spritesheet = goomba[0].spritesheet;
     
     block* box;
     
@@ -275,7 +314,7 @@ int main()
         if(mario.vy > 0)
         {
             // did mario stomp any goombas?
-            for(int i = 0; i < 8; i++)
+            for(int i = 0; i < 16; i++)
             {
                 if(goomba[i].isOnScreen(x) && mario.isTouching(&goomba[i]))
                 {
@@ -329,7 +368,7 @@ int main()
         if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data);
         mario.draw(gsGlobal, x, y);
-        for(int i = 0;i < 8; i++)
+        for(int i = 0;i < 16; i++)
         {
             if(goomba[i].isOnScreen(x))goomba[i].draw(gsGlobal, x, y);
         }
@@ -356,12 +395,12 @@ int main()
         {
             if((tick&7) == 0)
             {
-                for(int i = 0; i < 8; i++)
+                for(int i = 0; i < 16; i++)
                 {
                     if(goomba[i].x > x && goomba[i].x < x + 320)goomba[i].hflip^=1;
                 }
             }
-            for(int i = 0; i < 8; i++)
+            for(int i = 0; i < 16; i++)
             {
                 if(goomba[i].x > x && goomba[i].x < x + 320)
                 {
