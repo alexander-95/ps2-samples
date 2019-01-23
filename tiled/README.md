@@ -10,3 +10,5 @@
 #### Goomba
 ![spritesheet](images/goomba.png "goomba")
 
+#### Koopa
+![spritesheet](images/koopa.png "koopa")

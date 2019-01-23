@@ -7,6 +7,7 @@
 #include "spritesheet.h"
 #include "mario.h"
 #include "goomba.h"
+#include "koopa.h"
 #include "controller.hpp"
 #include "map.hpp"
 #include "map_data.h"
@@ -131,6 +132,15 @@ int main()
     mario.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &mario.spritesheet, mario_array, mario.spritesheet.Width, mario.spritesheet.Height );
 
+    character koopa;
+    koopa.spritesheet.Width = 96;
+    koopa.spritesheet.Height = 24;
+    koopa.spritesheet.PSM = GS_PSM_CT32;
+    gsKit_texture_abgr(gsGlobal, &koopa.spritesheet, koopa_array, koopa.spritesheet.Width, koopa.spritesheet.Height );
+    koopa.height = 24;
+    koopa.x = 32;
+    koopa.y = 184;
+    
     character goomba[16];
     for(int i = 0; i < 16; i++)
     {
@@ -372,6 +382,7 @@ int main()
         {
             if(goomba[i].isOnScreen(x))goomba[i].draw(gsGlobal, x, y);
         }
+        if(koopa.isOnScreen(x))koopa.draw(gsGlobal, x, y);
 
         if(box)
         {

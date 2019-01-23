@@ -3,8 +3,8 @@
 # |     ___|   |____
 
 EE_BIN =  tiled.elf
-EE_OBJS = tiled.o spritesheet.o controller.o map.o map_data.o character.o mario.o block.o goomba.o
-TEXTURE_SRC = spritesheet.c spritesheet.h mario.c mario.h goomba.c goomba.h
+EE_OBJS = tiled.o spritesheet.o controller.o map.o map_data.o character.o mario.o block.o goomba.o koopa.o
+TEXTURE_SRC = spritesheet.c spritesheet.h mario.c mario.h goomba.c goomba.h koopa.c koopa.h
 
 EE_INCLUDES    = /usr/local/ps2dev/ps2sdk/ee/include
 SDK_COMMON     = /usr/local/ps2dev/ps2sdk/common/include
@@ -19,10 +19,12 @@ all:
 	python png2abgr.py spritesheet.png
 	python png2abgr.py mario.png
 	python png2abgr.py goomba.png
+	python png2abgr.py koopa.png
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c spritesheet.c -o spritesheet.o
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c map_data.c -o map_data.o
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c mario.c -o mario.o
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c goomba.c -o goomba.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c koopa.c -o koopa.o
 
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c controller.cpp -o controller.o
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c map.cpp -o map.o
