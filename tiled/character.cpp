@@ -196,3 +196,23 @@ int character::isTouching(character* c)
     if(collision_x && collision_y) return 1;
     else return 0;
 }
+
+u8 character::standingOnPipe(map* level)
+{
+    int x1 = x, y1 = y+height+1;
+    int x2 = x+width, y2 = y+height+1;
+    
+    // figure out which tile mario is running into
+    int tile_x1 = (x1 / level->tile_width);
+    int tile_y1 = (y1 / level->tile_height);
+    int index1 = tile_y1 * level->width + tile_x1;
+    int value1 = level->data[index1];
+
+    int tile_x2 = (x2 / level->tile_width);
+    int tile_y2 = (y2 / level->tile_height);
+    int index2 = tile_y2 * level->width + tile_x2;
+    int value2 = level->data[index2];
+    if(value1 == 16 && value2 == 17) return 1;
+    else return 0;
+
+}

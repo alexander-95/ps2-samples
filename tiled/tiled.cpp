@@ -295,12 +295,9 @@ int main()
                    !mario.canMoveDown(&level1, solid, 2))mario.vy = -6;//mario.y-=2;
             }
         }
-        if(pad.down()) //redundant thanks to gravity
+        if(pad.down())
         {
-            if(mario.y+(16*scale_factor) < level1.height*level1.tile_height*scale_factor)
-            {
-                if(mario.canMoveDown(&level1, solid, 2))mario.y+=2;
-            }
+            if(mario.standingOnPipe(&level1))printf("standing on pipe\n");
         }
         if(pad.triangle() && (tick & 8))
         {

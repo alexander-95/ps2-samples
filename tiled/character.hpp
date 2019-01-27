@@ -19,6 +19,7 @@ public:
     int gravity(map* level, u8* solid, u8 tick, int gravity);
     int isOnScreen(int screen_x);
     int isTouching(character* c);
+    u8 standingOnPipe(map* level);
     int x;
     int y;
     int vy;
