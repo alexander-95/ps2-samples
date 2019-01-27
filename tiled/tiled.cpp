@@ -228,7 +228,7 @@ int main()
     goomba[15].direction = 1;
     goomba[15].spritesheet = goomba[0].spritesheet;
     
-    block* box;
+    block* box = NULL;
     
     u8 solid[32] = {0,1,0,0,0,0,0,0,
                     0,0,0,1,1,1,0,0,
@@ -297,7 +297,17 @@ int main()
         }
         if(pad.down())
         {
-            if(mario.standingOnPipe(&level1))printf("standing on pipe\n");
+            if(mario.standingOnPipe(&level1))
+            {
+                printf("standing on pipe\n");
+
+                // respawn mario
+                mario.x = 0;
+
+                // re-position camera
+                x = 0;
+                
+            }
         }
         if(pad.triangle() && (tick & 8))
         {
