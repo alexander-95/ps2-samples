@@ -138,7 +138,7 @@ int main()
     koopa.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &koopa.spritesheet, koopa_array, koopa.spritesheet.Width, koopa.spritesheet.Height );
     koopa.height = 24;
-    koopa.x = 32;
+    koopa.x = 1712;
     koopa.y = 184;
     
     character goomba[16];
@@ -419,6 +419,11 @@ int main()
                     goomba[i].gravity(&level1, solid, tick, gravity);
                 }
             }
+            koopa.traverse(&level1, solid);
+            koopa.gravity(&level1, solid, tick, gravity);
+            koopa.hflip = koopa.direction ^ 1;
+            if((tick&7) == 0)koopa.sprite = 2;
+            else koopa.sprite = 3;
         }
         tick++;
         tick&=15;
