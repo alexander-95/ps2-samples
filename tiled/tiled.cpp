@@ -33,7 +33,7 @@ void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width,
     gsKit_texture_upload(gsGlobal, tex);
 }
 
-void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, int start_x, int start_y, int value)
+void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, int start_x, int start_y, int value, int z)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int index_x = value % 8; // 8 is the width of the tilesheet, in tiles
@@ -51,10 +51,10 @@ void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map*
                             
                             (start_x + level->tile_width)*scale_factor, (start_y + level->tile_height)*scale_factor,     // x4, y4
                             level->tile_width*(index_x+1), level->tile_height*(index_y+1), // u4, v4
-                            0,TexCol);
+                            z,TexCol);
 }
 
-void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, int x, int y, u8* map_data)
+void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, int x, int y, u8* map_data, u8* solid)
 {
     // figure out the tile to draw
     int tile_x = x / level->tile_width;
@@ -74,7 +74,8 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
         {
             int index = tile_y * level->width + tile_x;
             int value = map_data[index];
-            drawTile(gsGlobal, spritesheet, scale_factor, level, start_x, start_y, value);
+            int z = solid[value]*2;
+            drawTile(gsGlobal, spritesheet, scale_factor, level, start_x, start_y, value, z);
             start_x += level->tile_width;
             tile_x++;
         }
@@ -244,87 +245,108 @@ int main()
         pad.read();
         if(!mario.canMoveDown(&level1, solid, 1))mario.sprite = 0;
         else mario.sprite = 5;
-        
-        if(pad.left())
+
+        if(!mario.animationMode)
         {
-            mario.hflip = 1;
-            if(tick&1)mario.gate++;
-            mario.gate &= 3;
-            if(!mario.canMoveDown(&level1, solid, 2))
+            if(pad.left())
             {
-                if(mario.gate & 1)mario.sprite = 2;
-                else
+                mario.hflip = 1;
+                if(tick&1)mario.gate++;
+                mario.gate &= 3;
+                if(!mario.canMoveDown(&level1, solid, 2))
                 {
-                    if(!mario.gate) mario.sprite = 1;
-                    else mario.sprite = 3;
+                    if(mario.gate & 1)mario.sprite = 2;
+                    else
+                    {
+                        if(!mario.gate) mario.sprite = 1;
+                        else mario.sprite = 3;
+                    }
+                }
+                if(mario.canMoveLeft(&level1, solid, 2))
+                {
+                    mario.x-=2;
+                    if(x > 0)x-=2;
                 }
             }
-            if(mario.canMoveLeft(&level1, solid, 2))
+            if(pad.right())
             {
-                mario.x-=2;
-                if(x > 0)x-=2;
-            }
-        }
-        if(pad.right())
-        {
-            mario.hflip = 0;
-            if(tick&1)mario.gate++;
-            mario.gate &= 3;
-            if(!mario.canMoveDown(&level1, solid, 2))
-            {
-                if(mario.gate & 1)mario.sprite = 2;
-                else
+                mario.hflip = 0;
+                if(tick&1)mario.gate++;
+                mario.gate &= 3;
+                if(!mario.canMoveDown(&level1, solid, 2))
                 {
-                    if(!mario.gate) mario.sprite = 1;
-                    else mario.sprite = 3;
+                    if(mario.gate & 1)mario.sprite = 2;
+                    else
+                    {
+                        if(!mario.gate) mario.sprite = 1;
+                        else mario.sprite = 3;
+                    }
+                }
+                if(mario.canMoveRight(&level1, solid, 2))
+                {
+                    mario.x+=2;
+                    if(x+(gsGlobal->Width/(2*scale_factor)) < (level1.width*level1.tile_width) &&
+                       mario.x > (gsGlobal->Width/(2*scale_factor))) x+=2;
                 }
             }
-            if(mario.canMoveRight(&level1, solid, 2))
+            if(pad.up() || pad.x())
             {
-                mario.x+=2;
-                if(x+(gsGlobal->Width/(2*scale_factor)) < (level1.width*level1.tile_width) &&
-                   mario.x > (gsGlobal->Width/(2*scale_factor))) x+=2;
+                mario.sprite = 5;
+                if(mario.y > 0)
+                {
+                    if(mario.canMoveUp(&level1, solid, 2) &&
+                       !mario.canMoveDown(&level1, solid, 2))mario.vy = -6;//mario.y-=2;
+                }
+            }
+            if(pad.down())
+            {
+                if(mario.standingOnPipe(&level1))
+                {
+                    printf("standing on pipe\n");
+                    mario.animationMode = 1;
+                }
+            }
+            if(pad.triangle() && (tick & 8))
+            {
+                if(superMario)
+                {
+                    superMario = 0;
+                    mario.height = 16;
+                    mario.width = 16;
+                    mario.y+=16;
+                }
+                else
+                {
+                    superMario = 1;
+                    mario.height = 32;
+                    mario.width = 18;
+                    mario.y -= 16;
+                }
             }
         }
-        if(pad.up() || pad.x())
+        // mario is entering a pipe
+        else if(mario.animationMode == 1)
         {
-            mario.sprite = 5;
-            if(mario.y > 0)
+            if(mario.animationFrame < 10)
             {
-                if(mario.canMoveUp(&level1, solid, 2) &&
-                   !mario.canMoveDown(&level1, solid, 2))mario.vy = -6;//mario.y-=2;
-            }
-        }
-        if(pad.down())
-        {
-            if(mario.standingOnPipe(&level1))
-            {
-                printf("standing on pipe\n");
-
-                // respawn mario
-                mario.x = 0;
-
-                // re-position camera
-                x = 0;
-                
-            }
-        }
-        if(pad.triangle() && (tick & 8))
-        {
-            if(superMario)
-            {
-                superMario = 0;
-                mario.height = 16;
-                mario.width = 16;
-                mario.y+=16;
+                if((tick & 7) == 0)
+                {
+                    mario.y+=2;
+                    mario.animationFrame++;
+                }
             }
             else
             {
-                superMario = 1;
-                mario.height = 32;
-                mario.width = 18;
-                mario.y -= 16;
+                mario.animationMode = 0;
+                mario.animationFrame = 0;
+                mario.x = 0; // respawn mario
+                x = 0; // re-position camera
             }
+        }
+        // mario is dying
+        else if(mario.animationMode == 2)
+        {
+            printf("dead!\n");
         }
 
         // dealing with gravity
@@ -383,7 +405,7 @@ int main()
             }
         }
         if(superMario)mario.sprite+=15;
-        drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data);
+        drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data, solid);
         mario.draw(gsGlobal, x, y);
         for(int i = 0;i < 16; i++)
         {

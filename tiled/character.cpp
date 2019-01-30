@@ -13,6 +13,8 @@ character::character()
     hflip = 0;
     width = 16;
     height = 16;
+    animationMode = 0;
+    animationFrame = 0;
     printf("character spawned\n");
 }
 
