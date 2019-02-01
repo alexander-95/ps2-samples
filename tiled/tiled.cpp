@@ -67,8 +67,10 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
     // position of the top left corner of the current tile
     int start_x = 0 - point_x;
     int start_y = 0 - point_y;
-    
-    while(start_y < gsGlobal->Height && tile_y < level->height)
+
+    u8 rowsDrawn = 0;
+
+    while(start_y < gsGlobal->Height && tile_y < level->absoluteHeight && rowsDrawn < level->height)
     {
         while(start_x < gsGlobal->Width && tile_x < level->width)
         {
@@ -82,6 +84,7 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
         start_x = 0 - point_x;
         tile_x = x / level->tile_width;
         start_y += level->tile_height;
+        rowsDrawn++;
         tile_y++;
     }
 }
@@ -241,10 +244,20 @@ int main()
     u8 superMario = 0;
     while(1)
     {
+        printf("mario: <%d, %d>\n", mario.x, mario.y);
+
         gsKit_clear(gsGlobal, bg_color);
         pad.read();
         if(!mario.canMoveDown(&level1, solid, 1))mario.sprite = 0;
         else mario.sprite = 5;
+        // mario fell into a pit
+        if(false && mario.y > 208)
+        {
+            printf("fell\n");
+            mario.x = 0;
+            x = 0;
+            mario.y = 192;
+        }
 
         if(!mario.animationMode)
         {
@@ -339,8 +352,12 @@ int main()
             {
                 mario.animationMode = 0;
                 mario.animationFrame = 0;
-                mario.x = 0; // respawn mario
-                x = 0; // re-position camera
+                //mario.x = 0; // respawn mario
+                //x = 0; // re-position camera
+                x = 2368;
+                y = 240;
+                mario.x = 2384;
+                mario.y = 240;
             }
         }
         // mario is dying

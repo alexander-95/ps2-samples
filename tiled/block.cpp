@@ -40,12 +40,8 @@ void block::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
 
 int block::update()
 {
-    if(phase==0)y-=2;
-    else if(phase==1)y-=4;
-    else if(phase==2)y-=2;
-    else if(phase==3)y+=2;
-    else if(phase==4)y+=4;
-    else if(phase==5)y+=2;
+    int arr[6] ={-2, -4, -2, 2, 4, 2};
+    if(phase<6)y+=arr[phase];
     else if(phase==6)return 1;
     if(phase < 7)phase++;
     return 0;

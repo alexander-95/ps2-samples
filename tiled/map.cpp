@@ -8,6 +8,7 @@ map::map()
 {
     width = 224;
     height = 15;
+    absoluteHeight = 30;
     tile_width = 16;
     tile_height = 16;
 }
