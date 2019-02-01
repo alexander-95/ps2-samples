@@ -8,11 +8,14 @@
 #include "mario.h"
 #include "goomba.h"
 #include "koopa.h"
+#include "pickups.h"
+
 #include "controller.hpp"
 #include "map.hpp"
 #include "map_data.h"
 #include "character.hpp"
 #include "block.hpp"
+#include "pickup.hpp"
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
@@ -144,6 +147,16 @@ int main()
     koopa.height = 24;
     koopa.x = 1712;
     koopa.y = 184;
+
+    pickup coin;
+    coin.spritesheet.Width = 64;
+    coin.spritesheet.Height = 64;
+    coin.spritesheet.PSM = GS_PSM_CT32;
+    gsKit_texture_abgr(gsGlobal, &coin.spritesheet, pickups_array, coin.spritesheet.Width, coin.spritesheet.Height );
+    coin.width = 8;
+    coin.height = 16;
+    coin.x = 48;
+    coin.y = 192;
     
     character goomba[16];
     for(int i = 0; i < 16; i++)
@@ -424,6 +437,7 @@ int main()
         if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data, solid);
         mario.draw(gsGlobal, x, y);
+        coin.draw(gsGlobal, x, y);
         for(int i = 0;i < 16; i++)
         {
             if(goomba[i].isOnScreen(x))goomba[i].draw(gsGlobal, x, y);
@@ -456,6 +470,8 @@ int main()
                 {
                     if(goomba[i].x > x && goomba[i].x < x + 320)goomba[i].hflip^=1;
                 }
+                coin.sprite++;
+                coin.sprite&=3;
             }
             for(int i = 0; i < 16; i++)
             {
@@ -470,6 +486,7 @@ int main()
             koopa.hflip = koopa.direction ^ 1;
             if((tick&7) == 0)koopa.sprite = 2;
             else koopa.sprite = 3;
+            
         }
         tick++;
         tick&=15;
