@@ -12,6 +12,7 @@ pickup::pickup()
     width = 8;
     height = 16;
     sprite = 0;
+    activated = 0;
 }
 
 pickup::~pickup()
@@ -37,4 +38,14 @@ void pickup::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
                             x1+(2*width),y1+(2*height), // x4, y4
                             u2, v2,                     // u4, v4
                             1, TexCol);
+}
+
+void pickup::update()
+{
+    if(activated)
+    {
+        int arr[25] ={-20, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
+        if(phase<25)y+=arr[phase];
+        if(phase < 25)phase++;
+    }
 }

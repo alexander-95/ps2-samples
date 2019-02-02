@@ -155,8 +155,8 @@ int main()
     gsKit_texture_abgr(gsGlobal, &coin.spritesheet, pickups_array, coin.spritesheet.Width, coin.spritesheet.Height );
     coin.width = 8;
     coin.height = 16;
-    coin.x = 48;
-    coin.y = 192;
+    coin.x = 355;
+    coin.y = 80;
     
     character goomba[16];
     for(int i = 0; i < 16; i++)
@@ -429,6 +429,7 @@ int main()
                         block1.spritesheet = level1.spritesheet;
                         level1.data[index] = 0;
                         box = &block1;
+                        coin.activated = 1;
                     }
                 }
                 mario.y += mario.vy;
@@ -438,6 +439,7 @@ int main()
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data, solid);
         mario.draw(gsGlobal, x, y);
         coin.draw(gsGlobal, x, y);
+        coin.update();
         for(int i = 0;i < 16; i++)
         {
             if(goomba[i].isOnScreen(x))goomba[i].draw(gsGlobal, x, y);
