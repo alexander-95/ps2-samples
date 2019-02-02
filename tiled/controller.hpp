@@ -31,8 +31,8 @@ public:
     int down();
     int left();
     int right();
-    int x();
-    int square();
-    int circle();
-    int triangle();
+    int x(u8 singlePress);
+    int square(u8 singlePress);
+    int circle(u8 singlePress);
+    int triangle(u8 singlePress);
 };

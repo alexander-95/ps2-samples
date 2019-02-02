@@ -314,7 +314,7 @@ int main()
                        mario.x > (gsGlobal->Width/(2*scale_factor))) x+=2;
                 }
             }
-            if(pad.up() || pad.x())
+            if(pad.up() || pad.x(1))
             {
                 mario.sprite = 5;
                 if(mario.y > 0)
@@ -331,7 +331,7 @@ int main()
                     mario.animationMode = 1;
                 }
             }
-            if(pad.triangle() && (tick & 8))
+            if(pad.triangle(1))
             {
                 if(superMario)
                 {

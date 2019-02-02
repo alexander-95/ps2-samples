@@ -210,22 +210,26 @@ int controller::down()
     return old_pad & PAD_DOWN;
 }
 
-int controller::x()
+int controller::x(u8 singlePress)
 {
-    return old_pad & PAD_CROSS;
+    if(singlePress)return new_pad & PAD_CROSS;
+    else return old_pad & PAD_CROSS;
 }
 
-int controller::square()
+int controller::square(u8 singlePress)
 {
-    return old_pad & PAD_SQUARE;
+    if(singlePress)return new_pad & PAD_SQUARE;
+    else return old_pad & PAD_SQUARE;
 }
 
-int controller::circle()
+int controller::circle(u8 singlePress)
 {
-    return old_pad & PAD_CIRCLE;
+    if(singlePress)return new_pad & PAD_CIRCLE;
+    else return old_pad & PAD_CIRCLE;
 }
 
-int controller::triangle()
+int controller::triangle(u8 singlePress)
 {
-    return old_pad & PAD_TRIANGLE;
+    if(singlePress)return new_pad & PAD_TRIANGLE;
+    else return old_pad & PAD_TRIANGLE;
 }
