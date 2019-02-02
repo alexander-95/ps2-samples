@@ -160,11 +160,20 @@ int main()
     gsKit_texture_abgr(gsGlobal, &coin[0].spritesheet, pickups_array, coin[0].spritesheet.Width, coin[0].spritesheet.Height );
     for(int i = 1; i < 32; i++)coin[i].spritesheet = coin[0].spritesheet;
     coin[0].x = 260; coin[0].y = 144;
-    coin[1].x = 340; coin[1].y = 144;
-    coin[2].x = 372; coin[2].y = 144;
-    coin[3].x = 356; coin[3].y = 80;
+    coin[1].x = 372; coin[1].y = 144;
+    coin[2].x = 356; coin[2].y = 80;
 
-    
+    pickup mushroom[4];
+    for(int i = 0; i < 4; i++)
+    {
+        mushroom[i].spritesheet.Width = 64;
+        mushroom[i].spritesheet.Height = 64;
+        mushroom[i].spritesheet.PSM = GS_PSM_CT32;
+        mushroom[i].width = 16;
+        mushroom[i].height = 16;
+    }
+    for(int i = 0; i < 4; i++)mushroom[i].spritesheet = coin[0].spritesheet;
+    mushroom[0].x = 336; mushroom[0].y = 144; mushroom[0].type = 1; mushroom[0].activated = 0;
     
     character goomba[16];
     for(int i = 0; i < 16; i++)
@@ -268,8 +277,8 @@ int main()
         
         gsKit_clear(gsGlobal, bg_color);
         pad.read();
-        if(!mario.canMoveDown(&level1, solid, 1))mario.sprite = 0;
-        else mario.sprite = 5;
+        if(!mario.canMoveDown(&level1, solid, 1) && !mario.animationMode)mario.sprite = 0;
+        else if(!mario.animationMode) mario.sprite = 5;
         // mario fell into a pit
         if(false && mario.y > 208)
         {
@@ -380,14 +389,43 @@ int main()
                 mario.y = 240;
             }
         }
-        // mario is dying
+        // growing into big mario
         else if(mario.animationMode == 2)
         {
-            printf("dead!\n");
+            u8 arr1[10] = {0, 13, 0, 13, 0, 13, 15, 0, 13, 15};
+            char arr2[10] = {0, -16, 16,-16,16,-16,0,16,-16,0};
+            
+            if(mario.animationFrame < 10)
+            {
+                if((tick & 3) == 0)
+                {
+                    mario.sprite = arr1[mario.animationFrame];
+                    mario.y += arr2[mario.animationFrame];
+                    if(mario.sprite == 0)
+                    {
+                        mario.height = 16;
+                        mario.width = 16;
+                    }
+                    else
+                    {
+                        mario.height = 32;
+                        mario.width = 18;
+                        
+                    }
+                    mario.animationFrame++;
+                }
+            }
+            else
+            {
+                mario.animationMode = 0;
+                mario.animationFrame = 0;
+                mario.sprite = 0;
+                superMario = 1;
+            }
         }
 
         // dealing with gravity
-        if(mario.vy > 0)
+        if(mario.vy > 0 && !mario.animationMode)
         {
             // did mario stomp any goombas?
             for(int i = 0; i < 16; i++)
@@ -439,9 +477,9 @@ int main()
                         level1.data[index] = 0;
                         box = &block1;
                         if(index == 2032)coin[0].activated = 1;
-                        else if(index == 2037)coin[1].activated = 1;
-                        else if(index == 2039)coin[2].activated = 1;
-                        else if(index == 1142)coin[3].activated = 1;
+                        else if(index == 2037)mushroom[0].activated = 1;
+                        else if(index == 2039)coin[1].activated = 1;
+                        else if(index == 1142)coin[2].activated = 1;
                     }
                 }
                 mario.y += mario.vy;
@@ -455,6 +493,18 @@ int main()
             coin[i].draw(gsGlobal, x, y);
             coin[i].update();
         }
+        for(int i = 0; i < 4; i++)
+        {
+            if(mario.pickedup(&mushroom[0]))
+            {
+                printf("picked up mushroom");
+                mushroom[i].activated = 0;
+                mario.animationMode = 2;
+            }
+            mushroom[i].draw(gsGlobal, x, y);
+            if((tick & 7)==0)mushroom[i].update();
+        }
+        
         for(int i = 0;i < 16; i++)
         {
             if(goomba[i].isOnScreen(x))goomba[i].draw(gsGlobal, x, y);
@@ -509,7 +559,7 @@ int main()
             
         }
         tick++;
-        tick&=15;
+        tick&=31;
     }
     return 0;
 }

@@ -9,7 +9,7 @@ pickup::pickup()
 {
     x = 0;
     y = 0;
-    width = 8;
+    width = 16;
     height = 16;
     sprite = 0;
     activated = 0;
@@ -46,13 +46,26 @@ void pickup::update()
 {
     if(activated)
     {
-        int arr[25] ={-20, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
-        if(phase < 25)y+=arr[phase];
-        else
+        if(type == 0) // coin
         {
-            activated = 0;
-            printf("+200\n");
+            int arr[25] ={-20, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
+            if(phase < 25)y+=arr[phase];
+            else
+            {
+                activated = 0;
+                printf("+200\n");
+            }
+            if(phase < 26)phase++;
         }
-        if(phase < 26)phase++;
+        else if(type == 1) // mushroom
+        {
+            if(phase < 8)y-=2;
+            else
+            {
+                
+                //printf("mushroom\n");
+            }
+            if(phase < 9)phase++;
+        }
     }
 }

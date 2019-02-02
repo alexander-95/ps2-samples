@@ -199,6 +199,16 @@ int character::isTouching(character* c)
     else return 0;
 }
 
+int character::pickedup(pickup* p)
+{
+    if(!p->activated)return 0;
+    u8 collision_x = 0, collision_y = 0;
+    if(p->x > x - p->width && p->x < x + width) collision_x = 1;
+    if(p->y > y - p->height && p->y < y + height) collision_y = 1;
+    if(collision_x && collision_y) return 1;
+    else return 0;
+}
+
 u8 character::standingOnPipe(map* level)
 {
     int x1 = x, y1 = y+height+1;

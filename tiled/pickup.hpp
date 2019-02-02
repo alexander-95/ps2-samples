@@ -4,6 +4,9 @@
 
 #include <gsKit.h>
 
+#ifndef PICKUP_HPP
+#define PICKUP_HPP
+
 class pickup
 {
 public:
@@ -21,3 +24,5 @@ public:
     u8 type;
     GSTEXTURE spritesheet;
 };
+
+#endif

@@ -4,6 +4,7 @@
 
 #include <gsKit.h>
 #include "map.hpp"
+#include "pickup.hpp"
 
 class character
 {
@@ -19,6 +20,7 @@ public:
     int gravity(map* level, u8* solid, u8 tick, int gravity);
     int isOnScreen(int screen_x);
     int isTouching(character* c);
+    int pickedup(pickup* p);
     u8 standingOnPipe(map* level);
     int x;
     int y;
