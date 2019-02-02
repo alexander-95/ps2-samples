@@ -162,6 +162,13 @@ int main()
     coin[0].x = 260; coin[0].y = 144;
     coin[1].x = 372; coin[1].y = 144;
     coin[2].x = 356; coin[2].y = 80;
+    coin[17].x = 1508; coin[17].y = 80;
+    coin[18].x = 1700; coin[18].y = 144;
+    coin[19].x = 1748; coin[19].y = 144;
+    coin[20].x = 1796; coin[20].y = 144;
+    coin[21].x = 2068; coin[21].y = 80;
+    coin[22].x = 2084; coin[22].y = 80;
+    coin[23].x = 2724; coin[23].y = 144;
 
     pickup mushroom[4];
     for(int i = 0; i < 4; i++)
@@ -174,6 +181,20 @@ int main()
     }
     for(int i = 0; i < 4; i++)mushroom[i].spritesheet = coin[0].spritesheet;
     mushroom[0].x = 336; mushroom[0].y = 144; mushroom[0].type = 1; mushroom[0].activated = 0;
+
+    pickup flower[2];
+    for(int i = 0; i < 2; i++)
+    {
+        flower[i].spritesheet.Width = 64;
+        flower[i].spritesheet.Height = 64;
+        flower[i].spritesheet.PSM = GS_PSM_CT32;
+        flower[i].width = 16;
+        flower[i].height = 16;
+        flower[i].type = 2;
+    }
+    for(int i = 0; i < 2; i++)flower[i].spritesheet = coin[0].spritesheet;
+    flower[0].x = 1248; flower[0].y = 144;
+    flower[1].x = 1744; flower[1].y = 80;
     
     character goomba[16];
     for(int i = 0; i < 16; i++)
@@ -480,6 +501,15 @@ int main()
                         else if(index == 2037)mushroom[0].activated = 1;
                         else if(index == 2039)coin[1].activated = 1;
                         else if(index == 1142)coin[2].activated = 1;
+                        else if(index == 1214)coin[17].activated = 1;
+                        else if(index == 2122)coin[18].activated = 1;
+                        else if(index == 2125)coin[19].activated = 1;
+                        else if(index == 2128)coin[20].activated = 1;
+                        else if(index == 1249)coin[21].activated = 1;
+                        else if(index == 1250)coin[22].activated = 1;
+                        else if(index == 2186)coin[23].activated = 1;
+                        else if(index == 2094)flower[0].activated = 1;
+                        else if(index == 1229)flower[1].activated = 1;
                     }
                 }
                 mario.y += mario.vy;
@@ -502,7 +532,20 @@ int main()
                 mario.animationMode = 2;
             }
             mushroom[i].draw(gsGlobal, x, y);
-            if((tick & 7)==0)mushroom[i].update();
+            mushroom[i].update();
+        }
+        for(int i = 0; i < 2; i++)
+        {
+            flower[i].draw(gsGlobal, x, y);
+            if((tick & 7)==0)
+            {
+                flower[i].update();
+            }
+            if(tick&1)
+            {
+                flower[i].sprite++;
+                flower[i].sprite&=3;
+            }
         }
         
         for(int i = 0;i < 16; i++)

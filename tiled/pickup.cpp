@@ -57,7 +57,7 @@ void pickup::update()
             }
             if(phase < 26)phase++;
         }
-        else if(type == 1) // mushroom
+        else if(type == 1 or type == 2) // mushroom or flower
         {
             if(phase < 8)y-=2;
             else
