@@ -257,8 +257,7 @@ int main()
     u8 superMario = 0;
     while(1)
     {
-        printf("mario: <%d, %d>\n", mario.x, mario.y);
-
+        
         gsKit_clear(gsGlobal, bg_color);
         pad.read();
         if(!mario.canMoveDown(&level1, solid, 1))mario.sprite = 0;
@@ -429,7 +428,7 @@ int main()
                         block1.spritesheet = level1.spritesheet;
                         level1.data[index] = 0;
                         box = &block1;
-                        coin.activated = 1;
+                        if(index = 1142)coin.activated = 1;
                     }
                 }
                 mario.y += mario.vy;
