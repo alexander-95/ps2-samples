@@ -13,6 +13,7 @@ pickup::pickup()
     height = 16;
     sprite = 0;
     activated = 0;
+    type = 0;
 }
 
 pickup::~pickup()
@@ -22,8 +23,9 @@ pickup::~pickup()
 
 void pickup::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
 {
+    if(!activated)return;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    int u1 = width*sprite, v1 = 0, u2 = width*(sprite+1), v2 = height;
+    int u1 = width*sprite, v1 = type*height, u2 = width*(sprite+1), v2 = (type+1)*height;
     int x1 = x*2 - screen_x*2, y1 = y*2 - screen_y*2;
     gsKit_prim_quad_texture(gsGlobal, &spritesheet,
                             x1,y1,                      // x1, y1
@@ -45,7 +47,12 @@ void pickup::update()
     if(activated)
     {
         int arr[25] ={-20, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
-        if(phase<25)y+=arr[phase];
-        if(phase < 25)phase++;
+        if(phase < 25)y+=arr[phase];
+        else
+        {
+            activated = 0;
+            printf("+200\n");
+        }
+        if(phase < 26)phase++;
     }
 }

@@ -148,15 +148,23 @@ int main()
     koopa.x = 1712;
     koopa.y = 184;
 
-    pickup coin;
-    coin.spritesheet.Width = 64;
-    coin.spritesheet.Height = 64;
-    coin.spritesheet.PSM = GS_PSM_CT32;
-    gsKit_texture_abgr(gsGlobal, &coin.spritesheet, pickups_array, coin.spritesheet.Width, coin.spritesheet.Height );
-    coin.width = 8;
-    coin.height = 16;
-    coin.x = 355;
-    coin.y = 80;
+    pickup coin[32];
+    for(int i = 0; i < 32; i++)
+    {
+        coin[i].spritesheet.Width = 64;
+        coin[i].spritesheet.Height = 64;
+        coin[i].spritesheet.PSM = GS_PSM_CT32;
+        coin[i].width = 8;
+        coin[i].height = 16;
+    }
+    gsKit_texture_abgr(gsGlobal, &coin[0].spritesheet, pickups_array, coin[0].spritesheet.Width, coin[0].spritesheet.Height );
+    for(int i = 1; i < 32; i++)coin[i].spritesheet = coin[0].spritesheet;
+    coin[0].x = 260; coin[0].y = 144;
+    coin[1].x = 340; coin[1].y = 144;
+    coin[2].x = 372; coin[2].y = 144;
+    coin[3].x = 356; coin[3].y = 80;
+
+    
     
     character goomba[16];
     for(int i = 0; i < 16; i++)
@@ -418,7 +426,9 @@ int main()
                 if(mario.vy == 0)
                 {
                     int index = level1.get_index(mario.x + 8, mario.y - 1);
-                    printf("hit box %d\n", level1.data[index]);
+                    int coinx = ((index % 224) * 16)+4;
+                    int coiny = (index / 224) * 16;
+                    printf("hit box %d (%d) coin location: <%d, %d>\n", index,level1.data[index], coinx, coiny);
                     if(level1.data[index] == 11)
                     {
                         block block1;
@@ -428,7 +438,10 @@ int main()
                         block1.spritesheet = level1.spritesheet;
                         level1.data[index] = 0;
                         box = &block1;
-                        if(index = 1142)coin.activated = 1;
+                        if(index == 2032)coin[0].activated = 1;
+                        else if(index == 2037)coin[1].activated = 1;
+                        else if(index == 2039)coin[2].activated = 1;
+                        else if(index == 1142)coin[3].activated = 1;
                     }
                 }
                 mario.y += mario.vy;
@@ -437,8 +450,11 @@ int main()
         if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data, solid);
         mario.draw(gsGlobal, x, y);
-        coin.draw(gsGlobal, x, y);
-        coin.update();
+        for(int i = 0; i < 32; i++)
+        {
+            coin[i].draw(gsGlobal, x, y);
+            coin[i].update();
+        }
         for(int i = 0;i < 16; i++)
         {
             if(goomba[i].isOnScreen(x))goomba[i].draw(gsGlobal, x, y);
@@ -471,8 +487,11 @@ int main()
                 {
                     if(goomba[i].x > x && goomba[i].x < x + 320)goomba[i].hflip^=1;
                 }
-                coin.sprite++;
-                coin.sprite&=3;
+                for(int i = 0; i < 32; i++)
+                {
+                    coin[i].sprite++;
+                    coin[i].sprite&=3;
+                }
             }
             for(int i = 0; i < 16; i++)
             {
