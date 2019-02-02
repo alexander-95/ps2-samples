@@ -12,3 +12,6 @@
 
 #### Koopa
 ![spritesheet](images/koopa.png "koopa")
+
+#### Pick-ups
+![spritesheet](images/pickups.png "pick-ups")
