@@ -21,7 +21,9 @@ block::~block()
 void block::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
-    int u1 = 16*sprite, v1 = 0, u2 = 16*(sprite+1), v2 = 16;
+    u8 spritex = sprite % 8; // 8 is the width of the tilesheet in tiles
+    u8 spritey = sprite / 8;
+    int u1 = 16*spritex, v1 = 16*spritey, u2 = 16*(spritex+1), v2 = 16*(spritey+1);
     int x1 = (x-screen_x)*2, y1 = (y-screen_y)*2;
     gsKit_prim_quad_texture(gsGlobal, &spritesheet,
                             x1, y1,         // x1, y1

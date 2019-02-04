@@ -20,6 +20,15 @@
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
     u32 VramTextureSize = gsKit_texture_size(width, height, GS_PSM_CT32);
+    u32 size = VramTextureSize;
+    char* units[3] = {"b", "kb", "mb"};
+    u8 unit = 0;
+    while(size > 1024)
+    {
+        size /= 1024;
+        unit++;
+    }
+    printf("allocating %d%s\n", size,units[unit]);
 
     tex->Width = width;
     tex->Height = height;
@@ -99,8 +108,8 @@ int main()
     gsGlobal->Width=640;
     gsGlobal->Height=512;
     gsGlobal->PSMZ = GS_PSMZ_32;
-    gsGlobal->PSM = GS_PSM_CT32;
-    gsGlobal->ZBuffering = GS_SETTING_ON;
+    gsGlobal->PSM = GS_PSM_CT16;
+    gsGlobal->ZBuffering = GS_SETTING_OFF;
     gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
     gsGlobal->DoubleBuffering = GS_SETTING_ON;
 
@@ -128,7 +137,7 @@ int main()
     
     map level1;
     level1.spritesheet.Width = 128;
-    level1.spritesheet.Height = 64;
+    level1.spritesheet.Height = 128;
     level1.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &level1.spritesheet, spritesheet_array, level1.spritesheet.Width, level1.spritesheet.Height );
     level1.data = map_data;
@@ -285,10 +294,15 @@ int main()
     
     block* box = NULL;
     
-    u8 solid[32] = {0,1,0,0,0,0,0,0,
+    u8 solid[64] = {0,1,0,0,0,0,0,0,
                     0,0,0,1,1,1,0,0,
                     1,1,0,0,0,0,0,0,
-                    1,1,0,0,0,0,0,0};
+                    1,1,0,0,0,0,0,0,
+                    1,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0};
+    
     mario.vy = 0;
     int gravity = 1;
     u8 tick = 0;
@@ -491,7 +505,7 @@ int main()
                     if(level1.data[index] == 11)
                     {
                         block block1;
-                        block1.sprite = 1;
+                        block1.sprite = 32;
                         block1.x = ((mario.x + 8) >> 4)<<4;
                         block1.y = ((mario.y - 1) >> 4)<<4;
                         block1.spritesheet = level1.spritesheet;
@@ -563,7 +577,7 @@ int main()
                 {
                     int index_x = box->x / level1.tile_width;
                     int index_y = box->y / level1.tile_height;
-                    level1.data[(index_y*level1.width)+index_x] = 1;
+                    level1.data[(index_y*level1.width)+index_x] = 32;
                 }
             }
         }
