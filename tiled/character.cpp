@@ -139,7 +139,7 @@ int character::canMoveLeft(map* level, u8* solid, int n )
     else return 0;
 }
 
-int character::traverse(map* level, u8* solid)
+void character::traverse(map* level, u8* solid)
 {
     if(direction)
     {
@@ -153,7 +153,7 @@ int character::traverse(map* level, u8* solid)
     }
 }
 
-int character::gravity(map* level, u8* solid, u8 tick, int gravity )
+void character::gravity(map* level, u8* solid, u8 tick, int gravity )
 {
     if(vy > 0)
     {
