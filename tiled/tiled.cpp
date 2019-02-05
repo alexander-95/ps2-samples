@@ -109,7 +109,7 @@ int main()
     gsGlobal->Height=512;
     gsGlobal->PSMZ = GS_PSMZ_32;
     gsGlobal->PSM = GS_PSM_CT16;
-    gsGlobal->ZBuffering = GS_SETTING_OFF;
+    gsGlobal->ZBuffering = GS_SETTING_ON;
     gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
     gsGlobal->DoubleBuffering = GS_SETTING_ON;
 
@@ -258,7 +258,7 @@ int main()
         if(!mario.canMoveDown(&level1, solid, 1) && !mario.animationMode)mario.sprite = 0;
         else if(!mario.animationMode) mario.sprite = 5;
         // mario fell into a pit
-        if(false && mario.y > 208)
+        if(mario.y > y + 208)
         {
             printf("fell\n");
             mario.x = 0;
@@ -285,7 +285,7 @@ int main()
                 if(mario.canMoveLeft(&level1, solid, 2))
                 {
                     mario.x-=2;
-                    if(x > 0)x-=2;
+                    if(x > 0 && y == 0)x-=2;
                 }
             }
             if(pad.right())
@@ -306,7 +306,8 @@ int main()
                 {
                     mario.x+=2;
                     if(x+(gsGlobal->Width/(2*scale_factor)) < (level1.width*level1.tile_width) &&
-                       mario.x > (gsGlobal->Width/(2*scale_factor))) x+=2;
+                       mario.x > (gsGlobal->Width/(2*scale_factor)) &&
+                       y == 0) x+=2;
                 }
             }
             if(pad.up() || pad.x(1))
