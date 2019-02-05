@@ -187,9 +187,12 @@ int main()
         mushroom[i].spritesheet.PSM = GS_PSM_CT32;
         mushroom[i].width = 16;
         mushroom[i].height = 16;
+        mushroom[i].type = 1;
+        mushroom[i].activated = 0;
     }
     for(int i = 0; i < 4; i++)mushroom[i].spritesheet = coin[0].spritesheet;
-    mushroom[0].x = 336; mushroom[0].y = 144; mushroom[0].type = 1; mushroom[0].activated = 0;
+    mushroom[0].x = 336; mushroom[0].y = 144;
+    mushroom[1].x = 1024; mushroom[1].y = 128; mushroom[1].sprite = 1;
 
     pickup flower[2];
     for(int i = 0; i < 2; i++)
@@ -298,7 +301,7 @@ int main()
                     0,0,0,1,1,1,0,0,
                     1,1,0,0,0,0,0,0,
                     1,1,0,0,0,0,0,0,
-                    1,0,0,0,0,0,0,0,
+                    1,1,0,0,0,0,0,0,
                     0,0,0,0,0,0,0,0,
                     0,0,0,0,0,0,0,0,
                     0,0,0,0,0,0,0,0};
@@ -502,7 +505,7 @@ int main()
                     int coinx = ((index % 224) * 16)+4;
                     int coiny = (index / 224) * 16;
                     printf("hit box %d (%d) coin location: <%d, %d>\n", index,level1.data[index], coinx, coiny);
-                    if(level1.data[index] == 11)
+                    if(level1.data[index] == 11 || level1.data[index] == 33)
                     {
                         block block1;
                         block1.sprite = 32;
@@ -524,6 +527,7 @@ int main()
                         else if(index == 2186)coin[23].activated = 1;
                         else if(index == 2094)flower[0].activated = 1;
                         else if(index == 1229)flower[1].activated = 1;
+                        else if(index == 1856)mushroom[1].activated = 1;
                     }
                 }
                 mario.y += mario.vy;
