@@ -214,86 +214,26 @@ int main()
         goomba[i].spritesheet.Width = 32;
         goomba[i].spritesheet.Height = 16;
         goomba[i].spritesheet.PSM = GS_PSM_CT32;
+        goomba[i].direction = 1;
     }
     gsKit_texture_abgr(gsGlobal, &goomba[0].spritesheet, goomba_array, goomba[0].spritesheet.Width, goomba[0].spritesheet.Height );
-    goomba[0].x = 352;
-    goomba[0].y = 192;
-    goomba[0].direction = 0;
-
-    goomba[1].x = 640;
-    goomba[1].y = 192;
-    goomba[1].direction = 1;
-    goomba[1].spritesheet = goomba[0].spritesheet;
-
-    goomba[2].x = 816;
-    goomba[2].y = 192;
-    goomba[2].direction = 1;
-    goomba[2].spritesheet = goomba[0].spritesheet;
-
-    goomba[3].x = 848;
-    goomba[3].y = 192;
-    goomba[3].direction = 1;
-    goomba[3].spritesheet = goomba[0].spritesheet;
-
-    goomba[4].x = 1280;
-    goomba[4].y = 64;
-    goomba[4].direction = 1;
-    goomba[4].spritesheet = goomba[0].spritesheet;
-
-    goomba[5].x = 1312;
-    goomba[5].y = 64;
-    goomba[5].direction = 1;
-    goomba[5].spritesheet = goomba[0].spritesheet;
-
-    goomba[6].x = 1552;
-    goomba[6].y = 192;
-    goomba[6].direction = 1;
-    goomba[6].spritesheet = goomba[0].spritesheet;
-
-    goomba[7].x = 1576;
-    goomba[7].y = 192;
-    goomba[7].direction = 1;
-    goomba[7].spritesheet = goomba[0].spritesheet;
-
-    goomba[8].x = 1824;
-    goomba[8].y = 192;
-    goomba[8].direction = 1;
-    goomba[8].spritesheet = goomba[0].spritesheet;
-    
-    goomba[9].x = 1848;
-    goomba[9].y = 192;
-    goomba[9].direction = 1;
-    goomba[9].spritesheet = goomba[0].spritesheet;
-
-    goomba[10].x = 1984;
-    goomba[10].y = 192;
-    goomba[10].direction = 1;
-    goomba[10].spritesheet = goomba[0].spritesheet;
-
-    goomba[11].x = 2008;
-    goomba[11].y = 192;
-    goomba[11].direction = 1;
-    goomba[11].spritesheet = goomba[0].spritesheet;
-
-    goomba[12].x = 2048;
-    goomba[12].y = 192;
-    goomba[12].direction = 1;
-    goomba[12].spritesheet = goomba[0].spritesheet;
-
-    goomba[13].x = 2072;
-    goomba[13].y = 192;
-    goomba[13].direction = 1;
-    goomba[13].spritesheet = goomba[0].spritesheet;
-
-    goomba[14].x = 2784;
-    goomba[14].y = 192;
-    goomba[14].direction = 1;
-    goomba[14].spritesheet = goomba[0].spritesheet;
-
-    goomba[15].x = 2808;
-    goomba[15].y = 192;
-    goomba[15].direction = 1;
-    goomba[15].spritesheet = goomba[0].spritesheet;
+    for(int i = 1; i < 16; i++)goomba[i].spritesheet = goomba[0].spritesheet;
+    goomba[0].x = 352; goomba[0].y = 192;goomba[0].direction = 0;
+    goomba[1].x = 640; goomba[1].y = 192;
+    goomba[2].x = 816; goomba[2].y = 192;
+    goomba[3].x = 848; goomba[3].y = 192;
+    goomba[4].x = 1280; goomba[4].y = 64;
+    goomba[5].x = 1312; goomba[5].y = 64;
+    goomba[6].x = 1552; goomba[6].y = 192;
+    goomba[7].x = 1576; goomba[7].y = 192;
+    goomba[8].x = 1824; goomba[8].y = 192;
+    goomba[9].x = 1848; goomba[9].y = 192;
+    goomba[10].x = 1984; goomba[10].y = 192;
+    goomba[11].x = 2008; goomba[11].y = 192;
+    goomba[12].x = 2048; goomba[12].y = 192;
+    goomba[13].x = 2072; goomba[13].y = 192;
+    goomba[14].x = 2784; goomba[14].y = 192;
+    goomba[15].x = 2808; goomba[15].y = 192;
     
     block* box = NULL;
     
