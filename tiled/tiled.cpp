@@ -241,7 +241,7 @@ int main()
                     0,0,0,1,1,1,0,0,
                     1,1,0,0,0,0,0,0,
                     1,1,0,0,0,0,0,0,
-                    1,1,0,0,0,0,0,0,
+                    1,1,1,1,0,0,0,0,
                     0,0,0,0,0,0,0,0,
                     0,0,0,0,0,0,0,0,
                     0,0,0,0,0,0,0,0};
@@ -252,7 +252,8 @@ int main()
     u8 superMario = 0;
     while(1)
     {
-        
+        if(y == 0)bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
+        else bg_color = GS_SETREG_RGBAQ(0x00,0x00,0x00,0x00,0x00);
         gsKit_clear(gsGlobal, bg_color);
         pad.read();
         if(!mario.canMoveDown(&level1, solid, 1) && !mario.animationMode)mario.sprite = 0;
