@@ -171,14 +171,37 @@ int main()
     coin[0].x = 260; coin[0].y = 144;
     coin[1].x = 372; coin[1].y = 144;
     coin[2].x = 356; coin[2].y = 80;
-    coin[17].x = 1508; coin[17].y = 80;
-    coin[18].x = 1700; coin[18].y = 144;
-    coin[19].x = 1748; coin[19].y = 144;
-    coin[20].x = 1796; coin[20].y = 144;
-    coin[21].x = 2068; coin[21].y = 80;
-    coin[22].x = 2084; coin[22].y = 80;
-    coin[23].x = 2724; coin[23].y = 144;
+    coin[3].x = 1508; coin[3].y = 80;
+    coin[4].x = 1700; coin[4].y = 144;
+    coin[5].x = 1748; coin[5].y = 144;
+    coin[6].x = 1796; coin[6].y = 144;
+    coin[7].x = 2068; coin[7].y = 80;
+    coin[8].x = 2084; coin[8].y = 80;
+    coin[9].x = 2724; coin[9].y = 144;
 
+    // underground coins
+    coin[10].x = 2436; coin[10].y = 384; coin[10].activated = 1;
+    coin[11].x = 2452; coin[11].y = 384; coin[11].activated = 1;
+    coin[12].x = 2468; coin[12].y = 384; coin[12].activated = 1;
+    coin[13].x = 2484; coin[13].y = 384; coin[13].activated = 1;
+    coin[14].x = 2500; coin[14].y = 384; coin[14].activated = 1;
+    coin[15].x = 2516; coin[15].y = 384; coin[15].activated = 1;
+    coin[16].x = 2532; coin[16].y = 384; coin[16].activated = 1;
+    coin[17].x = 2436; coin[17].y = 352; coin[17].activated = 1;
+    coin[18].x = 2452; coin[18].y = 352; coin[18].activated = 1;
+    coin[19].x = 2468; coin[19].y = 352; coin[19].activated = 1;
+    coin[20].x = 2484; coin[20].y = 352; coin[20].activated = 1;
+    coin[21].x = 2500; coin[21].y = 352; coin[21].activated = 1;
+    coin[22].x = 2516; coin[22].y = 352; coin[22].activated = 1;
+    coin[23].x = 2532; coin[23].y = 352; coin[23].activated = 1;
+    
+    coin[24].x = 2452; coin[24].y = 320; coin[24].activated = 1;
+    coin[25].x = 2468; coin[25].y = 320; coin[25].activated = 1;
+    coin[26].x = 2484; coin[26].y = 320; coin[26].activated = 1;
+    coin[27].x = 2500; coin[27].y = 320; coin[27].activated = 1;
+    coin[28].x = 2516; coin[28].y = 320; coin[28].activated = 1;
+    
+    
     pickup mushroom[4];
     for(int i = 0; i < 4; i++)
     {
@@ -460,13 +483,13 @@ int main()
                         else if(index == 2037)mushroom[0].activated = 1;
                         else if(index == 2039)coin[1].activated = 1;
                         else if(index == 1142)coin[2].activated = 1;
-                        else if(index == 1214)coin[17].activated = 1;
-                        else if(index == 2122)coin[18].activated = 1;
-                        else if(index == 2125)coin[19].activated = 1;
-                        else if(index == 2128)coin[20].activated = 1;
-                        else if(index == 1249)coin[21].activated = 1;
-                        else if(index == 1250)coin[22].activated = 1;
-                        else if(index == 2186)coin[23].activated = 1;
+                        else if(index == 1214)coin[3].activated = 1;
+                        else if(index == 2122)coin[4].activated = 1;
+                        else if(index == 2125)coin[5].activated = 1;
+                        else if(index == 2128)coin[6].activated = 1;
+                        else if(index == 1249)coin[7].activated = 1;
+                        else if(index == 1250)coin[8].activated = 1;
+                        else if(index == 2186)coin[9].activated = 1;
                         else if(index == 2094)flower[0].activated = 1;
                         else if(index == 1229)flower[1].activated = 1;
                         else if(index == 1856)mushroom[1].activated = 1;
@@ -481,7 +504,7 @@ int main()
         for(int i = 0; i < 32; i++)
         {
             coin[i].draw(gsGlobal, x, y);
-            coin[i].update();
+            if(i < 10)coin[i].update();
         }
         for(int i = 0; i < 4; i++)
         {
