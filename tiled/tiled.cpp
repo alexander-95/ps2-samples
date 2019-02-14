@@ -518,6 +518,11 @@ int main()
         {
             coin[i].draw(gsGlobal, x, y);
             if(i < 10)coin[i].update();
+            if(mario.pickedup(&coin[i]))
+            {
+                printf("picked up a coin");
+                coin[i].activated = 0;
+            }
         }
         for(int i = 0; i < 4; i++)
         {
@@ -543,7 +548,6 @@ int main()
                 flower[i].sprite&=3;
             }
         }
-        
         for(int i = 0;i < 16; i++)
         {
             if(goomba[i].isOnScreen(x))goomba[i].draw(gsGlobal, x, y);
