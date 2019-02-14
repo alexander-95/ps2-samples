@@ -498,6 +498,19 @@ int main()
                 mario.y += mario.vy;
             }
         }
+        else if(mario.vy == 0) // mario is only able to get killed by enemies when not jumping or falling
+        {
+            for(int i = 0; i < 16; i++)
+            {
+                if(goomba[i].isOnScreen(x) && mario.isTouching(&goomba[i]))
+                {
+                    printf("touching a goomba\n");
+                    mario.x = 0;
+                    x = 0;
+                    mario.y = 192;
+                }
+            }
+        }
         if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data, solid);
         mario.draw(gsGlobal, x, y);
