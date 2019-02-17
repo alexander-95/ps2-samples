@@ -15,3 +15,6 @@
 
 #### Pick-ups
 ![spritesheet](images/pickups.png "pick-ups")
+
+#### HUD
+![spritesheet](images/hud.png "HUD")
