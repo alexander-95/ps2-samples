@@ -9,6 +9,7 @@
 #include "goomba.h"
 #include "koopa.h"
 #include "pickups.h"
+#include "hud.h"
 
 #include "controller.hpp"
 #include "map.hpp"
@@ -16,6 +17,7 @@
 #include "character.hpp"
 #include "block.hpp"
 #include "pickup.hpp"
+#include "HUD.hpp"
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
@@ -134,6 +136,12 @@ int main()
     int x = 0, y=0; // top left corner of the screen
     int scale_factor = 2;
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
+
+    HUD hud;
+    hud.spritesheet.Width = 128;
+    hud.spritesheet.Height = 128;
+    hud.spritesheet.PSM = GS_PSM_CT32;
+    gsKit_texture_abgr(gsGlobal, &hud.spritesheet, hud_array, hud.spritesheet.Width, hud.spritesheet.Height );
     
     map level1;
     level1.spritesheet.Width = 128;
@@ -273,6 +281,8 @@ int main()
     int gravity = 1;
     u8 tick = 0;
     u8 superMario = 0;
+    int time = 400;
+    int score = 0;
     while(1)
     {
         if(y == 0)bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
@@ -479,17 +489,17 @@ int main()
                         block1.spritesheet = level1.spritesheet;
                         level1.data[index] = 0;
                         box = &block1;
-                        if(index == 2032)coin[0].activated = 1;
+                        if(index == 2032){coin[0].activated = 1;score+=200;}
                         else if(index == 2037)mushroom[0].activated = 1;
-                        else if(index == 2039)coin[1].activated = 1;
-                        else if(index == 1142)coin[2].activated = 1;
-                        else if(index == 1214)coin[3].activated = 1;
-                        else if(index == 2122)coin[4].activated = 1;
-                        else if(index == 2125)coin[5].activated = 1;
-                        else if(index == 2128)coin[6].activated = 1;
-                        else if(index == 1249)coin[7].activated = 1;
-                        else if(index == 1250)coin[8].activated = 1;
-                        else if(index == 2186)coin[9].activated = 1;
+                        else if(index == 2039){coin[1].activated = 1;score+=200;}
+                        else if(index == 1142){coin[2].activated = 1;score+=200;}
+                        else if(index == 1214){coin[3].activated = 1;score+=200;}
+                        else if(index == 2122){coin[4].activated = 1;score+=200;}
+                        else if(index == 2125){coin[5].activated = 1;score+=200;}
+                        else if(index == 2128){coin[6].activated = 1;score+=200;}
+                        else if(index == 1249){coin[7].activated = 1;score+=200;}
+                        else if(index == 1250){coin[8].activated = 1;score+=200;}
+                        else if(index == 2186){coin[9].activated = 1;score+=200;}
                         else if(index == 2094)flower[0].activated = 1;
                         else if(index == 1229)flower[1].activated = 1;
                         else if(index == 1856)mushroom[1].activated = 1;
@@ -520,15 +530,16 @@ int main()
             if(i < 10)coin[i].update();
             if(mario.pickedup(&coin[i]))
             {
-                printf("picked up a coin");
+                printf("picked up a coin\n");
                 coin[i].activated = 0;
+                score+=200;
             }
         }
         for(int i = 0; i < 4; i++)
         {
             if(mario.pickedup(&mushroom[0]))
             {
-                printf("picked up mushroom");
+                printf("picked up mushroom\n");
                 mushroom[i].activated = 0;
                 mario.animationMode = 2;
             }
@@ -567,6 +578,9 @@ int main()
                 }
             }
         }
+        hud.draw(gsGlobal, 0, 0);
+        hud.drawTime(gsGlobal, time);
+        hud.drawScore(gsGlobal, score);
         
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
@@ -601,8 +615,8 @@ int main()
             else koopa.sprite = 3;
             
         }
+        if((tick&127) == 0)time--;
         tick++;
-        tick&=31;
     }
     return 0;
 }
