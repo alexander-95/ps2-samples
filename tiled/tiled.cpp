@@ -103,6 +103,22 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
     }
 }
 
+void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, int score)
+{
+    u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
+    printf("starting game\n");
+    for(u16 tick = 0; tick < 128; tick++)
+    {
+        hud->draw(gsGlobal, 0, 0);
+        hud->drawScore(gsGlobal, score);
+        gsKit_sync_flip(gsGlobal);
+        gsKit_queue_exec(gsGlobal);
+        gsKit_queue_reset(gsGlobal->Per_Queue);
+        gsKit_clear(gsGlobal, 0);
+    }
+    printf("game started\n");
+}
+
 int main()
 {   
     GSGLOBAL* gsGlobal = gsKit_init_global();
@@ -283,6 +299,9 @@ int main()
     u8 superMario = 0;
     int time = 400;
     int score = 0;
+
+    drawLevelStart(gsGlobal, &hud, score);
+    
     while(1)
     {
         if(y == 0)bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
