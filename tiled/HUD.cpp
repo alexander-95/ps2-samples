@@ -133,3 +133,49 @@ void HUD::drawTime(GSGLOBAL* gsGlobal, int time)
     }
     while(time);
 }
+
+void HUD::drawWorld(GSGLOBAL* gsGlobal, int world, int level)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
+    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+                            240,27,                // x1, y1
+                            0.0f+(8*world), 35.0f, // u1, v1
+
+                            240,41,                // x2, y2
+                            0.0f+(8*world), 42.0f, // u2, v2
+
+                            254,27,                // x3, y3
+                            7.0f+(8*world), 35.0f, // u3, v3
+
+                            254,41,                // x4, y4
+                            7.0f+(8*world), 42.0f, // u4, v4
+                            3, TexCol);
+
+    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+                            256,27,                // x1, y1
+                            8, 56, // u1, v1
+
+                            256,41,                // x2, y2
+                            8, 64, // u2, v2
+
+                            270,27,                // x3, y3
+                            14, 56, // u3, v3
+
+                            270,41,                // x4, y4
+                            14, 64, // u4, v4
+                            3, TexCol);
+
+    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+                            272,27,                // x1, y1
+                            0.0f+(8*level), 35.0f, // u1, v1
+
+                            272,41,                // x2, y2
+                            0.0f+(8*level), 42.0f, // u2, v2
+
+                            286,27,                // x3, y3
+                            7.0f+(8*level), 35.0f, // u3, v3
+
+                            286,41,                // x4, y4
+                            7.0f+(8*level), 42.0f, // u4, v4
+                            3, TexCol);
+}

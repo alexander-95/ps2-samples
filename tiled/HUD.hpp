@@ -12,6 +12,7 @@ public:
     void draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y);
     void drawScore(GSGLOBAL* gsGlobal, int score);
     void drawTime(GSGLOBAL* gsGlobal, int score);
+    void drawWorld(GSGLOBAL* gsGlobal, int world, int level);
     int x;
     int y;
     int width;

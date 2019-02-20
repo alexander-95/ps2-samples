@@ -600,6 +600,7 @@ int main()
         hud.draw(gsGlobal, 0, 0);
         hud.drawTime(gsGlobal, time);
         hud.drawScore(gsGlobal, score);
+        hud.drawWorld(gsGlobal, 1, 1);
         
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
@@ -634,7 +635,7 @@ int main()
             else koopa.sprite = 3;
             
         }
-        if((tick&127) == 0)time--;
+        if((tick&31) == 0)time--;
         tick++;
     }
     return 0;
