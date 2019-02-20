@@ -111,6 +111,7 @@ void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, int score)
     {
         hud->draw(gsGlobal, 0, 0);
         hud->drawScore(gsGlobal, score);
+        hud->drawWorld(gsGlobal, 1, 1);
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
@@ -317,6 +318,7 @@ int main()
             mario.x = 0;
             x = 0;
             mario.y = 192;
+            drawLevelStart(gsGlobal, &hud, score);
         }
 
         if(!mario.animationMode)
@@ -537,6 +539,7 @@ int main()
                     mario.x = 0;
                     x = 0;
                     mario.y = 192;
+                    drawLevelStart(gsGlobal, &hud, score);
                 }
             }
         }
