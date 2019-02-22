@@ -103,15 +103,19 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
     }
 }
 
-void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, int score)
+void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, character* mario, int score, int lives)
 {
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
     printf("starting game\n");
+    mario->x = 128;
+    mario->y = 128;
     for(u16 tick = 0; tick < 128; tick++)
     {
         hud->draw(gsGlobal, 0, 0);
         hud->drawScore(gsGlobal, score);
         hud->drawWorld(gsGlobal, 1, 1);
+        mario->draw(gsGlobal, 0, 0);
+        hud->drawLives(gsGlobal, lives);
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
@@ -126,7 +130,7 @@ int main()
     gsGlobal->Mode = GS_MODE_PAL;
     gsGlobal->Width=640;
     gsGlobal->Height=512;
-    gsGlobal->PSMZ = GS_PSMZ_32;
+    //gsGlobal->PSMZ = GS_PSMZ_32;
     gsGlobal->PSM = GS_PSM_CT16;
     gsGlobal->ZBuffering = GS_SETTING_ON;
     gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
@@ -300,8 +304,11 @@ int main()
     u8 superMario = 0;
     int time = 400;
     int score = 0;
+    int lives = 3;
 
-    drawLevelStart(gsGlobal, &hud, score);
+    drawLevelStart(gsGlobal, &hud, &mario, score, lives);
+    mario.x = 0;
+    mario.y = 192;
     
     while(1)
     {
@@ -318,7 +325,7 @@ int main()
             mario.x = 0;
             x = 0;
             mario.y = 192;
-            drawLevelStart(gsGlobal, &hud, score);
+            drawLevelStart(gsGlobal, &hud, &mario, score, lives);
         }
 
         if(!mario.animationMode)
@@ -539,7 +546,7 @@ int main()
                     mario.x = 0;
                     x = 0;
                     mario.y = 192;
-                    drawLevelStart(gsGlobal, &hud, score);
+                    drawLevelStart(gsGlobal, &hud, &mario, score, lives);
                 }
             }
         }

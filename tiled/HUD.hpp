@@ -13,6 +13,7 @@ public:
     void drawScore(GSGLOBAL* gsGlobal, int score);
     void drawTime(GSGLOBAL* gsGlobal, int score);
     void drawWorld(GSGLOBAL* gsGlobal, int world, int level);
+    void drawLives(GSGLOBAL* gsGlobal, int lives);
     int x;
     int y;
     int width;

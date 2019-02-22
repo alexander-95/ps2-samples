@@ -179,3 +179,47 @@ void HUD::drawWorld(GSGLOBAL* gsGlobal, int world, int level)
                             7.0f+(8*level), 42.0f, // u4, v4
                             3, TexCol);
 }
+
+
+void HUD::drawLives(GSGLOBAL* gsGlobal, int lives)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
+    int x1 = 300, y1 = 266;
+    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+                            x1,y1,                // x1, y1
+                            16, 56, // u1, v1
+
+                            x1,y1+14,                // x2, y2
+                            16, 63, // u2, v2
+
+                            x1+14,y1,                // x3, y3
+                            24, 56, // u3, v3
+
+                            x1+14,y1+14,                // x4, y4
+                            24, 63, // u4, v4
+                            3, TexCol);
+
+    int offset = 0,curr=0, i=0;
+    int x2 = 350, y2 = 266;
+    do
+    {
+        curr = lives%10;
+        gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+                                (x2)-offset, y2,       // x1, y1
+                                0.0f+(8*curr), 35.0f,  // u1, v1
+
+                                (x2)-offset, y2+14,              // x2, y2
+                                0.0f+(8*curr), 42.0f, // u2, v2
+
+                                (x2+14)-offset, y2, // x3, y3
+                                7.0f+(8*curr), 35.0f,  // u3, v3
+
+                                (x2+14)-offset, y2+14,        // x4, y4
+                                7.0f+(8*curr), 42.0f, // u4, v4
+                                3, TexCol);
+        offset+=16;
+        lives/=10;
+        i++;
+    }
+    while(lives);
+}
