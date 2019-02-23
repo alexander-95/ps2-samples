@@ -322,10 +322,7 @@ int main()
         if(!mario.animationMode && mario.y > y + 208)
         {
             printf("fell\n");
-            mario.x = 0;
-            x = 0;
-            mario.y = 192;
-            drawLevelStart(gsGlobal, &hud, &mario, score, lives);
+            mario.animationMode = 4;
         }
 
         if(!mario.animationMode)
