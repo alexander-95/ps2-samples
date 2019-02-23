@@ -15,6 +15,7 @@ character::character()
     height = 16;
     animationMode = 0;
     animationFrame = 0;
+    collisionDetection = 1;
     printf("character spawned\n");
 }
 
@@ -51,6 +52,7 @@ void character::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
 
 int character::canMoveDown(map* level, u8* solid, int n )
 {
+    if(!collisionDetection)return 1;
     int x1 = x;
     int y1 = y+n+(height-1);
     int x2 = x+(width-1);
@@ -73,6 +75,7 @@ int character::canMoveDown(map* level, u8* solid, int n )
 
 int character::canMoveUp(map* level, u8* solid, int n )
 {
+    if(!collisionDetection)return 1;
     int x1 = x;
     int y1 = y-n;
     int x2 = x+(width-1);
@@ -95,6 +98,7 @@ int character::canMoveUp(map* level, u8* solid, int n )
 
 int character::canMoveRight(map* level, u8* solid, int n )
 {
+    if(!collisionDetection)return 1;
     int x1 = x+n+(width-1);
     int y1 = y;
     int x2 = x+n+(width-1);
@@ -119,6 +123,7 @@ int character::canMoveRight(map* level, u8* solid, int n )
 
 int character::canMoveLeft(map* level, u8* solid, int n )
 {
+    if(!collisionDetection)return 1;
     int x1 = x-n;
     int y1 = y;
     int x2 = x-n;
@@ -192,6 +197,7 @@ int character::isOnScreen(int screen_x)
 
 int character::isTouching(character* c)
 {
+    if(!collisionDetection)return 0;
     u8 collision_x = 0, collision_y = 0;
     if(c->x > x - c->width && c->x < x + width) collision_x = 1;
     if(c->y > y - c->height && c->y < y + height) collision_y = 1;

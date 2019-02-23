@@ -319,7 +319,7 @@ int main()
         if(!mario.canMoveDown(&level1, solid, 1) && !mario.animationMode)mario.sprite = 0;
         else if(!mario.animationMode) mario.sprite = 5;
         // mario fell into a pit
-        if(mario.y > y + 208)
+        if(!mario.animationMode && mario.y > y + 208)
         {
             printf("fell\n");
             mario.x = 0;
@@ -406,6 +406,10 @@ int main()
                     mario.y -= 16;
                 }
             }
+            if(pad.square(1))
+            {
+                mario.collisionDetection ^= 1;
+            }
         }
         // mario is entering a pipe
         else if(mario.animationMode == 1)
@@ -464,9 +468,50 @@ int main()
                 superMario = 1;
             }
         }
+        // skrinking back down to small mario
+        else if(mario.animationMode == 3)
+        {
+            
+        }
+        // death animation
+        else if(mario.animationMode == 4)
+        {
+            //u8 arr[10] = {10,10,10,10,10,-20,-20,-20,-20,-20};
+            mario.sprite = 13;
+            mario.collisionDetection = 0;
+            if(mario.animationFrame < 15)
+            {
+                if((tick & 1) == 0)
+                {
+                    mario.y -= 5;
+                    mario.animationFrame++;
+                }
+            }
+            else if(mario.animationFrame < 80)
+            {
+                if((tick & 1) == 0)
+                {
+                    mario.y += 5;
+                    mario.animationFrame++;
+                }
+            }
+            else
+            {
+                mario.animationMode = 0;
+                mario.animationFrame = 0;
+                mario.sprite = 0;
+                drawLevelStart(gsGlobal, &hud, &mario, score, lives);
+                mario.x = 0;
+                x = 0;
+                mario.y = 192;
+                mario.collisionDetection = 1;
+            }
+        }
+        
+        
 
         // dealing with gravity
-        if(mario.vy > 0 && !mario.animationMode)
+        if(mario.vy > 0)
         {
             // did mario stomp any goombas?
             for(int i = 0; i < 16; i++)
@@ -478,12 +523,12 @@ int main()
                 }
             }
             
-            if(mario.canMoveDown(&level1, solid, mario.vy))
+            if(!mario.animationMode && mario.canMoveDown(&level1, solid, mario.vy))
             {
                 mario.y += mario.vy;
                 if((tick & 3) == 0)mario.vy += gravity;
             }
-            else
+            else if(!mario.animationMode)
             {
                 while(mario.vy > 0 && !mario.canMoveDown(&level1, solid, mario.vy))mario.vy--;
                 mario.y += mario.vy;
@@ -540,13 +585,14 @@ int main()
         {
             for(int i = 0; i < 16; i++)
             {
-                if(goomba[i].isOnScreen(x) && mario.isTouching(&goomba[i]))
+                if(mario.animationMode == 0 && goomba[i].isOnScreen(x) && mario.isTouching(&goomba[i]))
                 {
                     printf("touching a goomba\n");
-                    mario.x = 0;
-                    x = 0;
-                    mario.y = 192;
-                    drawLevelStart(gsGlobal, &hud, &mario, score, lives);
+                    //mario.x = 0;
+                    //x = 0;
+                    //mario.y = 192;
+                    mario.animationMode = 4;
+                    //drawLevelStart(gsGlobal, &hud, &mario, score, lives);
                 }
             }
         }

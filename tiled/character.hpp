@@ -33,5 +33,6 @@ public:
     u8 height;
     u8 animationMode;
     u8 animationFrame;
+    u8 collisionDetection;
     GSTEXTURE spritesheet;
 };
