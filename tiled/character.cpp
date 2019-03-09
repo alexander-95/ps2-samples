@@ -16,6 +16,8 @@ character::character()
     animationMode = 0;
     animationFrame = 0;
     collisionDetection = 1;
+    activated = 1;
+    TTL = 5;
     printf("character spawned\n");
 }
 
@@ -26,6 +28,7 @@ character::~character()
 
 void character::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
 {
+    if(!activated)return;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int u1 = width*sprite, v1 = 0, u2 = width*(sprite+1), v2 = height;
     int x1 = x*2 - screen_x*2, y1 = y*2 - screen_y*2;
@@ -231,6 +234,28 @@ u8 character::standingOnPipe(map* level)
     int index2 = tile_y2 * level->width + tile_x2;
     int value2 = level->data[index2];
     if(value1 == 16 && value2 == 17) return 1;
+    else return 0;
+
+}
+u8 character::pipeOnRight(map* level)
+{
+    int x1 = x+width+1, y1 = y;
+    int x2 = x+width+1, y2 = y+height-1;
+    
+    // figure out which tile mario is running into
+    int tile_x1 = (x1 / level->tile_width);
+    int tile_y1 = (y1 / level->tile_height);
+    int index1 = tile_y1 * level->width + tile_x1;
+    int value1 = level->data[index1];
+
+    int tile_x2 = (x2 / level->tile_width);
+    int tile_y2 = (y2 / level->tile_height);
+    int index2 = tile_y2 * level->width + tile_x2;
+    int value2 = level->data[index2];
+
+    printf("value1 = %d\nvalue2 = %d\n", value1, value2);
+    
+    if((value1 == 40 || value1 == 48) && value2 == 48) return 1;
     else return 0;
 
 }

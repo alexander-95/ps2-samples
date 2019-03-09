@@ -22,6 +22,7 @@ public:
     int isTouching(character* c);
     int pickedup(pickup* p);
     u8 standingOnPipe(map* level);
+    u8 pipeOnRight(map* level);
     int x;
     int y;
     int vy;
@@ -34,5 +35,7 @@ public:
     u8 animationMode;
     u8 animationFrame;
     u8 collisionDetection;
+    u8 activated;
+    u8 TTL;
     GSTEXTURE spritesheet;
 };

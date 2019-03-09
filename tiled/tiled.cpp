@@ -294,8 +294,8 @@ int main()
                     1,1,0,0,0,0,0,0,
                     1,1,0,0,0,0,0,0,
                     1,1,1,1,0,0,0,0,
-                    0,0,0,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0,
+                    1,1,1,0,0,0,0,0,
+                    1,1,1,0,0,0,0,0,
                     0,0,0,0,0,0,0,0};
     
     mario.vy = 0;
@@ -324,6 +324,7 @@ int main()
             printf("fell\n");
             mario.animationMode = 4;
         }
+        if(mario.pipeOnRight(&level1))mario.animationMode = 5;
 
         if(!mario.animationMode)
         {
@@ -406,6 +407,10 @@ int main()
             if(pad.square(1))
             {
                 mario.collisionDetection ^= 1;
+            }
+            if(pad.circle(1))
+            {
+                mario.animationMode = 5;
             }
         }
         // mario is entering a pipe
@@ -504,6 +509,27 @@ int main()
                 mario.collisionDetection = 1;
             }
         }
+        else if(mario.animationMode == 5)
+        {
+            mario.vy = 0;
+            if(mario.animationFrame < 10)
+            {
+                if((tick & 7) == 0)
+                {
+                    mario.x+=2;
+                    mario.animationFrame++;
+                }
+            }
+            else
+            {
+                mario.animationMode = 0;
+                mario.animationFrame = 0;
+                x = 0;
+                y = 0;
+                mario.x = 0;
+                mario.y = 192;
+            }
+        }
         
         
 
@@ -517,6 +543,8 @@ int main()
                 {
                     goomba[i].sprite = 1;
                     mario.vy = -6;
+                    goomba[i].activated = 0;
+                    goomba[i].collisionDetection = 0;
                 }
             }
             
