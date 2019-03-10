@@ -23,6 +23,7 @@ public:
     int pickedup(pickup* p);
     u8 standingOnPipe(map* level);
     u8 pipeOnRight(map* level);
+    void print();
     int x;
     int y;
     int vy;
@@ -36,6 +37,5 @@ public:
     u8 animationFrame;
     u8 collisionDetection;
     u8 activated;
-    u8 TTL;
     GSTEXTURE spritesheet;
 };

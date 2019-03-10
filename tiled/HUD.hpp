@@ -14,6 +14,8 @@ public:
     void drawTime(GSGLOBAL* gsGlobal, int score);
     void drawWorld(GSGLOBAL* gsGlobal, int world, int level);
     void drawLives(GSGLOBAL* gsGlobal, int lives);
+    void drawString(GSGLOBAL* gsGlobal, int screen_x, int screen_y, char* str);
+    void drawDigit(GSGLOBAL* gsGlobal, int screen_x, int screen_y, u8 digit);
     int x;
     int y;
     int width;

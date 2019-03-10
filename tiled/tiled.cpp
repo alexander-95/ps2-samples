@@ -10,6 +10,8 @@
 #include "koopa.h"
 #include "pickups.h"
 #include "hud.h"
+#include "title.h"
+#include "cursor.h"
 
 #include "controller.hpp"
 #include "map.hpp"
@@ -105,8 +107,6 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
 
 void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, character* mario, int score, int lives)
 {
-    u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
-    printf("starting game\n");
     mario->x = 128;
     mario->y = 128;
     for(u16 tick = 0; tick < 128; tick++)
@@ -122,6 +122,65 @@ void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, character* mario, int score, i
         gsKit_clear(gsGlobal, 0);
     }
     printf("game started\n");
+}
+
+void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1, u8* map_data, u8* solid)
+{
+    u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    GSTEXTURE title;
+    GSTEXTURE cursor;
+    gsKit_texture_abgr(gsGlobal, &title, title_array, 176, 88 );
+    gsKit_texture_abgr(gsGlobal, &cursor, cursor_array, 8, 8 );
+    int x1 = 160, y1 = 60;
+    int x2 = 210, y2 = 250;
+    u8 menu_option = 0;
+    while(1)
+    {
+        if(menu_option == 0) y2 = 250;
+        else if(menu_option == 1) y2 = 282;
+        pad->read();
+        if(pad->down())menu_option = 1;
+        else if(pad->up())menu_option = 0;
+        if(pad->x(1) && menu_option == 0)break;
+        gsKit_prim_quad_texture(gsGlobal, &title,
+                                x1,y1,         // x1, y1
+                                0, 0,         // u1, v1
+
+                                x1,y1+(title.Height * 2),         // x2, y2
+                                0, title.Height,         // u2, v2
+
+                                x1+(title.Width * 2),y1,         // x3, y3
+                                title.Width, 0,         // u3, v3
+
+                                x1+(title.Width * 2),y1+(title.Height * 2),         // x4, y4
+                                title.Width, title.Height,         // u4, v4
+                                5, TexCol);
+        gsKit_prim_quad_texture(gsGlobal, &cursor,
+                                x2,y2,         // x1, y1
+                                0, 0,         // u1, v1
+
+                                x2,y2+(cursor.Height * 2),         // x2, y2
+                                0, cursor.Height,         // u2, v2
+
+                                x2+(cursor.Width * 2),y2,         // x3, y3
+                                cursor.Width, 0,         // u3, v3
+
+                                x2+(cursor.Width * 2),y2+(cursor.Height * 2),         // x4, y4
+                                cursor.Width, cursor.Height,         // u4, v4
+                                5, TexCol);
+
+        drawScreen(gsGlobal, &level1->spritesheet, 2, level1, 0, 0, map_data, solid);
+        hud->drawDigit(gsGlobal, 250,250, 1);
+        hud->drawString(gsGlobal, 282,250, "PLAYER GAME");
+        hud->drawDigit(gsGlobal, 250,280, 2);
+        hud->drawString(gsGlobal, 282,280, "PLAYER GAME");
+        
+        gsKit_sync_flip(gsGlobal);
+        gsKit_queue_exec(gsGlobal);
+        gsKit_queue_reset(gsGlobal->Per_Queue);
+        gsKit_clear(gsGlobal, bg_color);
+    }
 }
 
 int main()
@@ -229,8 +288,7 @@ int main()
     coin[26].x = 2484; coin[26].y = 320; coin[26].activated = 1;
     coin[27].x = 2500; coin[27].y = 320; coin[27].activated = 1;
     coin[28].x = 2516; coin[28].y = 320; coin[28].activated = 1;
-    
-    
+
     pickup mushroom[4];
     for(int i = 0; i < 4; i++)
     {
@@ -305,7 +363,10 @@ int main()
     int time = 400;
     int score = 0;
     int lives = 3;
+    u8 frameByFrame = 0;
 
+    drawStartScreen(gsGlobal, & pad, &hud, &level1, map_data, solid);
+    
     drawLevelStart(gsGlobal, &hud, &mario, score, lives);
     mario.x = 0;
     mario.y = 192;
@@ -408,9 +469,14 @@ int main()
             {
                 mario.collisionDetection ^= 1;
             }
+            
             if(pad.circle(1))
             {
-                mario.animationMode = 5;
+                if(!frameByFrame)frameByFrame = 1;
+            }
+            if(frameByFrame)
+            {
+                while(!pad.circle(1))pad.read();
             }
         }
         // mario is entering a pipe
@@ -703,6 +769,8 @@ int main()
             }
             for(int i = 0; i < 16; i++)
             {
+                printf("%d: ", i);
+                goomba[i].print();
                 if(goomba[i].x > x && goomba[i].x < x + 320)
                 {
                     goomba[i].traverse(&level1, solid);

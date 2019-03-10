@@ -9,6 +9,7 @@ character::character()
 {
     x = 0;
     y = 0;
+    vy = 0;
     sprite = 0;
     hflip = 0;
     width = 16;
@@ -17,7 +18,6 @@ character::character()
     animationFrame = 0;
     collisionDetection = 1;
     activated = 1;
-    TTL = 5;
     printf("character spawned\n");
 }
 
@@ -149,6 +149,7 @@ int character::canMoveLeft(map* level, u8* solid, int n )
 
 void character::traverse(map* level, u8* solid)
 {
+    if(!activated)return;
     if(direction)
     {
         if(canMoveRight(level,solid, 1))x++;
@@ -163,6 +164,7 @@ void character::traverse(map* level, u8* solid)
 
 void character::gravity(map* level, u8* solid, u8 tick, int gravity )
 {
+    if(!activated)return;
     if(vy > 0)
     {
         if(canMoveDown(level, solid, vy))
@@ -253,9 +255,14 @@ u8 character::pipeOnRight(map* level)
     int index2 = tile_y2 * level->width + tile_x2;
     int value2 = level->data[index2];
 
-    printf("value1 = %d\nvalue2 = %d\n", value1, value2);
+    //printf("value1 = %d\nvalue2 = %d\n", value1, value2);
     
     if((value1 == 40 || value1 == 48) && value2 == 48) return 1;
     else return 0;
 
+}
+
+void character::print()
+{
+    printf("position: <%d, %d> vy: %d\n", x, y, vy);
 }

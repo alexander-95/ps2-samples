@@ -208,14 +208,14 @@ void HUD::drawLives(GSGLOBAL* gsGlobal, int lives)
                                 (x2)-offset, y2,       // x1, y1
                                 0.0f+(8*curr), 35.0f,  // u1, v1
 
-                                (x2)-offset, y2+14,              // x2, y2
-                                0.0f+(8*curr), 42.0f, // u2, v2
+                                (x2)-offset, y2+14,    // x2, y2
+                                0.0f+(8*curr), 42.0f,  // u2, v2
 
-                                (x2+14)-offset, y2, // x3, y3
+                                (x2+14)-offset, y2,    // x3, y3
                                 7.0f+(8*curr), 35.0f,  // u3, v3
 
-                                (x2+14)-offset, y2+14,        // x4, y4
-                                7.0f+(8*curr), 42.0f, // u4, v4
+                                (x2+14)-offset, y2+14, // x4, y4
+                                7.0f+(8*curr), 42.0f,  // u4, v4
                                 3, TexCol);
         offset+=16;
         lives/=10;
@@ -223,3 +223,54 @@ void HUD::drawLives(GSGLOBAL* gsGlobal, int lives)
     }
     while(lives);
 }
+
+void HUD::drawString(GSGLOBAL* gsGlobal, int screen_x, int screen_y, char* str)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
+    int offset = 0;
+    u8 curr;
+    u8 v1 = 42;
+    for(int i = 0; str[i]; i++)
+    {
+        curr = str[i] - 65;
+        if(curr < 16) v1 = 42;
+        else v1 = 49;
+        curr%=16;
+        gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+                                (screen_x)+offset, screen_y,       // x1, y1
+                                0.0f+(8*curr), v1,  // u1, v1
+
+                                (screen_x)+offset, screen_y+14,    // x2, y2
+                                0.0f+(8*curr), v1+7.0f,  // u2, v2
+
+                                (screen_x+14)+offset, screen_y,    // x3, y3
+                                7.0f+(8*curr), v1,  // u3, v3
+
+                                (screen_x+14)+offset, screen_y+14, // x4, y4
+                                7.0f+(8*curr), v1+7.0f,  // u4, v4
+                                3, TexCol);
+        offset += 16;
+    }
+    
+}
+
+void HUD::drawDigit(GSGLOBAL* gsGlobal, int screen_x, int screen_y, u8 digit)
+{
+    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
+    int offset = 0;
+    u8 v1 = 35;
+    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+                            (screen_x)+offset, screen_y,       // x1, y1
+                            0.0f+(8*digit), v1,  // u1, v1
+                            
+                            (screen_x)+offset, screen_y+14,    // x2, y2
+                            0.0f+(8*digit), v1+7.0f,  // u2, v2
+                            
+                            (screen_x+14)+offset, screen_y,    // x3, y3
+                            7.0f+(8*digit), v1,  // u3, v3
+
+                            (screen_x+14)+offset, screen_y+14, // x4, y4
+                            7.0f+(8*digit), v1+7.0f,  // u4, v4
+                            3, TexCol);
+}
+    
