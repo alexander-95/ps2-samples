@@ -54,6 +54,16 @@ struct sound
     u8* buffer;
 };
 
+void loadSound(struct sound* s)
+{
+    fseek(s->adpcm, 0, SEEK_END);
+    s->size = ftell(s->adpcm);
+    fseek(s->adpcm, 0, SEEK_SET);
+    s->buffer = malloc(s->size);
+    fread(s->buffer, 1, s->size, s->adpcm);
+    fclose(s->adpcm);
+}
+
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
     u32 VramTextureSize = gsKit_texture_size(width, height, GS_PSM_CT32);
@@ -624,41 +634,12 @@ int main(int argc, char* argv[])
         wing.adpcm = fopen("mass:flappy/sfx_wing.adp", "rb");
     }
 
-    fseek(point.adpcm, 0, SEEK_END);
-    point.size = ftell(point.adpcm);
-    fseek(point.adpcm, 0, SEEK_SET);
-    point.buffer = malloc(point.size);
-    fread(point.buffer, 1, point.size, point.adpcm);
-    fclose(point.adpcm);
-
-    fseek(wing.adpcm, 0, SEEK_END);
-    wing.size = ftell(wing.adpcm);
-    fseek(wing.adpcm, 0, SEEK_SET);
-    wing.buffer = malloc(wing.size);
-    fread(wing.buffer, 1, wing.size, wing.adpcm);
-    fclose(wing.adpcm);
-
-    fseek(hit.adpcm, 0, SEEK_END);
-    hit.size = ftell(hit.adpcm);
-    fseek(hit.adpcm, 0, SEEK_SET);
-    hit.buffer = malloc(hit.size);
-    fread(hit.buffer, 1, hit.size, hit.adpcm);
-    fclose(hit.adpcm);
-
-    fseek(die.adpcm, 0, SEEK_END);
-    die.size = ftell(die.adpcm);
-    fseek(die.adpcm, 0, SEEK_SET);
-    die.buffer = malloc(die.size);
-    fread(die.buffer, 1, die.size, die.adpcm);
-    fclose(die.adpcm);
-
-    fseek(swooshing.adpcm, 0, SEEK_END);
-    swooshing.size = ftell(swooshing.adpcm);
-    fseek(swooshing.adpcm, 0, SEEK_SET);
-    swooshing.buffer = malloc(swooshing.size);
-    fread(swooshing.buffer, 1, swooshing.size, swooshing.adpcm);
-    fclose(swooshing.adpcm);
-    
+    loadSound(&point);
+    loadSound(&wing);
+    loadSound(&hit);
+    loadSound(&die);
+    loadSound(&swooshing);
+        
     audsrv_adpcm_init();
     audsrv_set_volume(MAX_VOLUME);
     audsrv_load_adpcm(&point.s, point.buffer, point.size);
@@ -819,6 +800,5 @@ int main(int argc, char* argv[])
         gsKit_queue_reset(gsGlobal->Per_Queue);
         gsKit_clear(gsGlobal, 0);
     }
-
 }
 }
