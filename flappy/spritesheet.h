@@ -2,6 +2,6 @@
 #ifndef SPRITESHEET_H
 #define SPRITESHEET_H
 
-extern const u32 spritesheet_array[];
+extern u32 spritesheet_array[];
 
 #endif

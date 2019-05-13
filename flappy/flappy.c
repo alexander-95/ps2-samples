@@ -543,8 +543,8 @@ int main(int argc, char* argv[])
     dmaKit_chan_init(DMA_CHANNEL_GIF);
     gsKit_init_screen(gsGlobal);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
-    gsKit_texture_abgr(gsGlobal, &bg, &bg_array, 320, 256 );
-    gsKit_texture_abgr(gsGlobal, &spriteSheet, &spritesheet_array, 320, 256 );
+    gsKit_texture_abgr(gsGlobal, &bg, bg_array, 320, 256 );
+    gsKit_texture_abgr(gsGlobal, &spriteSheet, spritesheet_array, 320, 256 );
     gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
 
     //loading screen
