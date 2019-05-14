@@ -574,13 +574,9 @@ void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
     return;
 }
 
-static int padBuf[256] __attribute__((aligned(64)));
-
-int main(int argc, char* argv[])
+struct pipeList* setupPipes()
 {
     int i;
-    //platform dimensions
-    int top = 380;
     struct pipeList* pipes = malloc(sizeof(struct pipeList));
     pipes->gap = 200;
     struct pipe* curr = malloc(sizeof(struct pipe));
@@ -594,33 +590,14 @@ int main(int argc, char* argv[])
         curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
         curr = curr->next;
     }
+    return pipes;
+}
 
-    GSGLOBAL* gsGlobal = gsKit_init_global();
-    gsGlobal->Mode = GS_MODE_PAL;
-    gsGlobal->Width=640;
-    gsGlobal->Height=512;
-    //gsGlobal->PSM = GS_PSM_CT32;
-    gsGlobal->PSMZ = GS_PSMZ_16S;
-    gsGlobal->ZBuffering = GS_SETTING_ON;
-    gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
-    gsGlobal->DoubleBuffering = GS_SETTING_ON;
-
-    
-    //u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
+void renderTitleScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet)
+{
     u64 TexCol = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);
-    dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
-                D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
-
-    //Initialize the DMAC
-    dmaKit_chan_init(DMA_CHANNEL_GIF);
-    gsKit_init_screen(gsGlobal);
-    gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
-    GSTEXTURE bg = loadTexture(gsGlobal, bg_array, 320, 256, GS_PSM_CT24);    
-    GSTEXTURE spriteSheet = loadTexture(gsGlobal, spritesheet_array, 320, 256, GS_PSM_CT32);
     gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
-    
-    //loading screen
-    gsKit_prim_quad_texture(gsGlobal, &spriteSheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             320.0f-66.0f, 256.0f-16.0f,  // x1, y1
                             172.0f, 0.0f,              // u1, v1
 
@@ -635,7 +612,41 @@ int main(int argc, char* argv[])
                             3, TexCol);
     gsKit_queue_exec(gsGlobal);
     gsKit_sync_flip(gsGlobal);
+    gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 
+}
+
+static int padBuf[256] __attribute__((aligned(64)));
+
+int main(int argc, char* argv[])
+{
+    //platform dimensions
+    int top = 380;
+
+    struct pipeList* pipes = setupPipes();
+
+    GSGLOBAL* gsGlobal = gsKit_init_global();
+    gsGlobal->Mode = GS_MODE_PAL;
+    gsGlobal->Width=640;
+    gsGlobal->Height=512;
+    //gsGlobal->PSM = GS_PSM_CT32;
+    gsGlobal->PSMZ = GS_PSMZ_16S;
+    gsGlobal->ZBuffering = GS_SETTING_ON;
+    gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
+    gsGlobal->DoubleBuffering = GS_SETTING_ON;
+
+    dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
+                D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
+
+    //Initialize the DMAC
+    dmaKit_chan_init(DMA_CHANNEL_GIF);
+    gsKit_init_screen(gsGlobal);
+    gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
+    GSTEXTURE bg = loadTexture(gsGlobal, bg_array, 320, 256, GS_PSM_CT24);    
+    GSTEXTURE spriteSheet = loadTexture(gsGlobal, spritesheet_array, 320, 256, GS_PSM_CT32);
+    
+    renderTitleScreen(gsGlobal, &spriteSheet);
+    
     //controller setup
     unsigned int old_pad = 0;
     unsigned int new_pad, paddata;
@@ -666,7 +677,6 @@ int main(int argc, char* argv[])
     
     stabilise(port,slot);
     highScore = getHighScore();
-    gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 
     // pre-game loop
     int game_started = 0, game_ended = 0;
@@ -764,7 +774,7 @@ int main(int argc, char* argv[])
 
             // bug: need to traverse the linked list and free all pipes!
             free(pipes);
-            free(curr);
+            //free(curr);
             free(b);
         }
 
