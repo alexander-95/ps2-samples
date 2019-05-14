@@ -56,6 +56,14 @@ struct sound
     u8* buffer;
 };
 
+void updateFrame(GSGLOBAL* gsGlobal)
+{
+    gsKit_sync_flip(gsGlobal);
+    gsKit_queue_exec(gsGlobal);
+    gsKit_queue_reset(gsGlobal->Per_Queue);
+    gsKit_clear(gsGlobal, 0);
+}
+
 void padUpdate(int port, int slot, struct padButtonStatus* buttons, unsigned int* old_pad, unsigned int* new_pad, unsigned int* paddata)
 {
     if(padRead(port, slot, buttons) != 0)
@@ -64,6 +72,20 @@ void padUpdate(int port, int slot, struct padButtonStatus* buttons, unsigned int
         *new_pad = *paddata & ~(*old_pad);
         *old_pad = *paddata;
     }
+}
+
+void loadAudioModules()
+{
+    int ret;
+    printf("sample: kicking IRXs\n");
+    ret = SifLoadModule("rom:LIBSD", 0, NULL);
+    if (ret < 0)ret = SifLoadModule("host:LIBSD", 0, NULL);
+    printf("libsd loadmodule %d\n", ret);
+
+    printf("sample: loading audsrv\n");
+    if(PCSX2) ret = SifLoadModule("host:audsrv.irx", 0, NULL);
+    else ret = SifLoadModule("mass:flappy/audsrv.irx", 0, NULL);
+    printf("audsrv loadmodule %d\n", ret);
 }
 
 void loadSound(struct sound* s, char* c)
@@ -88,6 +110,19 @@ void loadSound(struct sound* s, char* c)
 
     audsrv_load_adpcm(&s->s, s->buffer, s->size);
     free(s->buffer);
+}
+
+int initialiseAudio()
+{
+    if(audsrv_init() != 0)
+    {
+        printf("sample: failed to initialize audsrv\n");
+        printf("audsrv returned error string: %s\n", audsrv_get_error_string());
+        return 1;
+    }
+    audsrv_adpcm_init();
+    audsrv_set_volume(MAX_VOLUME);
+    return 0;
 }
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
@@ -615,28 +650,9 @@ int main(int argc, char* argv[])
     int gravity = 0, collided = 0, score = 0, highScore = 0;
 
     struct sound point, die, hit, swooshing, wing;
-     
-    printf("sample: kicking IRXs\n");
-    ret = SifLoadModule("rom:LIBSD", 0, NULL);
-    if (ret < 0)ret = SifLoadModule("host:LIBSD", 0, NULL);
-    printf("libsd loadmodule %d\n", ret);
 
-    printf("sample: loading audsrv\n");
-    if(PCSX2) ret = SifLoadModule("host:audsrv.irx", 0, NULL);
-    else ret = SifLoadModule("mass:flappy/audsrv.irx", 0, NULL);
-    printf("audsrv loadmodule %d\n", ret);
-
-    ret = audsrv_init();
-    if(ret != 0)
-    {
-        printf("sample: failed to initialize audsrv\n");
-        printf("audsrv returned error string: %s\n", audsrv_get_error_string());
-        return 1;
-    }
-
-    audsrv_adpcm_init();
-    audsrv_set_volume(MAX_VOLUME);
-    
+    loadAudioModules();
+    if(initialiseAudio() != 0)return 1;
     loadSound(&point, "sfx_point.adp");
     loadSound(&wing, "sfx_wing.adp");
     // loading more files not working on real PS2 for some reason
@@ -672,11 +688,7 @@ int main(int argc, char* argv[])
         drawBird(gsGlobal, b, &spriteSheet);
         drawPlatform(gsGlobal, &spriteSheet);
         drawGetReady(gsGlobal, &spriteSheet);
-
-        gsKit_sync_flip(gsGlobal);
-        gsKit_queue_exec(gsGlobal);
-        gsKit_queue_reset(gsGlobal->Per_Queue);
-        gsKit_clear(gsGlobal, 0);
+        updateFrame(gsGlobal);
     }
     
     // main game loop
@@ -700,9 +712,7 @@ int main(int argc, char* argv[])
             collided = 1;
         }
 
-        drawBackground(gsGlobal, &bg);
-
-	drawPipes(gsGlobal, pipes, &spriteSheet);
+        
         int oldScore = score;
 	if(!collided)movePipes(pipes, 2, b, &score);
 
@@ -711,8 +721,6 @@ int main(int argc, char* argv[])
             audsrv_play_adpcm(&point.s);
         }
 
-        drawPlatform(gsGlobal, &spriteSheet);
-
         // draw bird
         if(gravity)
         {
@@ -720,13 +728,14 @@ int main(int argc, char* argv[])
             if(b->y + b->vy <= 380 )b->y += b->vy;
             else b->y=380;
         }
-        drawBird(gsGlobal, b, &spriteSheet);
-        printScore(gsGlobal, score, &spriteSheet);
 
-        gsKit_sync_flip(gsGlobal);
-        gsKit_queue_exec(gsGlobal);
-        gsKit_queue_reset(gsGlobal->Per_Queue);
-        gsKit_clear(gsGlobal, 0);
+        drawBackground(gsGlobal, &bg);
+        drawPipes(gsGlobal, pipes, &spriteSheet);
+        drawBird(gsGlobal, b, &spriteSheet);
+        drawPlatform(gsGlobal, &spriteSheet);
+        printScore(gsGlobal, score, &spriteSheet);
+        updateFrame(gsGlobal);
+        
     }
     audsrv_stop_audio();
 
@@ -744,10 +753,7 @@ int main(int argc, char* argv[])
             drawEnd(gsGlobal, &spriteSheet, score, highScore);
             drawSaveIcon(gsGlobal, &spriteSheet);
 
-            gsKit_queue_exec(gsGlobal);
-            gsKit_sync_flip(gsGlobal);
-            gsKit_queue_reset(gsGlobal->Per_Queue);
-            gsKit_clear(gsGlobal, 0);
+            updateFrame(gsGlobal);
 
             if(score > highScore)highScore = score;
             setHighScore(highScore);
@@ -768,10 +774,7 @@ int main(int argc, char* argv[])
         drawPlatform(gsGlobal, &spriteSheet);
         drawEnd(gsGlobal, &spriteSheet, score, highScore);
 
-        gsKit_sync_flip(gsGlobal);
-        gsKit_queue_exec(gsGlobal);
-        gsKit_queue_reset(gsGlobal->Per_Queue);
-        gsKit_clear(gsGlobal, 0);
+        updateFrame(gsGlobal);
     }
 }
 }
