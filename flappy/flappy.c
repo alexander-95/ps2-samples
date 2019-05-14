@@ -56,6 +56,16 @@ struct sound
     u8* buffer;
 };
 
+void padUpdate(int port, int slot, struct padButtonStatus* buttons, unsigned int* old_pad, unsigned int* new_pad, unsigned int* paddata)
+{
+    if(padRead(port, slot, buttons) != 0)
+    {
+        *paddata = 0xffff ^ buttons->btns;
+        *new_pad = *paddata & ~(*old_pad);
+        *old_pad = *paddata;
+    }
+}
+
 void loadSound(struct sound* s, char* c)
 {
     char* filename = (char*)malloc(50 * sizeof(char));
@@ -649,20 +659,13 @@ int main(int argc, char* argv[])
     resetPipes(pipes);
     while(!game_started)
     {
-        if(padRead(port, slot, &buttons) != 0)
+        padUpdate(port, slot, &buttons, &old_pad, &new_pad, &paddata);
+        if(new_pad & PAD_CROSS)
         {
-            paddata = 0xffff ^ buttons.btns;
-
-            new_pad = paddata & ~old_pad;
-            old_pad = paddata;
-
-            if(new_pad & PAD_CROSS)
-            {
-                game_started = 1;
-                gravity = 1;
-                b->vy = -3;
-                srand(time(NULL));
-            }
+            game_started = 1;
+            gravity = 1;
+            b->vy = -3;
+            srand(time(NULL));
         }
 
         drawBackground(gsGlobal, &bg);
@@ -679,19 +682,11 @@ int main(int argc, char* argv[])
     // main game loop
     while(!game_ended)
     {
-
-        if(padRead(port, slot, &buttons) != 0)
+        padUpdate(port, slot, &buttons, &old_pad, &new_pad, &paddata);
+        if(!collided && new_pad & PAD_CROSS)
         {
-            paddata = 0xffff ^ buttons.btns;
-
-            new_pad = paddata & ~old_pad;
-            old_pad = paddata;
-
-            if(!collided && new_pad & PAD_CROSS)
-            {
-                b->vy = -5;
-                audsrv_play_adpcm(&wing.s);
-            }
+            b->vy = -5;
+            audsrv_play_adpcm(&wing.s);
         }
         if(birdTouchingGround(b, top))
         {
