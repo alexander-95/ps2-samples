@@ -144,6 +144,16 @@ void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width,
     gsKit_texture_upload(gsGlobal, tex);
 }
 
+GSTEXTURE loadTexture(GSGLOBAL* gsGlobal, u32* tex_array, int width, int height, int psm)
+{
+    GSTEXTURE tex;
+    tex.Width=width;
+    tex.Height=height;
+    tex.PSM = psm;
+    gsKit_texture_abgr(gsGlobal, &tex, tex_array, width, height );
+    return tex;
+}
+
 int collision(struct bird* b, struct pipeList* pipes)
 {
     struct pipe* curr = pipes->head;
@@ -568,7 +578,7 @@ static int padBuf[256] __attribute__((aligned(64)));
 
 int main(int argc, char* argv[])
 {
-    int i,ret;
+    int i;
     //platform dimensions
     int top = 380;
     struct pipeList* pipes = malloc(sizeof(struct pipeList));
@@ -595,16 +605,7 @@ int main(int argc, char* argv[])
     gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
     gsGlobal->DoubleBuffering = GS_SETTING_ON;
 
-    GSTEXTURE bg;
-    bg.Width=320;
-    bg.Height=256;
-    bg.PSM = GS_PSM_CT24;
-
-    GSTEXTURE spriteSheet;
-    spriteSheet.Width = 320;
-    spriteSheet.Height = 256;
-    spriteSheet.PSM = GS_PSM_CT32;
-
+    
     //u64 White = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);// set color
     u64 TexCol = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);
     dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
@@ -614,8 +615,8 @@ int main(int argc, char* argv[])
     dmaKit_chan_init(DMA_CHANNEL_GIF);
     gsKit_init_screen(gsGlobal);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
-    gsKit_texture_abgr(gsGlobal, &bg, bg_array, 320, 256 );
-    gsKit_texture_abgr(gsGlobal, &spriteSheet, spritesheet_array, 320, 256 );
+    GSTEXTURE bg = loadTexture(gsGlobal, bg_array, 320, 256, GS_PSM_CT24);    
+    GSTEXTURE spriteSheet = loadTexture(gsGlobal, spritesheet_array, 320, 256, GS_PSM_CT32);
     gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
     
     //loading screen
@@ -752,7 +753,6 @@ int main(int argc, char* argv[])
             drawPlatform(gsGlobal, &spriteSheet);
             drawEnd(gsGlobal, &spriteSheet, score, highScore);
             drawSaveIcon(gsGlobal, &spriteSheet);
-
             updateFrame(gsGlobal);
 
             if(score > highScore)highScore = score;
@@ -773,7 +773,6 @@ int main(int argc, char* argv[])
         drawBird(gsGlobal, b, &spriteSheet);
         drawPlatform(gsGlobal, &spriteSheet);
         drawEnd(gsGlobal, &spriteSheet, score, highScore);
-
         updateFrame(gsGlobal);
     }
 }
