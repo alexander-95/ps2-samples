@@ -22,6 +22,8 @@
 #include <tamtypes.h>
 #include <audsrv.h>
 
+u8 PCSX2 = 1;
+
 struct pipe
 {
     int x, y;
@@ -54,14 +56,28 @@ struct sound
     u8* buffer;
 };
 
-void loadSound(struct sound* s)
+void loadSound(struct sound* s, char* c)
 {
+    char* filename = (char*)malloc(50 * sizeof(char));
+    if(PCSX2) sprintf(filename, "host:%s", c);
+    else sprintf(filename, "mass:flappy/%s", c);
+    s->adpcm = fopen(filename, "rb");
+
+    if(s->adpcm == NULL)
+    {
+        printf("failed to open adpcm file\n");
+        audsrv_quit();
+    }
+
     fseek(s->adpcm, 0, SEEK_END);
     s->size = ftell(s->adpcm);
     fseek(s->adpcm, 0, SEEK_SET);
     s->buffer = malloc(s->size);
     fread(s->buffer, 1, s->size, s->adpcm);
     fclose(s->adpcm);
+
+    audsrv_load_adpcm(&s->s, s->buffer, s->size);
+    free(s->buffer);
 }
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
@@ -556,7 +572,7 @@ int main(int argc, char* argv[])
     gsKit_texture_abgr(gsGlobal, &bg, bg_array, 320, 256 );
     gsKit_texture_abgr(gsGlobal, &spriteSheet, spritesheet_array, 320, 256 );
     gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
-
+    
     //loading screen
     gsKit_prim_quad_texture(gsGlobal, &spriteSheet,
                             320.0f-66.0f, 256.0f-16.0f,  // x1, y1
@@ -583,19 +599,16 @@ int main(int argc, char* argv[])
     loadModules();
     padInit(0);
     openPad(port,slot,padBuf);
-
-    
     
     struct bird* b = malloc(sizeof(struct bird));
 
     int gravity = 0, collided = 0, score = 0, highScore = 0;
 
     struct sound point, die, hit, swooshing, wing;
-    
-    u8 PCSX2 = 1;
- 
+     
     printf("sample: kicking IRXs\n");
     ret = SifLoadModule("rom:LIBSD", 0, NULL);
+    if (ret < 0)ret = SifLoadModule("host:LIBSD", 0, NULL);
     printf("libsd loadmodule %d\n", ret);
 
     printf("sample: loading audsrv\n");
@@ -611,48 +624,19 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if(PCSX2) point.adpcm = fopen("host:sfx_point.adp", "rb");
-    else point.adpcm = fopen("mass:flappy/sfx_point.adp", "rb");
-    if(point.adpcm == NULL)
-    {
-        printf("failed to open adpcm file\n");
-        audsrv_quit();
-        return 1;
-    }
-    if(PCSX2)
-    {
-        die.adpcm = fopen("host:sfx_die.adp", "rb");
-        hit.adpcm = fopen("host:sfx_hit.adp", "rb");
-        swooshing.adpcm = fopen("host:sfx_swooshing.adp", "rb");
-        wing.adpcm = fopen("host:sfx_wing.adp", "rb");
-    }
-    else
-    {
-        die.adpcm = fopen("mass:flappy/sfx_die.adp", "rb");
-        hit.adpcm = fopen("mass:flappy/sfx_hit.adp", "rb");
-        swooshing.adpcm = fopen("mass:flappy/sfx_swooshing.adp", "rb");
-        wing.adpcm = fopen("mass:flappy/sfx_wing.adp", "rb");
-    }
-
-    loadSound(&point);
-    loadSound(&wing);
-    loadSound(&hit);
-    loadSound(&die);
-    loadSound(&swooshing);
-        
     audsrv_adpcm_init();
     audsrv_set_volume(MAX_VOLUME);
-    audsrv_load_adpcm(&point.s, point.buffer, point.size);
-    free(point.buffer);
-    audsrv_load_adpcm(&wing.s, wing.buffer, wing.size);
-    free(wing.buffer);
-    audsrv_load_adpcm(&hit.s, hit.buffer, hit.size);
-    free(hit.buffer);
-    //audsrv_load_adpcm(&die.s, die.buffer, die.size);
-    free(die.buffer);
-    //audsrv_load_adpcm(&swooshing.s, swooshing.buffer, swooshing.size);
-    free(swooshing.buffer);
-
+    
+    loadSound(&point, "sfx_point.adp");
+    loadSound(&wing, "sfx_wing.adp");
+    // loading more files not working on real PS2 for some reason
+    if(PCSX2)
+    {
+        loadSound(&hit, "sfx_hit.adp");
+        loadSound(&die, "sfx_die.adp");
+        loadSound(&swooshing, "sfx_swooshing.adp");
+    }
+    
     stabilise(port,slot);
     highScore = getHighScore();
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
@@ -716,9 +700,9 @@ int main(int argc, char* argv[])
         }
         if(collision(b, pipes))
         {
-            if(!collided)audsrv_play_adpcm(&hit.s);
+            // this sound file won't be loaded on a real PS2
+            if(!collided && PCSX2)audsrv_play_adpcm(&hit.s);
             collided = 1;
-            
         }
 
         drawBackground(gsGlobal, &bg);
