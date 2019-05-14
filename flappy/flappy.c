@@ -733,39 +733,33 @@ int main(int argc, char* argv[])
     // post-game loop
     while(game_ended)
     {
-        if(padRead(port, slot, &buttons) != 0)
+        padUpdate(port, slot, &buttons, &old_pad, &new_pad, &paddata);
+        
+        if(new_pad & PAD_CROSS)
         {
-            paddata = 0xffff ^ buttons.btns;
+            drawBackground(gsGlobal, &bg);
+            drawPipes(gsGlobal, pipes, &spriteSheet);
+            drawBird(gsGlobal, b, &spriteSheet);
+            drawPlatform(gsGlobal, &spriteSheet);
+            drawEnd(gsGlobal, &spriteSheet, score, highScore);
+            drawSaveIcon(gsGlobal, &spriteSheet);
 
-            new_pad = paddata & ~old_pad;
-            old_pad = paddata;
+            gsKit_queue_exec(gsGlobal);
+            gsKit_sync_flip(gsGlobal);
+            gsKit_queue_reset(gsGlobal->Per_Queue);
+            gsKit_clear(gsGlobal, 0);
 
-            if(new_pad & PAD_CROSS)
-            {
-                drawBackground(gsGlobal, &bg);
-                drawPipes(gsGlobal, pipes, &spriteSheet);
-                drawBird(gsGlobal, b, &spriteSheet);
-                drawPlatform(gsGlobal, &spriteSheet);
-                drawEnd(gsGlobal, &spriteSheet, score, highScore);
-                drawSaveIcon(gsGlobal, &spriteSheet);
+            if(score > highScore)highScore = score;
+            setHighScore(highScore);
 
-                gsKit_queue_exec(gsGlobal);
-                gsKit_sync_flip(gsGlobal);
-                gsKit_queue_reset(gsGlobal->Per_Queue);
-                gsKit_clear(gsGlobal, 0);
+            game_ended = 0;
+            game_started = 0;
+            collided = 0;
 
-                if(score > highScore)highScore = score;
-                setHighScore(highScore);
-
-                game_ended = 0;
-                game_started = 0;
-                collided = 0;
-
-                // bug: need to traverse the linked list and free all pipes!
-                free(pipes);
-                free(curr);
-                free(b);
-            }
+            // bug: need to traverse the linked list and free all pipes!
+            free(pipes);
+            free(curr);
+            free(b);
         }
 
         drawBackground(gsGlobal, &bg);
