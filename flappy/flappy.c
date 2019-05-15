@@ -634,7 +634,6 @@ void renderTitleScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet)
     gsKit_queue_exec(gsGlobal);
     gsKit_sync_flip(gsGlobal);
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
-
 }
 
 int main(int argc, char* argv[])
@@ -665,7 +664,6 @@ int main(int argc, char* argv[])
     struct bird* b = malloc(sizeof(struct bird));
     struct pipeList* pipes = setupPipes();
     int gravity = 0, collided = 0, score = 0, highScore = 0;
-    
 
     struct sound point, die, hit, swooshing, wing;
     loadAudioModules();
@@ -749,8 +747,7 @@ int main(int argc, char* argv[])
         drawBird(gsGlobal, b, &spriteSheet);
         drawPlatform(gsGlobal, &spriteSheet);
         printScore(gsGlobal, score, &spriteSheet);
-        updateFrame(gsGlobal);
-        
+        updateFrame(gsGlobal);        
     }
     audsrv_stop_audio();
 
