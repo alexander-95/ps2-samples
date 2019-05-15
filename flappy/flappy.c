@@ -23,6 +23,7 @@
 #include <audsrv.h>
 
 u8 PCSX2 = 1;
+static int padBuf[256] __attribute__((aligned(64)));
 
 struct pipe
 {
@@ -56,6 +57,13 @@ struct sound
     u8* buffer;
 };
 
+struct controller
+{
+    struct padButtonStatus buttons;
+    unsigned int old_pad, new_pad, paddata;
+    int port, slot;
+};
+
 void updateFrame(GSGLOBAL* gsGlobal)
 {
     gsKit_sync_flip(gsGlobal);
@@ -64,13 +72,13 @@ void updateFrame(GSGLOBAL* gsGlobal)
     gsKit_clear(gsGlobal, 0);
 }
 
-void padUpdate(int port, int slot, struct padButtonStatus* buttons, unsigned int* old_pad, unsigned int* new_pad, unsigned int* paddata)
+void padUpdate(struct controller* pad)
 {
-    if(padRead(port, slot, buttons) != 0)
+    if(padRead(pad->port, pad->slot, &pad->buttons) != 0)
     {
-        *paddata = 0xffff ^ buttons->btns;
-        *new_pad = *paddata & ~(*old_pad);
-        *old_pad = *paddata;
+        pad->paddata = 0xffff ^ pad->buttons.btns;
+        pad->new_pad = pad->paddata & ~pad->old_pad;
+        pad->old_pad = pad->paddata;
     }
 }
 
@@ -451,9 +459,9 @@ void resetBird(struct bird* b)
     b->cycle = 0;
 }
 
-int birdTouchingGround(struct bird* b, int ground)
+int birdTouchingGround(struct bird* b)
 {
-    if(b->y >= ground)
+    if(b->y >= 380)
     {
         return 1;
     }
@@ -593,6 +601,19 @@ struct pipeList* setupPipes()
     return pipes;
 }
 
+struct controller setupController()
+{
+    struct controller pad;
+    pad.old_pad = 0;
+    pad.port = 0, pad.slot = 0;
+    SifInitRpc(0);
+    loadModules();
+    padInit(0);
+    openPad(pad.port,pad.slot,padBuf);
+    stabilise(pad.port,pad.slot);
+    return pad;
+}
+
 void renderTitleScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);
@@ -616,15 +637,8 @@ void renderTitleScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet)
 
 }
 
-static int padBuf[256] __attribute__((aligned(64)));
-
 int main(int argc, char* argv[])
 {
-    //platform dimensions
-    int top = 380;
-
-    struct pipeList* pipes = setupPipes();
-
     GSGLOBAL* gsGlobal = gsKit_init_global();
     gsGlobal->Mode = GS_MODE_PAL;
     gsGlobal->Width=640;
@@ -647,22 +661,13 @@ int main(int argc, char* argv[])
     
     renderTitleScreen(gsGlobal, &spriteSheet);
     
-    //controller setup
-    unsigned int old_pad = 0;
-    unsigned int new_pad, paddata;
-    int port=0, slot=0;
-    struct padButtonStatus buttons;
-    SifInitRpc(0);
-    loadModules();
-    padInit(0);
-    openPad(port,slot,padBuf);
-    
+    struct controller pad1 = setupController();
     struct bird* b = malloc(sizeof(struct bird));
-
+    struct pipeList* pipes = setupPipes();
     int gravity = 0, collided = 0, score = 0, highScore = 0;
+    
 
     struct sound point, die, hit, swooshing, wing;
-
     loadAudioModules();
     if(initialiseAudio() != 0)return 1;
     loadSound(&point, "sfx_point.adp");
@@ -675,7 +680,6 @@ int main(int argc, char* argv[])
         loadSound(&swooshing, "sfx_swooshing.adp");
     }
     
-    stabilise(port,slot);
     highScore = getHighScore();
 
     // pre-game loop
@@ -686,13 +690,13 @@ int main(int argc, char* argv[])
     resetPipes(pipes);
     while(!game_started)
     {
-        padUpdate(port, slot, &buttons, &old_pad, &new_pad, &paddata);
-        if(new_pad & PAD_CROSS)
+        padUpdate(&pad1);
+        if(pad1.new_pad & PAD_CROSS)
         {
             game_started = 1;
             gravity = 1;
             b->vy = -3;
-            srand(time(NULL));
+            srand(time(0));
         }
 
         drawBackground(gsGlobal, &bg);
@@ -705,13 +709,13 @@ int main(int argc, char* argv[])
     // main game loop
     while(!game_ended)
     {
-        padUpdate(port, slot, &buttons, &old_pad, &new_pad, &paddata);
-        if(!collided && new_pad & PAD_CROSS)
+        padUpdate(&pad1);
+        if(!collided && pad1.new_pad & PAD_CROSS)
         {
             b->vy = -5;
             audsrv_play_adpcm(&wing.s);
         }
-        if(birdTouchingGround(b, top))
+        if(birdTouchingGround(b))
         {
             printf("bird hit the ground\n");
             game_ended = 1;
@@ -753,9 +757,9 @@ int main(int argc, char* argv[])
     // post-game loop
     while(game_ended)
     {
-        padUpdate(port, slot, &buttons, &old_pad, &new_pad, &paddata);
+        padUpdate(&pad1);
         
-        if(new_pad & PAD_CROSS)
+        if(pad1.new_pad & PAD_CROSS)
         {
             drawBackground(gsGlobal, &bg);
             drawPipes(gsGlobal, pipes, &spriteSheet);
