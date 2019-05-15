@@ -636,6 +636,37 @@ void renderTitleScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet)
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 }
 
+void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, GSTEXTURE* bg, GSTEXTURE* spritesheet)
+{
+    while(1)
+    {
+        padUpdate(pad1);
+        if(pad1->new_pad & PAD_CROSS) return;
+
+        drawBackground(gsGlobal, bg);
+        drawBird(gsGlobal, b, spritesheet);
+        drawPlatform(gsGlobal, spritesheet);
+        drawGetReady(gsGlobal, spritesheet);
+        updateFrame(gsGlobal);
+    }
+}
+
+void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes, GSTEXTURE* bg, GSTEXTURE* spritesheet)
+{
+    while(1)
+    {
+        padUpdate(pad1);
+        if(pad1->new_pad & PAD_CROSS) return;
+
+        drawBackground(gsGlobal, bg);
+        drawPipes(gsGlobal, pipes, spritesheet);
+        drawBird(gsGlobal, b, spritesheet);
+        drawPlatform(gsGlobal, spritesheet);
+        drawEnd(gsGlobal, spritesheet, *score, *highScore);
+        updateFrame(gsGlobal);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     GSGLOBAL* gsGlobal = gsKit_init_global();
@@ -680,29 +711,15 @@ int main(int argc, char* argv[])
     
     highScore = getHighScore();
 
-    // pre-game loop
-    int game_started = 0, game_ended = 0;
+    int game_ended = 0;
     while(1){
     score = 0;
     resetBird(b);
     resetPipes(pipes);
-    while(!game_started)
-    {
-        padUpdate(&pad1);
-        if(pad1.new_pad & PAD_CROSS)
-        {
-            game_started = 1;
-            gravity = 1;
-            b->vy = -3;
-            srand(time(0));
-        }
-
-        drawBackground(gsGlobal, &bg);
-        drawBird(gsGlobal, b, &spriteSheet);
-        drawPlatform(gsGlobal, &spriteSheet);
-        drawGetReady(gsGlobal, &spriteSheet);
-        updateFrame(gsGlobal);
-    }
+    pregameLoop(gsGlobal, &pad1, b, &bg, &spriteSheet);
+    gravity = 1;
+    b->vy = -3;
+    srand(time(0));
     
     // main game loop
     while(!game_ended)
@@ -724,7 +741,6 @@ int main(int argc, char* argv[])
             if(!collided && PCSX2)audsrv_play_adpcm(&hit.s);
             collided = 1;
         }
-
         
         int oldScore = score;
 	if(!collided)movePipes(pipes, 2, b, &score);
@@ -751,40 +767,24 @@ int main(int argc, char* argv[])
     }
     audsrv_stop_audio();
 
-    // post-game loop
-    while(game_ended)
-    {
-        padUpdate(&pad1);
-        
-        if(pad1.new_pad & PAD_CROSS)
-        {
-            drawBackground(gsGlobal, &bg);
-            drawPipes(gsGlobal, pipes, &spriteSheet);
-            drawBird(gsGlobal, b, &spriteSheet);
-            drawPlatform(gsGlobal, &spriteSheet);
-            drawEnd(gsGlobal, &spriteSheet, score, highScore);
-            drawSaveIcon(gsGlobal, &spriteSheet);
-            updateFrame(gsGlobal);
+    postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &bg, &spriteSheet);
+    drawBackground(gsGlobal, &bg);
+    drawPipes(gsGlobal, pipes, &spriteSheet);
+    drawBird(gsGlobal, b, &spriteSheet);
+    drawPlatform(gsGlobal, &spriteSheet);
+    drawEnd(gsGlobal, &spriteSheet, score, highScore);
+    drawSaveIcon(gsGlobal, &spriteSheet);
+    updateFrame(gsGlobal);
 
-            if(score > highScore)highScore = score;
-            setHighScore(highScore);
+    if(score > highScore)highScore = score;
+    setHighScore(highScore);
+            
+    // bug: need to traverse the linked list and free all pipes!
+    free(pipes);
+    //free(curr);
+    free(b);
 
-            game_ended = 0;
-            game_started = 0;
-            collided = 0;
-
-            // bug: need to traverse the linked list and free all pipes!
-            free(pipes);
-            //free(curr);
-            free(b);
-        }
-
-        drawBackground(gsGlobal, &bg);
-        drawPipes(gsGlobal, pipes, &spriteSheet);
-        drawBird(gsGlobal, b, &spriteSheet);
-        drawPlatform(gsGlobal, &spriteSheet);
-        drawEnd(gsGlobal, &spriteSheet, score, highScore);
-        updateFrame(gsGlobal);
-    }
+    game_ended = 0;
+    collided = 0;
 }
 }
