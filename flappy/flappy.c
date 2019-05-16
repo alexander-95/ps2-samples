@@ -651,7 +651,55 @@ void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, GS
     }
 }
 
-void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes, GSTEXTURE* bg, GSTEXTURE* spritesheet)
+void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
+              struct sound* wing, struct sound* point, struct sound* hit,
+              GSTEXTURE* bg, GSTEXTURE* spritesheet)
+{
+    int collided = 0;
+    while(1)
+    {
+        padUpdate(pad1);
+        if(!collided && pad1->new_pad & PAD_CROSS)
+        {
+            b->vy = -5;
+            audsrv_play_adpcm(&wing->s);
+        }
+        if(birdTouchingGround(b))
+        {
+            printf("bird hit the ground\n");
+            return;
+        }
+        if(collision(b, pipes))
+        {
+            // this sound file won't be loaded on a real PS2
+            if(!collided && PCSX2)audsrv_play_adpcm(&hit->s);
+            collided = 1;
+        }
+        
+        int oldScore = *score;
+	if(!collided)movePipes(pipes, 2, b, score);
+
+        if(*score!=oldScore)
+        {
+            audsrv_play_adpcm(&point->s);
+        }
+
+        // deal with gravity
+        b->vy += 0.3;
+        if(b->y + b->vy <= 380 )b->y += b->vy;
+        else b->y=380;
+
+        drawBackground(gsGlobal, bg);
+        drawPipes(gsGlobal, pipes, spritesheet);
+        drawBird(gsGlobal, b, spritesheet);
+        drawPlatform(gsGlobal, spritesheet);
+        printScore(gsGlobal, *score, spritesheet);
+        updateFrame(gsGlobal);
+    }
+}
+
+void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
+                  GSTEXTURE* bg, GSTEXTURE* spritesheet)
 {
     while(1)
     {
@@ -694,7 +742,7 @@ int main(int argc, char* argv[])
     struct controller pad1 = setupController();
     struct bird* b = malloc(sizeof(struct bird));
     struct pipeList* pipes = setupPipes();
-    int gravity = 0, collided = 0, score = 0, highScore = 0;
+    int score = 0, highScore = 0;
 
     struct sound point, die, hit, swooshing, wing;
     loadAudioModules();
@@ -711,60 +759,15 @@ int main(int argc, char* argv[])
     
     highScore = getHighScore();
 
-    int game_ended = 0;
     while(1){
     score = 0;
     resetBird(b);
     resetPipes(pipes);
     pregameLoop(gsGlobal, &pad1, b, &bg, &spriteSheet);
-    gravity = 1;
     b->vy = -3;
     srand(time(0));
-    
-    // main game loop
-    while(!game_ended)
-    {
-        padUpdate(&pad1);
-        if(!collided && pad1.new_pad & PAD_CROSS)
-        {
-            b->vy = -5;
-            audsrv_play_adpcm(&wing.s);
-        }
-        if(birdTouchingGround(b))
-        {
-            printf("bird hit the ground\n");
-            game_ended = 1;
-        }
-        if(collision(b, pipes))
-        {
-            // this sound file won't be loaded on a real PS2
-            if(!collided && PCSX2)audsrv_play_adpcm(&hit.s);
-            collided = 1;
-        }
-        
-        int oldScore = score;
-	if(!collided)movePipes(pipes, 2, b, &score);
 
-        if(score!=oldScore)
-        {
-            audsrv_play_adpcm(&point.s);
-        }
-
-        // draw bird
-        if(gravity)
-        {
-            b->vy += 0.3;
-            if(b->y + b->vy <= 380 )b->y += b->vy;
-            else b->y=380;
-        }
-
-        drawBackground(gsGlobal, &bg);
-        drawPipes(gsGlobal, pipes, &spriteSheet);
-        drawBird(gsGlobal, b, &spriteSheet);
-        drawPlatform(gsGlobal, &spriteSheet);
-        printScore(gsGlobal, score, &spriteSheet);
-        updateFrame(gsGlobal);        
-    }
+    gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &wing, &point, &hit, &bg, &spriteSheet);
     audsrv_stop_audio();
 
     postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &bg, &spriteSheet);
@@ -783,8 +786,5 @@ int main(int argc, char* argv[])
     free(pipes);
     //free(curr);
     free(b);
-
-    game_ended = 0;
-    collided = 0;
 }
 }
