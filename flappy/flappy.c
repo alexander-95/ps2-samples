@@ -57,6 +57,16 @@ struct sound
     u8* buffer;
 };
 
+struct audioResources
+{
+    struct sound point, die, hit, swooshing, wing;
+};
+
+struct textureResources
+{
+    GSTEXTURE bg, spriteSheet;
+};
+
 struct controller
 {
     struct padButtonStatus buttons;
@@ -636,24 +646,23 @@ void renderTitleScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet)
     gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 }
 
-void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, GSTEXTURE* bg, GSTEXTURE* spritesheet)
+void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, struct textureResources* texture)
 {
     while(1)
     {
         padUpdate(pad1);
         if(pad1->new_pad & PAD_CROSS) return;
 
-        drawBackground(gsGlobal, bg);
-        drawBird(gsGlobal, b, spritesheet);
-        drawPlatform(gsGlobal, spritesheet);
-        drawGetReady(gsGlobal, spritesheet);
+        drawBackground(gsGlobal, &texture->bg);
+        drawBird(gsGlobal, b, &texture->spriteSheet);
+        drawPlatform(gsGlobal, &texture->spriteSheet);
+        drawGetReady(gsGlobal, &texture->spriteSheet);
         updateFrame(gsGlobal);
     }
 }
 
 void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
-              struct sound* wing, struct sound* point, struct sound* hit,
-              GSTEXTURE* bg, GSTEXTURE* spritesheet)
+              struct audioResources* audio, struct textureResources* texture)
 {
     int collided = 0;
     while(1)
@@ -662,7 +671,7 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
         if(!collided && pad1->new_pad & PAD_CROSS)
         {
             b->vy = -5;
-            audsrv_play_adpcm(&wing->s);
+            audsrv_play_adpcm(&audio->wing.s);
         }
         if(birdTouchingGround(b))
         {
@@ -672,7 +681,7 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
         if(collision(b, pipes))
         {
             // this sound file won't be loaded on a real PS2
-            if(!collided && PCSX2)audsrv_play_adpcm(&hit->s);
+            if(!collided && PCSX2)audsrv_play_adpcm(&audio->hit.s);
             collided = 1;
         }
         
@@ -681,7 +690,7 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
 
         if(*score!=oldScore)
         {
-            audsrv_play_adpcm(&point->s);
+            audsrv_play_adpcm(&audio->point.s);
         }
 
         // deal with gravity
@@ -689,28 +698,28 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
         if(b->y + b->vy <= 380 )b->y += b->vy;
         else b->y=380;
 
-        drawBackground(gsGlobal, bg);
-        drawPipes(gsGlobal, pipes, spritesheet);
-        drawBird(gsGlobal, b, spritesheet);
-        drawPlatform(gsGlobal, spritesheet);
-        printScore(gsGlobal, *score, spritesheet);
+        drawBackground(gsGlobal, &texture->bg);
+        drawPipes(gsGlobal, pipes, &texture->spriteSheet);
+        drawBird(gsGlobal, b, &texture->spriteSheet);
+        drawPlatform(gsGlobal, &texture->spriteSheet);
+        printScore(gsGlobal, *score, &texture->spriteSheet);
         updateFrame(gsGlobal);
     }
 }
 
 void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
-                  GSTEXTURE* bg, GSTEXTURE* spritesheet)
+                  struct textureResources* texture)
 {
     while(1)
     {
         padUpdate(pad1);
         if(pad1->new_pad & PAD_CROSS) return;
 
-        drawBackground(gsGlobal, bg);
-        drawPipes(gsGlobal, pipes, spritesheet);
-        drawBird(gsGlobal, b, spritesheet);
-        drawPlatform(gsGlobal, spritesheet);
-        drawEnd(gsGlobal, spritesheet, *score, *highScore);
+        drawBackground(gsGlobal, &texture->bg);
+        drawPipes(gsGlobal, pipes, &texture->spriteSheet);
+        drawBird(gsGlobal, b, &texture->spriteSheet);
+        drawPlatform(gsGlobal, &texture->spriteSheet);
+        drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
         updateFrame(gsGlobal);
     }
 }
@@ -734,27 +743,29 @@ int main(int argc, char* argv[])
     dmaKit_chan_init(DMA_CHANNEL_GIF);
     gsKit_init_screen(gsGlobal);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
-    GSTEXTURE bg = loadTexture(gsGlobal, bg_array, 320, 256, GS_PSM_CT24);    
-    GSTEXTURE spriteSheet = loadTexture(gsGlobal, spritesheet_array, 320, 256, GS_PSM_CT32);
+    struct textureResources texture;
+    texture.bg = loadTexture(gsGlobal, bg_array, 320, 256, GS_PSM_CT24);    
+    texture.spriteSheet = loadTexture(gsGlobal, spritesheet_array, 320, 256, GS_PSM_CT32);
     
-    renderTitleScreen(gsGlobal, &spriteSheet);
+    renderTitleScreen(gsGlobal, &texture.spriteSheet);
     
     struct controller pad1 = setupController();
     struct bird* b = malloc(sizeof(struct bird));
     struct pipeList* pipes = setupPipes();
     int score = 0, highScore = 0;
 
-    struct sound point, die, hit, swooshing, wing;
+    //struct sound point, die, hit, swooshing, wing;
+    struct audioResources audio;
     loadAudioModules();
     if(initialiseAudio() != 0)return 1;
-    loadSound(&point, "sfx_point.adp");
-    loadSound(&wing, "sfx_wing.adp");
+    loadSound(&audio.point, "sfx_point.adp");
+    loadSound(&audio.wing, "sfx_wing.adp");
     // loading more files not working on real PS2 for some reason
     if(PCSX2)
     {
-        loadSound(&hit, "sfx_hit.adp");
-        loadSound(&die, "sfx_die.adp");
-        loadSound(&swooshing, "sfx_swooshing.adp");
+        loadSound(&audio.hit, "sfx_hit.adp");
+        loadSound(&audio.die, "sfx_die.adp");
+        loadSound(&audio.swooshing, "sfx_swooshing.adp");
     }
     
     highScore = getHighScore();
@@ -764,20 +775,20 @@ int main(int argc, char* argv[])
         score = 0;
         resetBird(b);
         resetPipes(pipes);
-        pregameLoop(gsGlobal, &pad1, b, &bg, &spriteSheet);
+        pregameLoop(gsGlobal, &pad1, b, &texture);
         b->vy = -3;
         srand(time(0));
 
-        gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &wing, &point, &hit, &bg, &spriteSheet);
+        gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &audio, &texture);
         audsrv_stop_audio();
 
-        postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &bg, &spriteSheet);
-        drawBackground(gsGlobal, &bg);
-        drawPipes(gsGlobal, pipes, &spriteSheet);
-        drawBird(gsGlobal, b, &spriteSheet);
-        drawPlatform(gsGlobal, &spriteSheet);
-        drawEnd(gsGlobal, &spriteSheet, score, highScore);
-        drawSaveIcon(gsGlobal, &spriteSheet);
+        postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &texture);
+        drawBackground(gsGlobal, &texture.bg);
+        drawPipes(gsGlobal, pipes, &texture.spriteSheet);
+        drawBird(gsGlobal, b, &texture.spriteSheet);
+        drawPlatform(gsGlobal, &texture.spriteSheet);
+        drawEnd(gsGlobal, &texture.spriteSheet, score, highScore);
+        drawSaveIcon(gsGlobal, &texture.spriteSheet);
         updateFrame(gsGlobal);
 
         if(score > highScore)highScore = score;
