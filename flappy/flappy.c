@@ -759,32 +759,33 @@ int main(int argc, char* argv[])
     
     highScore = getHighScore();
 
-    while(1){
-    score = 0;
-    resetBird(b);
-    resetPipes(pipes);
-    pregameLoop(gsGlobal, &pad1, b, &bg, &spriteSheet);
-    b->vy = -3;
-    srand(time(0));
+    while(1)
+    {
+        score = 0;
+        resetBird(b);
+        resetPipes(pipes);
+        pregameLoop(gsGlobal, &pad1, b, &bg, &spriteSheet);
+        b->vy = -3;
+        srand(time(0));
 
-    gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &wing, &point, &hit, &bg, &spriteSheet);
-    audsrv_stop_audio();
+        gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &wing, &point, &hit, &bg, &spriteSheet);
+        audsrv_stop_audio();
 
-    postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &bg, &spriteSheet);
-    drawBackground(gsGlobal, &bg);
-    drawPipes(gsGlobal, pipes, &spriteSheet);
-    drawBird(gsGlobal, b, &spriteSheet);
-    drawPlatform(gsGlobal, &spriteSheet);
-    drawEnd(gsGlobal, &spriteSheet, score, highScore);
-    drawSaveIcon(gsGlobal, &spriteSheet);
-    updateFrame(gsGlobal);
+        postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &bg, &spriteSheet);
+        drawBackground(gsGlobal, &bg);
+        drawPipes(gsGlobal, pipes, &spriteSheet);
+        drawBird(gsGlobal, b, &spriteSheet);
+        drawPlatform(gsGlobal, &spriteSheet);
+        drawEnd(gsGlobal, &spriteSheet, score, highScore);
+        drawSaveIcon(gsGlobal, &spriteSheet);
+        updateFrame(gsGlobal);
 
-    if(score > highScore)highScore = score;
-    setHighScore(highScore);
+        if(score > highScore)highScore = score;
+        setHighScore(highScore);
             
-    // bug: need to traverse the linked list and free all pipes!
-    free(pipes);
-    //free(curr);
-    free(b);
-}
+        // bug: need to traverse the linked list and free all pipes!
+        free(pipes);
+        //free(curr);
+        free(b);
+    }
 }
