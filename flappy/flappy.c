@@ -724,9 +724,8 @@ void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, i
     }
 }
 
-int main(int argc, char* argv[])
+void configureGraphics(GSGLOBAL* gsGlobal)
 {
-    GSGLOBAL* gsGlobal = gsKit_init_global();
     gsGlobal->Mode = GS_MODE_PAL;
     gsGlobal->Width=640;
     gsGlobal->Height=512;
@@ -735,7 +734,12 @@ int main(int argc, char* argv[])
     gsGlobal->ZBuffering = GS_SETTING_ON;
     gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
     gsGlobal->DoubleBuffering = GS_SETTING_ON;
+}
 
+int main(int argc, char* argv[])
+{
+    GSGLOBAL* gsGlobal = gsKit_init_global();
+    configureGraphics(gsGlobal);
     dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
                 D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
 
