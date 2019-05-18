@@ -736,6 +736,21 @@ void configureGraphics(GSGLOBAL* gsGlobal)
     gsGlobal->DoubleBuffering = GS_SETTING_ON;
 }
 
+void saveGame(GSGLOBAL* gsGlobal, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
+              struct textureResources* texture)
+{
+    drawBackground(gsGlobal, &texture->bg);
+    drawPipes(gsGlobal, pipes, &texture->spriteSheet);
+    drawBird(gsGlobal, b, &texture->spriteSheet);
+    drawPlatform(gsGlobal, &texture->spriteSheet);
+    drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
+    drawSaveIcon(gsGlobal, &texture->spriteSheet);
+    updateFrame(gsGlobal);
+
+    if(*score > *highScore)*highScore = *score;
+    setHighScore(*highScore);
+}
+
 int main(int argc, char* argv[])
 {
     GSGLOBAL* gsGlobal = gsKit_init_global();
@@ -784,23 +799,8 @@ int main(int argc, char* argv[])
         srand(time(0));
 
         gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &audio, &texture);
-        audsrv_stop_audio();
 
         postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &texture);
-        drawBackground(gsGlobal, &texture.bg);
-        drawPipes(gsGlobal, pipes, &texture.spriteSheet);
-        drawBird(gsGlobal, b, &texture.spriteSheet);
-        drawPlatform(gsGlobal, &texture.spriteSheet);
-        drawEnd(gsGlobal, &texture.spriteSheet, score, highScore);
-        drawSaveIcon(gsGlobal, &texture.spriteSheet);
-        updateFrame(gsGlobal);
-
-        if(score > highScore)highScore = score;
-        setHighScore(highScore);
-            
-        // bug: need to traverse the linked list and free all pipes!
-        free(pipes);
-        //free(curr);
-        free(b);
+        saveGame(gsGlobal, b, &score, &highScore, pipes, &texture);        
     }
 }
