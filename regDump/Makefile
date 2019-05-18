@@ -5,9 +5,9 @@
 EE_BIN = regDump.elf
 EE_OBJS = regDump.o
 
-EE_LIB   = /usr/lib/ps2dev/ps2sdk/ee/lib
-CRT      = /usr/lib/ps2dev/ps2sdk/ee/startup/crt0.o
-LINKFILE = /usr/lib/ps2dev/ps2sdk/ee/startup/linkfile
+EE_LIB   = /usr/local/ps2dev/ps2sdk/ee/lib
+CRT      = /usr/local/ps2dev/ps2sdk/ee/startup/crt0.o
+LINKFILE = /usr/local/ps2dev/ps2sdk/ee/startup/linkfile
 
 all:
 	ee-gcc -c regDump.S -o regDump.o
