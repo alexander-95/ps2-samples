@@ -13,9 +13,15 @@
 #include <dmaKit.h>
 #include <gsToolkit.h>
 #include <malloc.h>
+
 #include "controller.h"
+#include "log.h"
+
 #include "bg.h"
 #include "spritesheet.h"
+#include "font.h"
+#include "graphics.h"
+#include "draw.h"
 
 #include <string.h>
 #include <loadfile.h>
@@ -64,33 +70,8 @@ struct audioResources
 
 struct textureResources
 {
-    GSTEXTURE bg, spriteSheet;
+    GSTEXTURE bg, spriteSheet, font;
 };
-
-struct controller
-{
-    struct padButtonStatus buttons;
-    unsigned int old_pad, new_pad, paddata;
-    int port, slot;
-};
-
-void updateFrame(GSGLOBAL* gsGlobal)
-{
-    gsKit_sync_flip(gsGlobal);
-    gsKit_queue_exec(gsGlobal);
-    gsKit_queue_reset(gsGlobal->Per_Queue);
-    gsKit_clear(gsGlobal, 0);
-}
-
-void padUpdate(struct controller* pad)
-{
-    if(padRead(pad->port, pad->slot, &pad->buttons) != 0)
-    {
-        pad->paddata = 0xffff ^ pad->buttons.btns;
-        pad->new_pad = pad->paddata & ~pad->old_pad;
-        pad->old_pad = pad->paddata;
-    }
-}
 
 void loadAudioModules()
 {
@@ -106,14 +87,17 @@ void loadAudioModules()
     printf("audsrv loadmodule %d\n", ret);
 }
 
-void loadSound(struct sound* s, char* c)
+void loadSound(struct sound* s, char* c, GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l)
 {
     char* filename = (char*)malloc(50 * sizeof(char));
     if(PCSX2) sprintf(filename, "host:%s", c);
     else sprintf(filename, "mass:flappy/%s", c);
-    s->adpcm = fopen(filename, "rb");
+    s->adpcm = NULL;
+    while(s->adpcm == NULL)s->adpcm = fopen(filename, "rb");
 
-    if(s->adpcm == NULL)
+    logMessage(gsGlobal, font, l, filename);
+
+    if(0 && s->adpcm == NULL)
     {
         printf("failed to open adpcm file\n");
         audsrv_quit();
@@ -122,11 +106,19 @@ void loadSound(struct sound* s, char* c)
     fseek(s->adpcm, 0, SEEK_END);
     s->size = ftell(s->adpcm);
     fseek(s->adpcm, 0, SEEK_SET);
+    char str[45];
+    sprintf(str, "attempting malloc %d", s->size);
+    logMessage(gsGlobal, font, l, str);
     s->buffer = malloc(s->size);
+    logMessage(gsGlobal, font, l, "success. reading adpcm");
     fread(s->buffer, 1, s->size, s->adpcm);
+    logMessage(gsGlobal, font, l, "adpcm loaded into buffer");
     fclose(s->adpcm);
 
+    logMessage(gsGlobal, font, l, "file loaded from buffer");
+    
     audsrv_load_adpcm(&s->s, s->buffer, s->size);
+    logMessage(gsGlobal, font, l, "audio loaded to spu");
     free(s->buffer);
 }
 
@@ -143,35 +135,6 @@ int initialiseAudio()
     return 0;
 }
 
-void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
-{
-    u32 VramTextureSize = gsKit_texture_size(width, height, GS_PSM_CT32);
-
-    tex->Width = width;
-    tex->Height = height;
-    tex->PSM = GS_PSM_CT32;
-    tex->ClutPSM = 0;
-    tex->TBW = 1;
-    tex->Mem = arr;
-    tex->Clut = NULL;
-    tex->Vram = gsKit_vram_alloc(gsGlobal, VramTextureSize, GSKIT_ALLOC_USERBUFFER);
-    tex->VramClut = 0;
-    tex->Filter = GS_FILTER_NEAREST;
-    tex->Delayed = 0;
-
-    gsKit_texture_upload(gsGlobal, tex);
-}
-
-GSTEXTURE loadTexture(GSGLOBAL* gsGlobal, u32* tex_array, int width, int height, int psm)
-{
-    GSTEXTURE tex;
-    tex.Width=width;
-    tex.Height=height;
-    tex.PSM = psm;
-    gsKit_texture_abgr(gsGlobal, &tex, tex_array, width, height );
-    return tex;
-}
-
 int collision(struct bird* b, struct pipeList* pipes)
 {
     struct pipe* curr = pipes->head;
@@ -183,64 +146,6 @@ int collision(struct bird* b, struct pipeList* pipes)
         curr = curr->next;
     }
     return 0;
-}
-
-void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                0.0f, 400.0f,   // x1, y1
-                                0.0f, 200.0f,   // u1, v1
-
-                                0.0f, 512.0f,   // x2, y2
-                                0.0f, 256.0f,   // u2, v2
-
-                                640.0f, 400.0f, // x3, y3
-                                320.0f, 200.0f, // u3, v3
-
-                                640.0f, 512.0f, // x4, y4
-                                320.0f, 256.0f, // u4, v4
-                                1, TexCol);
-    return;
-}
-
-
-void drawGameOver(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                            320.0f-96.0f, 166.0f-21.0f, // x1, y1
-                            52.0f, 87.0f,              // u1, v1
-
-                            320.0f-96.0f, 166.0f+21.0f, // x2, y2
-                            52.0f, 108.0f,              // u2, v2
-
-                            320.0f+96.0f, 166.0f-21.0f, // x3, y3
-                            148.0f, 87.0f,             // u3, v3
-
-                            320.0f+96.0f, 166.0f+21.0f, // x4, y4
-                            148.0f, 108.0f,             // u4, v4
-                            3, TexCol); 
-    return;
-}
-
-void drawGetReady(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                            320.0f-92.0f, 256.0f-91.0f, // x1, y1
-                            52.0f, 109.0f,              // u1, v1
-
-                            320.0f-92.0f, 256.0f+91.0f, // x2, y2
-                            52.0f, 200.0f,              // u2, v2
-
-                            320.0f+92.0f, 256.0f-91.0f, // x3, y3
-                            144.0f, 109.0f,             // u3, v3
-
-                            320.0f+92.0f, 256.0f+91.0f, // x4, y4
-                            144.0f, 200.0f,             // u4, v4
-                            2, TexCol); 
-    return;
 }
 
 int getHighScore()
@@ -264,174 +169,6 @@ void setHighScore(int score)
         fprintf(savefile, "%d", score);
         fclose(savefile);
     }
-}
-
-void drawSaveIcon(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                            320.0f-9.0f, 256.0f-12.0f, // x1, y1
-                            259.0f, 188.0f,              // u1, v1
-
-                            320.0f-9.0f, 256.0f+12.0f, // x2, y2
-                            259.0f, 200.0f,              // u2, v2
-
-                            320.0f+9.0f, 256.0f-12.0f, // x3, y3
-                            268.0f, 188.0f,              // u3, v3
-
-                            320.0f+9.0f, 256.0f+12.0f, // x4, y4
-                            268.0f, 200.0f,              // u4, v4
-                            5, TexCol);
-}
-
-void drawNewLabel(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                262.0f-16.0f, 248.0f-7.0f, // x1, y1
-                                141.0f, 55.0f,              // u1, v1
-
-                                262.0f-16.0f, 248.0f+7.0f, // x2, y2
-                                141.0f, 62.0f,              // u2, v2
-
-                                262.0f+16.0f, 248.0f-7.0f, // x3, y3
-                                157.0f, 55.0f,              // u3, v3
-
-                                262.0f+16.0f, 248.0f+7.0f, // x4, y4
-                                157.0f, 62.0f,              // u4, v4
-                                4, TexCol);
-}
-
-void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    int medal = 0, new_medal = 0;
-    if(score >=10 && score < 20)
-    {
-        medal=0;
-        if(highScore < 10) new_medal = 1;
-    }
-    else if(score >= 20 && score <= 30)
-    {
-        medal=1;
-        if(highScore < 20) new_medal = 1;
-    }
-    else if(score > 30 && score < 40)
-    {
-        medal = 2;
-        if(highScore <= 30) new_medal = 1;
-    }
-    else
-    {
-        medal = 3;
-        new_medal = 1;
-    }
-
-    if(score >= 10)
-    {
-        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                256.0f-22.0f, 264.0f-22.0f, // x1, y1
-                                53.0f+(22*medal), 55.0f,              // u1, v1
-
-                                256.0f-22.0f, 264.0f+22.0f, // x2, y2
-                                53.0f+(22*medal), 78.0f,              // u2, v2
-
-                                256.0f+22.0f, 264.0f-22.0f, // x3, y3
-                                75.0f+(22*medal), 55.0f,              // u3, v3
-
-                                256.0f+22.0f, 264.0f+22.0f, // x4, y4
-                                75.0f+(22*medal), 78.0f,              // u4, v4
-                                3, TexCol);
-    }
-    if(new_medal)drawNewLabel(gsGlobal, spriteSheet);
-}
-
-void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                            320.0f-112.0f, 256.0f-56.0f, // x1, y1
-                            146.0f, 143.0f,              // u1, v1
-
-                            320.0f-112.0f, 256.0f+56.0f, // x2, y2
-                            146.0f, 200.0f,              // u2, v2
-
-                            320.0f+112.0f, 256.0f-56.0f, // x3, y3
-                            259.0f, 143.0f,              // u3, v3
-
-                            320.0f+112.0f, 256.0f+56.0f, // x4, y4
-                            259.0f, 200.0f,              // u4, v4
-                            2, TexCol);
-
-    int curr = 0, offset = 0;
-
-    drawMedal(gsGlobal, spriteSheet, score, highScore);
-    if(score > highScore)highScore = score;
-
-    // draw score
-    do
-    {
-        curr = score%10;
-        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                400.0f-offset, 236.0f,       // x1, y1
-                                52.0f+(6*curr), 41.0f,  // u1, v1
-
-                                400.0f-offset, 250.0f,              // x2, y2
-                                52.0f+(6*curr), 48.0f, // u2, v2
-
-                                412.0f-offset, 236.0f, // x3, y3
-                                58.0f+(6*curr), 41.0f,  // u3, v3
-
-                                412.0f-offset, 250.0f,        // x4, y4
-                                58.0f+(6*curr), 48.0f, // u4, v4
-                                3, TexCol);
-        offset+=14;
-        score/=10;
-    }
-    while(score);
-    offset = 0;
-
-    do
-    {
-        curr = highScore%10;
-        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                400.0f-offset, 276.0f,       // x1, y1
-                                52.0f+(6*curr), 41.0f,  // u1, v1
-
-                                400.0f-offset, 290.0f,              // x2, y2
-                                52.0f+(6*curr), 48.0f, // u2, v2
-
-                                412.0f-offset, 276.0f, // x3, y3
-                                58.0f+(6*curr), 41.0f,  // u3, v3
-
-                                412.0f-offset, 290.0f,        // x4, y4
-                                58.0f+(6*curr), 48.0f, // u4, v4
-                                3, TexCol);
-        offset+=14;
-        highScore/=10;
-    }
-    while(highScore);
-    drawGameOver(gsGlobal, spriteSheet);
-    return;
-}
-
-void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* bg)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, bg,
-                                0.0f, 0.0f,     // x1, y1
-                                0.0f, 0.0f,     // u1, v1
-
-                                0.0f, 512.0f,   // x2, y2
-                                0.0f, 256.0f,   // u2, v2
-
-                                640.0f, 0.0f,   // x3, y3
-                                320.0f, 0.0f,   // u3, v3
-
-                                640.0f, 512.0f, // x4, y4
-                                320.0f, 256.0f, // u4, v4
-                                0,TexCol);
-    return;
 }
 
 void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
@@ -556,42 +293,6 @@ void resetPipes(struct pipeList* pipes)
     }
 }
 
-void printScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites)
-{
-    int length, curr;
-    int temp = score;
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-
-    for(length=0; temp>0; temp/=10)length++;
-    if(score==0)length=1;
-
-    int height = 36, width = 24, space = 0;
-    int totalWidth = (width * length) + (space * (length-1));
-    totalWidth /= 2;
-    totalWidth -= width;
-    int p = 320 + totalWidth;
-    while(score)
-    {
-        curr = score % 10;
-        gsKit_prim_quad_texture(gsGlobal, sprites,
-                                p, 100.0f-height,       // x1, y1
-                                52.0f+(12*curr), 0.0f,  // u1, v1
-
-                                p, 100.0f,              // x2, y2
-                                52.0f+(12*curr), 18.0f, // u2, v2
-
-                                p+width, 100.0f-height, // x3, y3
-                                64.0f+(12*curr), 0.0f,  // u3, v3
-
-                                p+width, 100.0f,        // x4, y4
-                                64.0f+(12*curr), 18.0f, // u4, v4
-                                3, TexCol);
-        p -= width + space;
-        score/=10;
-    }
-    return;
-}
-
 struct pipeList* setupPipes()
 {
     int i;
@@ -611,42 +312,7 @@ struct pipeList* setupPipes()
     return pipes;
 }
 
-struct controller setupController()
-{
-    struct controller pad;
-    pad.old_pad = 0;
-    pad.port = 0, pad.slot = 0;
-    SifInitRpc(0);
-    loadModules();
-    padInit(0);
-    openPad(pad.port,pad.slot,padBuf);
-    stabilise(pad.port,pad.slot);
-    return pad;
-}
-
-void renderTitleScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet)
-{
-    u64 TexCol = GS_SETREG_RGBAQ(0xFF,0xFF,0xFF,0x00,0x00);
-    gsKit_mode_switch(gsGlobal, GS_PERSISTENT);
-    gsKit_prim_quad_texture(gsGlobal, spritesheet,
-                            320.0f-66.0f, 256.0f-16.0f,  // x1, y1
-                            172.0f, 0.0f,              // u1, v1
-
-                            320.0f-66.0f, 256.0f+16.0f, // x2, y2
-                            172.0f, 17.0f,              // u2, v2
-
-                            320.0f+66.0f, 256.0f-16.0f, // x3, y3
-                            238.0f, 0.0f,             // u3, v3
-
-                            320.0f+66.0f, 256.0f+16.0f, // x4, y4
-                            238.0f, 17.0f,             // u4, v4
-                            3, TexCol);
-    gsKit_queue_exec(gsGlobal);
-    gsKit_sync_flip(gsGlobal);
-    gsKit_mode_switch(gsGlobal, GS_ONESHOT);
-}
-
-void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, struct textureResources* texture)
+void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, struct textureResources* texture, char* buffer)
 {
     while(1)
     {
@@ -657,12 +323,12 @@ void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, st
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawGetReady(gsGlobal, &texture->spriteSheet);
-        updateFrame(gsGlobal);
+        updateFrame(gsGlobal, &texture->font, buffer);
     }
 }
 
 void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
-              struct audioResources* audio, struct textureResources* texture)
+              struct audioResources* audio, struct textureResources* texture, char* buffer)
 {
     int collided = 0;
     while(1)
@@ -702,13 +368,13 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
         drawPipes(gsGlobal, pipes, &texture->spriteSheet);
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
-        printScore(gsGlobal, *score, &texture->spriteSheet);
-        updateFrame(gsGlobal);
+        drawScore(gsGlobal, *score, &texture->spriteSheet);
+        updateFrame(gsGlobal, &texture->font, buffer);
     }
 }
 
 void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
-                  struct textureResources* texture)
+                  struct textureResources* texture, char* buffer)
 {
     while(1)
     {
@@ -720,24 +386,12 @@ void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, i
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
-        updateFrame(gsGlobal);
+        updateFrame(gsGlobal, &texture->font, buffer);
     }
 }
 
-void configureGraphics(GSGLOBAL* gsGlobal)
-{
-    gsGlobal->Mode = GS_MODE_PAL;
-    gsGlobal->Width=640;
-    gsGlobal->Height=512;
-    //gsGlobal->PSM = GS_PSM_CT32;
-    gsGlobal->PSMZ = GS_PSMZ_16S;
-    gsGlobal->ZBuffering = GS_SETTING_ON;
-    gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
-    gsGlobal->DoubleBuffering = GS_SETTING_ON;
-}
-
 void saveGame(GSGLOBAL* gsGlobal, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
-              struct textureResources* texture)
+              struct textureResources* texture, char* buffer)
 {
     drawBackground(gsGlobal, &texture->bg);
     drawPipes(gsGlobal, pipes, &texture->spriteSheet);
@@ -745,7 +399,7 @@ void saveGame(GSGLOBAL* gsGlobal, struct bird* b, int* score, int* highScore, st
     drawPlatform(gsGlobal, &texture->spriteSheet);
     drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
     drawSaveIcon(gsGlobal, &texture->spriteSheet);
-    updateFrame(gsGlobal);
+    updateFrame(gsGlobal, &texture->font, buffer);
 
     if(*score > *highScore)*highScore = *score;
     setHighScore(*highScore);
@@ -753,6 +407,7 @@ void saveGame(GSGLOBAL* gsGlobal, struct bird* b, int* score, int* highScore, st
 
 int main(int argc, char* argv[])
 {
+    printf("starting game\n");
     GSGLOBAL* gsGlobal = gsKit_init_global();
     configureGraphics(gsGlobal);
     dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC,
@@ -765,26 +420,30 @@ int main(int argc, char* argv[])
     struct textureResources texture;
     texture.bg = loadTexture(gsGlobal, bg_array, 320, 256, GS_PSM_CT24);    
     texture.spriteSheet = loadTexture(gsGlobal, spritesheet_array, 320, 256, GS_PSM_CT32);
+    texture.font = loadTexture(gsGlobal, font_array, 256,128,GS_PSM_CT32);
     
-    renderTitleScreen(gsGlobal, &texture.spriteSheet);
+    drawTitleScreen(gsGlobal, &texture.spriteSheet);
     
-    struct controller pad1 = setupController();
+    struct controller pad1 = setupController(padBuf);
     struct bird* b = malloc(sizeof(struct bird));
     struct pipeList* pipes = setupPipes();
     int score = 0, highScore = 0;
 
-    //struct sound point, die, hit, swooshing, wing;
+    struct log l;
+    l.index = 0;
+
     struct audioResources audio;
     loadAudioModules();
     if(initialiseAudio() != 0)return 1;
-    loadSound(&audio.point, "sfx_point.adp");
-    loadSound(&audio.wing, "sfx_wing.adp");
+    loadSound(&audio.point, "sfx_point.adp", gsGlobal, &texture.font, &l);
+    
+    loadSound(&audio.wing, "sfx_wing.adp", gsGlobal, &texture.font, &l);
     // loading more files not working on real PS2 for some reason
     if(PCSX2)
     {
-        loadSound(&audio.hit, "sfx_hit.adp");
-        loadSound(&audio.die, "sfx_die.adp");
-        loadSound(&audio.swooshing, "sfx_swooshing.adp");
+        loadSound(&audio.hit, "sfx_hit.adp", gsGlobal, &texture.font, &l);
+        loadSound(&audio.die, "sfx_die.adp", gsGlobal, &texture.font, &l);
+        loadSound(&audio.swooshing, "sfx_swooshing.adp", gsGlobal, &texture.font, &l);
     }
     
     highScore = getHighScore();
@@ -794,13 +453,11 @@ int main(int argc, char* argv[])
         score = 0;
         resetBird(b);
         resetPipes(pipes);
-        pregameLoop(gsGlobal, &pad1, b, &texture);
+        pregameLoop(gsGlobal, &pad1, b, &texture, l.buffer);
         b->vy = -3;
         srand(time(0));
-
-        gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &audio, &texture);
-
-        postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &texture);
-        saveGame(gsGlobal, b, &score, &highScore, pipes, &texture);        
+        gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &audio, &texture, l.buffer);
+        postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &texture, l.buffer);
+        saveGame(gsGlobal, b, &score, &highScore, pipes, &texture, l.buffer);
     }
 }

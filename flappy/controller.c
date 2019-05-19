@@ -163,4 +163,25 @@ int initializePad(int port, int slot)
     return 1;
 }
 
+struct controller setupController(int* padBuf)
+{
+    struct controller pad;
+    pad.old_pad = 0;
+    pad.port = 0, pad.slot = 0;
+    SifInitRpc(0);
+    loadModules();
+    padInit(0);
+    openPad(pad.port,pad.slot,padBuf);
+    stabilise(pad.port,pad.slot);
+    return pad;
+}
 
+void padUpdate(struct controller* pad)
+{
+    if(padRead(pad->port, pad->slot, &pad->buttons) != 0)
+    {
+        pad->paddata = 0xffff ^ pad->buttons.btns;
+        pad->new_pad = pad->paddata & ~pad->old_pad;
+        pad->old_pad = pad->paddata;
+    }
+}
