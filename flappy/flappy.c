@@ -301,7 +301,7 @@ struct pipeList* setupPipes()
     struct pipe* curr = malloc(sizeof(struct pipe));
     pipes->head = curr;
     pipes->length = 4;
-    for(i=0;i<pipes->length;i++)
+    for(i=0;i<pipes->length-1;i++)
     {
         struct pipe* p = malloc(sizeof(struct pipe));
         curr->next = p;
@@ -431,6 +431,15 @@ int main(int argc, char* argv[])
 
     struct log l;
     l.index = 0;
+    l.logfile = "mass:flappy/log.txt";
+    l.logToFile = 0;
+    l.logToScreen = 0;
+    if(l.logToFile)
+    {
+        FILE* f = fopen(l.logfile, "w");
+        fprintf(f, "log initialised\n");
+        fclose(f);
+    }
 
     struct audioResources audio;
     loadAudioModules();
