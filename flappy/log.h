@@ -8,6 +8,9 @@ struct log
 {
     int index;
     char buffer[28*45];
+    char* logfile;
+    u8 logToFile;
+    u8 logToScreen;
 };
 
 void logMessage(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, char* msg);
