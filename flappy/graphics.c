@@ -32,7 +32,7 @@ GSTEXTURE loadTexture(GSGLOBAL* gsGlobal, u32* tex_array, int width, int height,
 
 void updateFrame(GSGLOBAL* gsGlobal, GSTEXTURE* font, char* buffer)
 {
-    drawBuffer(gsGlobal, font, buffer);
+    //drawBuffer(gsGlobal, font, buffer);
     
     gsKit_sync_flip(gsGlobal);
     gsKit_queue_exec(gsGlobal);
@@ -45,7 +45,7 @@ void configureGraphics(GSGLOBAL* gsGlobal)
     gsGlobal->Mode = GS_MODE_PAL;
     gsGlobal->Width=640;
     gsGlobal->Height=512;
-    //gsGlobal->PSM = GS_PSM_CT32;
+    gsGlobal->PSM = GS_PSM_CT16;
     gsGlobal->PSMZ = GS_PSMZ_16S;
     gsGlobal->ZBuffering = GS_SETTING_ON;
     gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
