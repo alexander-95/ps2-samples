@@ -1,13 +1,13 @@
 #include "graphics.h"
 #include "draw.h"
 
-void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
+void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height, int psm)
 {
     u32 VramTextureSize = gsKit_texture_size(width, height, GS_PSM_CT32);
 
     tex->Width = width;
     tex->Height = height;
-    tex->PSM = GS_PSM_CT32;
+    tex->PSM = psm;
     tex->ClutPSM = 0;
     tex->TBW = 1;
     tex->Mem = arr;
@@ -26,7 +26,7 @@ GSTEXTURE loadTexture(GSGLOBAL* gsGlobal, u32* tex_array, int width, int height,
     tex.Width=width;
     tex.Height=height;
     tex.PSM = psm;
-    gsKit_texture_abgr(gsGlobal, &tex, tex_array, width, height );
+    gsKit_texture_abgr(gsGlobal, &tex, tex_array, width, height, psm );
     return tex;
 }
 
