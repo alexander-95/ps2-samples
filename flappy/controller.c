@@ -169,7 +169,7 @@ struct controller setupController(int* padBuf)
     pad.old_pad = 0;
     pad.port = 0, pad.slot = 0;
     SifInitRpc(0);
-    loadModules();
+    //loadModules();
     padInit(0);
     openPad(pad.port,pad.slot,padBuf);
     stabilise(pad.port,pad.slot);

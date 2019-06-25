@@ -5,10 +5,10 @@
 #include <gsKit.h>
 #include <time.h>
 #include <stdlib.h>
+
 #include <stdio.h>
 #include <kernel.h>
 #include <sifrpc.h>
-#include <loadfile.h>
 #include <libpad.h>
 #include <dmaKit.h>
 #include <gsToolkit.h>
@@ -22,14 +22,28 @@
 #include "font.h"
 #include "graphics.h"
 #include "draw.h"
+#include "ioman.h"
+#include "extern_irx.h"
+
+#include "audio/sfx_point.h"
+#include "audio/sfx_wing.h"
+#include "audio/sfx_hit.h"
+#include "audio/sfx_die.h"
+#include "audio/sfx_swooshing.h"
 
 #include <string.h>
 #include <loadfile.h>
 #include <tamtypes.h>
 #include <audsrv.h>
 
-u8 PCSX2 = 1;
+#include <iopcontrol.h>
+#include <iopheap.h>
+#include <sbv_patches.h>
+
+#include <unistd.h>
+
 static int padBuf[256] __attribute__((aligned(64)));
+#define IO_CUSTOM_SIMPLEACTION 1 // handler for parameter-less actions
 
 struct pipe
 {
@@ -57,7 +71,6 @@ struct bird
 
 struct sound
 {
-    FILE* adpcm;
     audsrv_adpcm_t s;
     int size;
     u8* buffer;
@@ -73,52 +86,33 @@ struct textureResources
     GSTEXTURE bg, spriteSheet, font;
 };
 
-void loadAudioModules()
-{
-    int ret;
-    printf("sample: kicking IRXs\n");
-    ret = SifLoadModule("rom:LIBSD", 0, NULL);
-    if (ret < 0)ret = SifLoadModule("host:LIBSD", 0, NULL);
-    printf("libsd loadmodule %d\n", ret);
+struct audioResources audio;
 
-    printf("sample: loading audsrv\n");
-    if(PCSX2) ret = SifLoadModule("host:audsrv.irx", 0, NULL);
-    else ret = SifLoadModule("mass:flappy/audsrv.irx", 0, NULL);
-    printf("audsrv loadmodule %d\n", ret);
+
+static void playPointSound(void)
+{
+    audsrv_ch_play_adpcm(0, &audio.point.s);
+}
+static void playWingSound(void)
+{
+    audsrv_ch_play_adpcm(1, &audio.wing.s);
+}
+static void playHitSound(void)
+{
+    audsrv_ch_play_adpcm(2, &audio.hit.s);
+}
+static void playDieSound(void)
+{
+    audsrv_ch_play_adpcm(3, &audio.die.s);
+}
+static void playSwooshingSound(void)
+{
+    audsrv_ch_play_adpcm(4, &audio.swooshing.s);
 }
 
-void loadSound(struct sound* s, char* c, GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l)
+void loadSoundToSPU(struct sound* s)
 {
-    char* filename = (char*)malloc(50 * sizeof(char));
-    if(PCSX2) sprintf(filename, "host:%s", c);
-    else sprintf(filename, "mass:flappy/%s", c);
-    s->adpcm = NULL;
-    while(s->adpcm == NULL)s->adpcm = fopen(filename, "rb");
-
-    logMessage(gsGlobal, font, l, filename);
-
-    if(0 && s->adpcm == NULL)
-    {
-        printf("failed to open adpcm file\n");
-        audsrv_quit();
-    }
-
-    fseek(s->adpcm, 0, SEEK_END);
-    s->size = ftell(s->adpcm);
-    fseek(s->adpcm, 0, SEEK_SET);
-    char str[45];
-    sprintf(str, "attempting malloc %d", s->size);
-    logMessage(gsGlobal, font, l, str);
-    s->buffer = malloc(s->size);
-    logMessage(gsGlobal, font, l, "success. reading adpcm");
-    fread(s->buffer, 1, s->size, s->adpcm);
-    logMessage(gsGlobal, font, l, "adpcm loaded into buffer");
-    fclose(s->adpcm);
-
-    logMessage(gsGlobal, font, l, "file loaded from buffer");
-    
     audsrv_load_adpcm(&s->s, s->buffer, s->size);
-    logMessage(gsGlobal, font, l, "audio loaded to spu");
     free(s->buffer);
 }
 
@@ -337,7 +331,8 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
         if(!collided && pad1->new_pad & PAD_CROSS)
         {
             b->vy = -5;
-            audsrv_play_adpcm(&audio->wing.s);
+            ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playWingSound);
+            
         }
         if(birdTouchingGround(b))
         {
@@ -347,7 +342,7 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
         if(collision(b, pipes))
         {
             // this sound file won't be loaded on a real PS2
-            if(!collided && PCSX2)audsrv_play_adpcm(&audio->hit.s);
+            if(!collided)ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playHitSound);
             collided = 1;
         }
         
@@ -356,7 +351,7 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
 
         if(*score!=oldScore)
         {
-            audsrv_play_adpcm(&audio->point.s);
+            ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playPointSound);
         }
 
         // deal with gravity
@@ -405,8 +400,62 @@ void saveGame(GSGLOBAL* gsGlobal, struct bird* b, int* score, int* highScore, st
     setHighScore(*highScore);
 }
 
+
+static void deferredAudioInit(void)
+{
+    audsrv_init();
+    audsrv_adpcm_init();
+    loadSoundToSPU(&audio.point);
+    loadSoundToSPU(&audio.wing);
+    loadSoundToSPU(&audio.hit);
+    loadSoundToSPU(&audio.die);
+    loadSoundToSPU(&audio.swooshing);
+}
+
+static void init(void)
+{
+    ioInit();
+    ioPutRequest(IO_CUSTOM_SIMPLEACTION, &deferredAudioInit);
+}
+
+
+void sysReset()
+{
+    SifExitIopHeap();
+    SifLoadFileExit();
+    SifExitRpc();
+
+    SifInitRpc(0);
+    while (!SifIopReset("", 0));
+    while (!SifIopSync());
+    SifInitRpc(0);
+
+    // init loadfile & iopheap services
+    SifLoadFileInit();
+    SifInitIopHeap();
+
+    // apply sbv patches
+    sbv_patch_enable_lmb();
+    sbv_patch_disable_prefix_check();
+
+    // load modules
+    SifLoadModule("rom0:SIO2MAN", 0, NULL);
+    SifLoadModule("rom0:PADMAN", 0, NULL);
+    SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
+    SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
+}
+
+void loadSound(struct sound* s, u8* data, int size)
+{
+    s->size = size;
+    s->buffer = data;
+    //s->adpcm = 1;
+}
+
 int main(int argc, char* argv[])
 {
+    ChangeThreadPriority(GetThreadId(), 31);
+
     printf("starting game\n");
     GSGLOBAL* gsGlobal = gsKit_init_global();
     configureGraphics(gsGlobal);
@@ -423,17 +472,12 @@ int main(int argc, char* argv[])
     texture.font = loadTexture(gsGlobal, font_array, 256,128,GS_PSM_CT32);
     
     drawTitleScreen(gsGlobal, &texture.spriteSheet);
-    
-    struct controller pad1 = setupController(padBuf);
-    struct bird* b = malloc(sizeof(struct bird));
-    struct pipeList* pipes = setupPipes();
-    int score = 0, highScore = 0;
 
     struct log l;
     l.index = 0;
     l.logfile = "mass:flappy/log.txt";
     l.logToFile = 0;
-    l.logToScreen = 0;
+    l.logToScreen = 1;
     if(l.logToFile)
     {
         FILE* f = fopen(l.logfile, "w");
@@ -441,19 +485,21 @@ int main(int argc, char* argv[])
         fclose(f);
     }
 
-    struct audioResources audio;
-    loadAudioModules();
-    if(initialiseAudio() != 0)return 1;
-    loadSound(&audio.point, "sfx_point.adp", gsGlobal, &texture.font, &l);
+    loadSound(&audio.point, sfx_point_array, 50736);
+    loadSound(&audio.wing, sfx_wing_array, 8560);
+    loadSound(&audio.hit, sfx_hit_array, 27632);
+    loadSound(&audio.die, sfx_die_array, 38160);
+    loadSound(&audio.swooshing, sfx_swooshing_array, 101360);
     
-    loadSound(&audio.wing, "sfx_wing.adp", gsGlobal, &texture.font, &l);
-    // loading more files not working on real PS2 for some reason
-    if(PCSX2)
-    {
-        loadSound(&audio.hit, "sfx_hit.adp", gsGlobal, &texture.font, &l);
-        loadSound(&audio.die, "sfx_die.adp", gsGlobal, &texture.font, &l);
-        loadSound(&audio.swooshing, "sfx_swooshing.adp", gsGlobal, &texture.font, &l);
-    }
+    sysReset();
+    init();
+    
+    ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playPointSound);    
+    
+    struct controller pad1 = setupController(padBuf);
+    struct bird* b = malloc(sizeof(struct bird));
+    struct pipeList* pipes = setupPipes();
+    int score = 0, highScore = 0;
     
     highScore = getHighScore();
 
