@@ -207,17 +207,32 @@ void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* spriteSheet)
     {
         //upper pipe
         gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                curr->x, curr->y-450,         // x1, y1
-                                0.0f+offset, 200.0f,          // u1, v1
+                                curr->x, curr->y-74,         // x2, y2
+                                0.0f+offset, 13.0f,          // u2, v2
 
-                                curr->x, curr->y-50,          // x2, y2
-                                0.0f+offset, 0.0f,            // u2, v2
+                                curr->x, curr->y-50,          // x1, y1
+                                0.0f+offset, 0.0f,            // u1, v1
 
-                                curr->x+curr->d, curr->y-450, // x3, y3
-                                26.0f+offset, 200.0f,         // u3, v3
+                                curr->x+curr->d, curr->y-74, // x4, y4
+                                26.0f+offset, 13.0f,         // u4, v4
 
-                                curr->x+curr->d, curr->y-50,  // x4, y4
-                                26.0f+offset, 0.0f,           // u4, v4
+                                curr->x+curr->d, curr->y-50,  // x3, y3
+                                26.0f+offset, 0.0f,           // u3, v3
+
+                                1, TexCol);
+        
+        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                curr->x, curr->y-450,         // x2, y2
+                                0.0f+offset, 14.0f,          // u2, v2
+
+                                curr->x, curr->y-74,          // x1, y1
+                                0.0f+offset, 13.0f,            // u1, v1
+
+                                curr->x+curr->d, curr->y-450, // x4, y4
+                                26.0f+offset, 14.0f,         // u4, v4
+
+                                curr->x+curr->d, curr->y-74,  // x3, y3
+                                26.0f+offset, 13.0f,           // u3, v3
                                 1, TexCol);
         
         // lower pipe
@@ -225,15 +240,30 @@ void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* spriteSheet)
                                 curr->x, curr->y+50,          // x1, y1
                                 0.0f+offset, 0.0f,            // u1, v1
 
-                                curr->x, curr->y+450,         // x2, y2
-                                0.0f+offset, 200.0f,          // u2, v2
+                                curr->x, curr->y+74,         // x2, y2
+                                0.0f+offset, 13.0f,          // u2, v2
 
                                 curr->x+curr->d, curr->y+50,  // x3, y3
                                 26.0f+offset, 0.0f,           // u3, v3
 
-                                curr->x+curr->d, curr->y+450, // x4, y4
-                                26.0f+offset, 200.0f,         // u4, v4
+                                curr->x+curr->d, curr->y+74, // x4, y4
+                                26.0f+offset, 13.0f,         // u4, v4
                                 1, TexCol);
+        
+        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                curr->x, curr->y+74,          // x1, y1
+                                0.0f+offset, 13.0f,            // u1, v1
+
+                                curr->x, curr->y+450,         // x2, y2
+                                0.0f+offset, 14.0f,          // u2, v2
+
+                                curr->x+curr->d, curr->y+74,  // x3, y3
+                                26.0f+offset, 13.0f,           // u3, v3
+
+                                curr->x+curr->d, curr->y+450, // x4, y4
+                                26.0f+offset, 14.0f,         // u4, v4
+                                1, TexCol);
+        
         curr = curr->next;
     }
     return;
