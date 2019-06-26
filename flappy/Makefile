@@ -18,15 +18,19 @@ LINKFILE       = $(PS2SDK)/ee/startup/linkfile
 IOP            = $(PS2SDK)/iop/include
 
 all:
+	python png2abgr32.py -i images/spritesheet.png -o textures/
+	python png2abgr32.py -i images/bg.png -o textures/
+	python png2abgr32.py -i images/font.png -o textures/
+
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c controller.c -o controller.o
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.c -o log.o
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.c -o graphics.o
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.c -o draw.o
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.c -o ioman.o
 
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c bg.c -o bg.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c spritesheet.c -o spritesheet.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c font.c -o font.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/bg.c -o bg.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/spritesheet.c -o spritesheet.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/font.c -o font.o
 
 	ee-gcc -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c audio/sfx_point.c -o sfx_point.o
 	ee-gcc -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c audio/sfx_wing.c -o sfx_wing.o

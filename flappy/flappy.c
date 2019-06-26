@@ -17,9 +17,10 @@
 #include "controller.h"
 #include "log.h"
 
-#include "bg.h"
-#include "spritesheet.h"
-#include "font.h"
+#include "textures/bg.h"
+#include "textures/spritesheet.h"
+#include "textures/font.h"
+
 #include "graphics.h"
 #include "draw.h"
 #include "thirdparty/ioman.h"

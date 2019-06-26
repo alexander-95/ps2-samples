@@ -1,26 +1,22 @@
 import numpy as np
 from PIL import Image
 import sys
-import argparse
 
-# python png2abgr.py -i foo.png
+# python png2abgr.py foo.png
 
-parser = argparse.ArgumentParser(description='convert png image to abgr array')
-parser.add_argument("-i", "--input", type=str, help="input PNG file")
-parser.add_argument("-o", "--output", type=str, help="directory for storing output files")
+#parse args. remember, the file name is the first argument, second should be a png file
+if len(sys.argv) != 2:
+    print  'ERROR:',sys.argv[0],'takes exactly 1 argument,', len(sys.argv)-1,'given'
+    quit()
 
-args = parser.parse_args()
-
-path, filename = "", args.input
-
+filename = sys.argv[1]
 if filename[-4:] != '.png':
     print 'ERROR: file does not have .png extension'
     quit()
-    
+
 # create a numpy array from the png file
 img = Image.open(filename).convert('RGBA')
 arr = np.array(img)
-#img.show()
 
 # create a list from the multi-dimensional numpy array
 data=[]
@@ -30,38 +26,32 @@ for i in range(img.height):
             arr[i,j,0] = 0
             arr[i,j,1] = 0
             arr[i,j,2] = 0
-        r = arr[i,j,0]
-        #r = int("{0:b}".format(r)[::-1], 2)
-        g = arr[i,j,1]
-        #g = int("{0:b}".format(g)[::-1], 2)
-        b = arr[i,j,2]
-        #b = int("{0:b}".format(b)[::-1], 2)
-        a = (128-(arr[i,j,3]*128/255))
-        x = (a<<24) + (b<<16) + (g<<8) + r
+        x = 0
+        x += arr[i,j,0]                     # B
+        x += arr[i,j,1]<<8                  # G
+        x += arr[i,j,2]<<16                 # R
+        x += (128-(arr[i,j,3]*128/255))<<24 # A
         # interestingly, the second approach causes transparency issues on a physical system,
         # that aren't seen on the emulator.
         #x += (255-arr[i,j,3])<<24 # A
         data.append(x)
 
-if '/' in args.input:
-    path, filename = args.input.split('/', -1)
-        
 #produce a header file
 filename = filename[:-4]
 
-h = open(args.output+filename+'.h', 'w') if args.output else open(filename+'.h', 'w')
+h = open(filename+'.h', 'w')
 
 h.write('#include <stdio.h>\n')
 h.write('#ifndef '+filename.upper()+'_H\n')
 h.write('#define '+filename.upper()+'_H\n')
 h.write('\n')
-h.write('extern u32 '+filename+'_array[];\n')
+h.write('extern const u32 '+filename+'_array[];\n')
 h.write('\n')
 h.write('#endif\n')
 h.close()
 
 #produce a source file
-c = open(args.output+filename+'.c', 'w') if args.output else open(filename+'.c', 'w')
+c = open(filename+'.c', 'w')
 c.write('#include "'+filename+'.h"\n')
 abgr = '{'
 
@@ -74,5 +64,5 @@ for i in range(img.height):
         
     
 abgr += '}'
-c.write('u32 '+filename+'_array[] __attribute__((aligned(16))) = '+abgr+';\n')
+c.write('extern const u32 '+filename+'_array[] = '+abgr+';\n')
 c.close()
