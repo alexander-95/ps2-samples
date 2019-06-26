@@ -22,7 +22,7 @@
 #include "font.h"
 #include "graphics.h"
 #include "draw.h"
-#include "ioman.h"
+#include "thirdparty/ioman.h"
 #include "extern_irx.h"
 
 #include "audio/sfx_point.h"
@@ -114,19 +114,6 @@ void loadSoundToSPU(struct sound* s)
 {
     audsrv_load_adpcm(&s->s, s->buffer, s->size);
     free(s->buffer);
-}
-
-int initialiseAudio()
-{
-    if(audsrv_init() != 0)
-    {
-        printf("sample: failed to initialize audsrv\n");
-        printf("audsrv returned error string: %s\n", audsrv_get_error_string());
-        return 1;
-    }
-    audsrv_adpcm_init();
-    audsrv_set_volume(MAX_VOLUME);
-    return 0;
 }
 
 int collision(struct bird* b, struct pipeList* pipes)
