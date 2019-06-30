@@ -17,7 +17,6 @@
 #include "controller.h"
 #include "log.h"
 
-#include "textures/bg.h"
 #include "textures/spritesheet.h"
 #include "textures/font.h"
 
@@ -84,7 +83,7 @@ struct audioResources
 
 struct textureResources
 {
-    GSTEXTURE bg, spriteSheet, font;
+    GSTEXTURE spriteSheet, font;
 };
 
 struct audioResources audio;
@@ -331,7 +330,7 @@ void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, st
         padUpdate(pad1);
         if(pad1->new_pad & PAD_CROSS) return;
 
-        drawBackground(gsGlobal, &texture->bg);
+        drawBackground(gsGlobal, &texture->spriteSheet);
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawGetReady(gsGlobal, &texture->spriteSheet);
@@ -377,7 +376,7 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
         if(b->y + b->vy <= 380 )b->y += b->vy;
         else b->y=380;
 
-        drawBackground(gsGlobal, &texture->bg);
+        drawBackground(gsGlobal, &texture->spriteSheet);
         drawPipes(gsGlobal, pipes, &texture->spriteSheet);
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
@@ -394,7 +393,7 @@ void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, i
         padUpdate(pad1);
         if(pad1->new_pad & PAD_CROSS) return;
 
-        drawBackground(gsGlobal, &texture->bg);
+        drawBackground(gsGlobal, &texture->spriteSheet);
         drawPipes(gsGlobal, pipes, &texture->spriteSheet);
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
@@ -406,7 +405,8 @@ void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, i
 void saveGame(GSGLOBAL* gsGlobal, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
               struct textureResources* texture, char* buffer)
 {
-    drawBackground(gsGlobal, &texture->bg);
+    drawBackground(gsGlobal, &texture->spriteSheet);
+
     drawPipes(gsGlobal, pipes, &texture->spriteSheet);
     drawBird(gsGlobal, b, &texture->spriteSheet);
     drawPlatform(gsGlobal, &texture->spriteSheet);
@@ -485,7 +485,6 @@ int main(int argc, char* argv[])
     gsKit_init_screen(gsGlobal);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
     struct textureResources texture;
-    texture.bg = loadTexture(gsGlobal, bg_array, 320, 256, GS_PSM_CT32);    
     texture.spriteSheet = loadTexture(gsGlobal, spritesheet_array, 320, 256, GS_PSM_CT32);
     texture.font = loadTexture(gsGlobal, font_array, 256,128,GS_PSM_CT32);
     

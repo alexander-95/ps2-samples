@@ -4,7 +4,7 @@
 
 BIN        = flappy.elf
 OBJS       = flappy.o controller.o log.o graphics.o draw.o ioman.o
-TEX_OBJS   = bg.o spritesheet.o font.o
+TEX_OBJS   = spritesheet.o font.o
 AUDIO_OBJS = sfx_point.o sfx_wing.o sfx_hit.o sfx_die.o sfx_swooshing.o
 IRX_OBJS   = libsd.o audsrv.o
 
@@ -19,7 +19,6 @@ IOP            = $(PS2SDK)/iop/include
 
 all:
 	python png2abgr32.py -i images/spritesheet.png -o textures/
-	python png2abgr32.py -i images/bg.png -o textures/
 	python png2abgr32.py -i images/font.png -o textures/
 
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c controller.c -o controller.o
@@ -28,7 +27,6 @@ all:
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.c -o draw.o
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.c -o ioman.o
 
-	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/bg.c -o bg.o
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/spritesheet.c -o spritesheet.o
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/font.c -o font.o
 

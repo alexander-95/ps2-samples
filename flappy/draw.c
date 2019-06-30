@@ -34,19 +34,32 @@ void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, char* buffer)
 void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                0.0f, 400.0f,   // x1, y1
+    int i = 0;
+    while(i < 640)
+    {
+            gsKit_prim_quad_texture(gsGlobal, spriteSheet,
+                                i, 400.0f,   // x1, y1
                                 0.0f, 200.0f,   // u1, v1
 
-                                0.0f, 512.0f,   // x2, y2
-                                0.0f, 256.0f,   // u2, v2
+                                i, 422.0f,   // x2, y2
+                                0.0f, 211.0f,   // u2, v2
 
-                                640.0f, 400.0f, // x3, y3
-                                320.0f, 200.0f, // u3, v3
+                                i+24, 400.0f, // x3, y3
+                                12, 200.0f, // u3, v3
 
-                                640.0f, 512.0f, // x4, y4
-                                320.0f, 256.0f, // u4, v4
+                                i+24, 422.0f, // x4, y4
+                                12, 211.0f, // u4, v4
                                 1, TexCol);
+            i+=24;
+    }
+    u64 groundColor = GS_SETREG_RGBAQ(0xDE,0xD8,0x94,0x00,0x00);
+    gsKit_prim_quad(gsGlobal,
+                    0,422,
+                    0,512,
+                    640,422,
+                    640,512,
+                    1, groundColor);
+    
 }
 
 void drawGameOver(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
@@ -233,22 +246,40 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScor
     drawGameOver(gsGlobal, spriteSheet);
 }
 
-void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* bg)
+void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* sprites)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    gsKit_prim_quad_texture(gsGlobal, bg,
-                                0.0f, 0.0f,     // x1, y1
-                                0.0f, 0.0f,     // u1, v1
 
-                                0.0f, 512.0f,   // x2, y2
+    u64 skycolor = GS_SETREG_RGBAQ(0x4E,0xC0,0xCA,0x00,0x00);
+    gsKit_prim_quad(gsGlobal,
+                    0,0,
+                    0,512,
+                    640,0,
+                    640,512,
+                    0, skycolor);
+
+    u64 bushcolor = GS_SETREG_RGBAQ(0x5E,0xE2,0x70,0x00,0x00);
+    gsKit_prim_quad(gsGlobal,
+                    0,386,
+                    0,512,
+                    640,386,
+                    640,512,
+                    0, bushcolor);
+    
+    gsKit_prim_quad_texture(gsGlobal, sprites,
+                                0.0f, 308.0f,     // x1, y1
+                                0.0f, 217.0f,     // u1, v1
+
+                                0.0f, 386.0f,   // x2, y2
                                 0.0f, 256.0f,   // u2, v2
 
-                                640.0f, 0.0f,   // x3, y3
-                                320.0f, 0.0f,   // u3, v3
+                                640.0f, 308.0f,   // x3, y3
+                                320.0f, 217.0f,   // u3, v3
 
-                                640.0f, 512.0f, // x4, y4
+                                640.0f, 386.0f, // x4, y4
                                 320.0f, 256.0f, // u4, v4
                                 0,TexCol);
+    
 }
 
 void drawFont(GSGLOBAL* gsGlobal, GSTEXTURE* font)
@@ -316,10 +347,10 @@ void drawTitleScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet)
                             172.0f, 17.0f,              // u2, v2
 
                             320.0f+66.0f, 256.0f-16.0f, // x3, y3
-                            238.0f, 0.0f,             // u3, v3
+                            239.0f, 0.0f,             // u3, v3
 
                             320.0f+66.0f, 256.0f+16.0f, // x4, y4
-                            238.0f, 17.0f,             // u4, v4
+                            239.0f, 17.0f,             // u4, v4
                             3, TexCol);
     gsKit_queue_exec(gsGlobal);
     gsKit_sync_flip(gsGlobal);

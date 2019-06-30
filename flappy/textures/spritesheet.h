@@ -1,7 +1,7 @@
 #include <stdio.h>
-#ifndef IMAGES/SPRITESHEET_H
-#define IMAGES/SPRITESHEET_H
+#ifndef SPRITESHEET_H
+#define SPRITESHEET_H
 
-extern u32 images/spritesheet_array[];
+extern u32 spritesheet_array[];
 
 #endif
