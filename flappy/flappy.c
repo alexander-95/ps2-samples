@@ -156,24 +156,24 @@ void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
 {
     int color = 0; // 0 = red, 1 = yellow, 2 = blue
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    // offset used to cycle between bird images for wing flapping animation
     float offset = 0;
     if((b->cycle & 4) == 0)offset = 17.0f;
     else if((b->cycle & 8) == 0)offset = 0.0f;
     else offset = 34.0f;
-    offset += (color*51);
 
     gsKit_prim_quad_texture(gsGlobal, tex,
-                            b->x, b->y,          // x1, y1
-                            52.0f+offset, 18.0f, // u1, v1
+                            b->x, b->y,                     // x1, y1
+                            0.0f+offset, 14.0f+(12*color),  // u1, v1
 
-                            b->x, b->y+24,       // x2, y2
-                            52.0f+offset, 30.0f, // u2, v2
+                            b->x, b->y+24,                  // x2, y2
+                            0.0f+offset, 26.0f+(12*color),  // u2, v2
 
-                            b->x+34, b->y,       // x3, y3
-                            69.0f+offset, 18.0f, // u3, v3
+                            b->x+34, b->y,                  // x3, y3
+                            17.0f+offset, 14.0f+(12*color), // u3, v3
 
-                            b->x+34, b->y+24,    // x4, y4
-                            69.0f+offset, 30.0f, // u4, v4
+                            b->x+34, b->y+24,               // x4, y4
+                            17.0f+offset, 26.0f+(12*color), // u4, v4
                             1, TexCol);
     b->cycle++;
     return;
