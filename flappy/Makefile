@@ -18,29 +18,36 @@ LINKFILE       = $(PS2SDK)/ee/startup/linkfile
 IOP            = $(PS2SDK)/iop/include
 
 all:
+
+#	create source files from png images
 	python png2abgr32.py -i images/spritesheet.png -o textures/
 	python png2abgr32.py -i images/font.png -o textures/
 
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c controller.c -o controller.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.c -o log.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.c -o graphics.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.c -o draw.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.c -o ioman.o
-
+#	compile image sources
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/spritesheet.c -o spritesheet.o
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/font.c -o font.o
 
+#	compile audio sources
 	ee-gcc -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c audio/sfx_point.c -o sfx_point.o
 	ee-gcc -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c audio/sfx_wing.c -o sfx_wing.o
 	ee-gcc -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c audio/sfx_hit.c -o sfx_hit.o
 	ee-gcc -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c audio/sfx_die.c -o sfx_die.o
 	ee-gcc -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c audio/sfx_swooshing.c -o sfx_swooshing.o
 
+#	compile irx modules
 	$(PS2SDK)/bin/bin2s $(PS2SDK)/iop/irx/libsd.irx libsd.s libsd_irx
 	ee-as -G0 libsd.s -o libsd.o
 	$(PS2SDK)/bin/bin2s $(PS2SDK)/iop/irx/audsrv.irx audsrv.s audsrv_irx
 	ee-as -G0 audsrv.s -o audsrv.o
 
+#	create object files
+	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c controller.c -o controller.o
+	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.c -o log.o
+	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.c -o graphics.o
+	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.c -o draw.o
+	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.c -o ioman.o
+
+#	compile game
 	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -I$(IOP) -I. -c flappy.c -o flappy.o
 	ee-gcc -T$(LINKFILE) -mno-crt0  -L$(GSKIT_LIB) -L$(EE_LIB) -o flappy.elf $(CRT) $(OBJS) $(TEX_OBJS) $(AUDIO_OBJS) $(IRX_OBJS) -Xlinker --start-group -laudsrv -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lkernel -lm -ldebug -lpatches -Xlinker --end-group
 
