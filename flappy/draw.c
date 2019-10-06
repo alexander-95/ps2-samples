@@ -266,20 +266,23 @@ void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* sprites)
                     640,512,
                     0, bushcolor);
 
-    gsKit_prim_quad_texture(gsGlobal, sprites,
-                                0.0f, 308.0f,     // x1, y1
-                                0.0f, 217.0f,     // u1, v1
+    int i;
+    for(i = 0; i < 320; i+=138)
+    {
+        gsKit_prim_quad_texture(gsGlobal, sprites,
+                                0.0f+(2*i), 308.0f,   // x1, y1
+                                0.0f, 217.0f,         // u1, v1
 
-                                0.0f, 386.0f,   // x2, y2
-                                0.0f, 256.0f,   // u2, v2
+                                0.0f+(2*i), 386.0f,   // x2, y2
+                                0.0f, 256.0f,         // u2, v2
 
-                                640.0f, 308.0f,   // x3, y3
-                                320.0f, 217.0f,   // u3, v3
+                                276.0f+(2*i), 308.0f, // x3, y3
+                                138.0f, 217.0f,       // u3, v3
 
-                                640.0f, 386.0f, // x4, y4
-                                320.0f, 256.0f, // u4, v4
+                                276.0f+(2*i), 386.0f, // x4, y4
+                                138.0f, 256.0f,       // u4, v4
                                 0,TexCol);
-    
+    }
 }
 
 void drawFont(GSGLOBAL* gsGlobal, GSTEXTURE* font)
