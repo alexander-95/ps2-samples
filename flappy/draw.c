@@ -121,16 +121,16 @@ void drawNewLabel(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, spriteSheet,
                                 262.0f-16.0f, 248.0f-7.0f, // x1, y1
-                                141.0f, 55.0f,             // u1, v1
+                                88.0f, 50.0f,             // u1, v1
 
                                 262.0f-16.0f, 248.0f+7.0f, // x2, y2
-                                141.0f, 62.0f,             // u2, v2
+                                88.0f, 57.0f,             // u2, v2
 
                                 262.0f+16.0f, 248.0f-7.0f, // x3, y3
-                                157.0f, 55.0f,             // u3, v3
+                                104.0f, 50.0f,             // u3, v3
 
                                 262.0f+16.0f, 248.0f+7.0f, // x4, y4
-                                157.0f, 62.0f,             // u4, v4
+                                104.0f, 57.0f,             // u4, v4
                                 4, TexCol);
 }
 
@@ -153,10 +153,10 @@ void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highSc
         medal = 2;
         if(highScore <= 30) new_medal = 1;
     }
-    else
+    else if(score >= 40)
     {
         medal = 3;
-        new_medal = 1;
+        if(highScore < 40) new_medal = 1;
     }
 
     if(score >= 10)
@@ -183,16 +183,16 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScor
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, spriteSheet,
                             320.0f-112.0f, 256.0f-56.0f, // x1, y1
-                            146.0f, 143.0f,              // u1, v1
+                            96.0f, 143.0f,              // u1, v1
 
                             320.0f-112.0f, 256.0f+56.0f, // x2, y2
-                            146.0f, 200.0f,              // u2, v2
+                            96.0f, 200.0f,              // u2, v2
 
                             320.0f+112.0f, 256.0f-56.0f, // x3, y3
-                            259.0f, 143.0f,              // u3, v3
+                            209.0f, 143.0f,              // u3, v3
 
                             320.0f+112.0f, 256.0f+56.0f, // x4, y4
-                            259.0f, 200.0f,              // u4, v4
+                            209.0f, 200.0f,              // u4, v4
                             2, TexCol);
 
     int curr = 0, offset = 0;

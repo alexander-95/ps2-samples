@@ -485,7 +485,7 @@ int main(int argc, char* argv[])
     gsKit_init_screen(gsGlobal);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
     struct textureResources texture;
-    texture.spriteSheet = loadTexture(gsGlobal, spritesheet_array, 320, 256, GS_PSM_CT32);
+    texture.spriteSheet = loadTexture(gsGlobal, spritesheet_array, 256, 256, GS_PSM_CT32);
     texture.font = loadTexture(gsGlobal, font_array, 256,128,GS_PSM_CT32);
     
     drawTitleScreen(gsGlobal, &texture.spriteSheet);
