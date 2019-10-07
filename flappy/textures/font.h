@@ -1,7 +1,7 @@
 #include <stdio.h>
-#ifndef IMAGES/FONT_H
-#define IMAGES/FONT_H
+#ifndef FONT_H
+#define FONT_H
 
-extern u32 images/font_array[];
+extern u32 font_array[];
 
 #endif

@@ -3,8 +3,8 @@
 void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y)
 {
     ascii -= 32;
-    u8 charWidth = 14, charHeight = 18;
-    u8 ascii_x = ascii % 18, ascii_y = ascii / 18;
+    u8 charWidth = 7, charHeight = 9;
+    u8 ascii_x = ascii % 9, ascii_y = ascii / 9;
     
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, font,
@@ -25,9 +25,9 @@ void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y)
 void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, char* buffer)
 {
     int i, j;
-    for(i = 0; i < 28; i++)
+    for(i = 0; i < 52; i++)
     {
-        for(j = 0; j < 45; j++) drawChar(gsGlobal, font, buffer[(i*45)+j], j, i);
+        for(j = 0; j < 90; j++) drawChar(gsGlobal, font, buffer[(i*90)+j], j, i);
     }
 }
 
