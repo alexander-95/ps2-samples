@@ -4,14 +4,14 @@
 
 #include <gsKit.h>
 
-#include "spritesheet.h"
-#include "mario.h"
-#include "goomba.h"
-#include "koopa.h"
-#include "pickups.h"
-#include "hud.h"
-#include "title.h"
-#include "cursor.h"
+#include "textures/spritesheet.h"
+#include "textures/mario.h"
+#include "textures/goomba.h"
+#include "textures/koopa.h"
+#include "textures/pickups.h"
+#include "textures/hud.h"
+#include "textures/title.h"
+#include "textures/cursor.h"
 
 #include "controller.hpp"
 #include "map.hpp"

@@ -6,34 +6,34 @@ EE_BIN =  tiled.elf
 EE_OBJS = tiled.o spritesheet.o controller.o map.o map_data.o character.o mario.o block.o goomba.o koopa.o pickup.o pickups.o hud.o HUD.o title.o cursor.o
 TEXTURE_SRC = spritesheet.c spritesheet.h mario.c mario.h goomba.c goomba.h koopa.c koopa.h pickups.c pickups.h hud.c hud.h title.c title.h cursor.c cursor.o
 
-EE_INCLUDES    = /usr/local/ps2dev/ps2sdk/ee/include
-SDK_COMMON     = /usr/local/ps2dev/ps2sdk/common/include
-EE_LIB         = /usr/local/ps2dev/ps2sdk/ee/lib
-CRT            = /usr/local/ps2dev/ps2sdk/ee/startup/crt0.o
-LINKFILE       = /usr/local/ps2dev/ps2sdk/ee/startup/linkfile
+EE_INCLUDES    = $(PS2SDK)/ee/include
+SDK_COMMON     = $(PS2SDK)/common/include
+EE_LIB         = $(PS2SDK)/ee/lib
+CRT            = $(PS2SDK)/ee/startup/crt0.o
+LINKFILE       = $(PS2SDK)/ee/startup/linkfile
 
-GSKIT_INCLUDES = /usr/local/ps2dev/gsKit/include
-GSKIT_LIB      = /usr/local/ps2dev/gsKit/lib
+GSKIT_INCLUDES = $(GSKIT)/include
+GSKIT_LIB      = $(GSKIT)/lib
 
 all:
-	python png2abgr.py spritesheet.png
-	python png2abgr.py mario.png
-	python png2abgr.py goomba.png
-	python png2abgr.py koopa.png
-	python png2abgr.py pickups.png
-	python png2abgr.py hud.png
-	python png2abgr.py title.png
-	python png2abgr.py cursor.png
+	python png2abgr32.py -i images/spritesheet.png -o textures/
+	python png2abgr32.py -i images/mario.png -o textures/
+	python png2abgr32.py -i images/goomba.png -o textures/
+	python png2abgr32.py -i images/koopa.png -o textures/
+	python png2abgr32.py -i images/pickups.png -o textures/
+	python png2abgr32.py -i images/hud.png -o textures/
+	python png2abgr32.py -i images/title.png -o textures/
+	python png2abgr32.py -i images/cursor.png -o textures/
 
-	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c spritesheet.c -o spritesheet.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/spritesheet.c -o spritesheet.o
 	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c map_data.c -o map_data.o
-	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c mario.c -o mario.o
-	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c goomba.c -o goomba.o
-	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c koopa.c -o koopa.o
-	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c pickups.c -o pickups.o
-	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c hud.c -o hud.o
-	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c title.c -o title.o
-	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c cursor.c -o cursor.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/mario.c -o mario.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/goomba.c -o goomba.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/koopa.c -o koopa.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/pickups.c -o pickups.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/hud.c -o hud.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/title.c -o title.o
+	ee-gcc -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c textures/cursor.c -o cursor.o
 
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c controller.cpp -o controller.o
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c map.cpp -o map.o
