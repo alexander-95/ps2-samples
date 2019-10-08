@@ -63,7 +63,7 @@ struct pipeList
 
 struct bird
 {
-    int x, y;
+    int x, y, color;
     float theta;
     float vy;
     unsigned char cycle;
@@ -154,8 +154,8 @@ void setHighScore(int score)
 
 void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
 {
-    int color = 0; // 0 = red, 1 = yellow, 2 = blue
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    int color = b->color;
     // offset used to cycle between bird images for wing flapping animation
     float offset = 0;
     if((b->cycle & 4) == 0)offset = 17.0f;
@@ -179,12 +179,13 @@ void drawBird(GSGLOBAL* gsGlobal, struct bird* b, GSTEXTURE* tex)
     return;
 }
 
-void resetBird(struct bird* b)
+void resetBird(struct bird* b, int color)
 {
     b->x = 200;
     b->y = 200;
     b->vy = 0;
     b->cycle = 0;
+    b->color = color;
 }
 
 int birdTouchingGround(struct bird* b)
@@ -517,13 +518,14 @@ int main(int argc, char* argv[])
     struct bird* b = malloc(sizeof(struct bird));
     struct pipeList* pipes = setupPipes();
     int score = 0, highScore = 0, nightMode = 0;
+    enum color{RED, YELLOW, BLUE};
     
     highScore = getHighScore();
 
     while(1)
     {
         score = 0;
-        resetBird(b);
+        resetBird(b, BLUE);
         resetPipes(pipes);
         pregameLoop(gsGlobal, &pad1, b, &texture, l.buffer, nightMode);
         b->vy = -3;
