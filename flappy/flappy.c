@@ -196,10 +196,10 @@ int birdTouchingGround(struct bird* b)
     return 0;
 }
 
-void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* spriteSheet)
+void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* spriteSheet, int nightMode)
 {
-    int daytime = 0, offset = 0;
-    if(daytime)offset = 26;
+    int offset = 0;
+    if(nightMode)offset = 26;
     struct pipe* curr = ps->head;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     while(curr!=NULL)
@@ -323,14 +323,14 @@ struct pipeList* setupPipes()
     return pipes;
 }
 
-void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, struct textureResources* texture, char* buffer)
+void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, struct textureResources* texture, char* buffer, int nightMode)
 {
     while(1)
     {
         padUpdate(pad1);
         if(pad1->new_pad & PAD_CROSS) return;
 
-        drawBackground(gsGlobal, &texture->spriteSheet);
+        drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawGetReady(gsGlobal, &texture->spriteSheet);
@@ -339,7 +339,7 @@ void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, st
 }
 
 void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
-              struct audioResources* audio, struct textureResources* texture, char* buffer)
+              struct audioResources* audio, struct textureResources* texture, char* buffer, int nightMode)
 {
     int collided = 0;
     while(1)
@@ -376,8 +376,8 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
         if(b->y + b->vy <= 380 )b->y += b->vy;
         else b->y=380;
 
-        drawBackground(gsGlobal, &texture->spriteSheet);
-        drawPipes(gsGlobal, pipes, &texture->spriteSheet);
+        drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
+        drawPipes(gsGlobal, pipes, &texture->spriteSheet, nightMode);
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawScore(gsGlobal, *score, &texture->spriteSheet);
@@ -386,15 +386,15 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
 }
 
 void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
-                  struct textureResources* texture, char* buffer)
+                  struct textureResources* texture, char* buffer, int nightMode)
 {
     while(1)
     {
         padUpdate(pad1);
         if(pad1->new_pad & PAD_CROSS) return;
 
-        drawBackground(gsGlobal, &texture->spriteSheet);
-        drawPipes(gsGlobal, pipes, &texture->spriteSheet);
+        drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
+        drawPipes(gsGlobal, pipes, &texture->spriteSheet, nightMode);
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
@@ -403,11 +403,11 @@ void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, i
 }
 
 void saveGame(GSGLOBAL* gsGlobal, struct bird* b, int* score, int* highScore, struct pipeList* pipes,
-              struct textureResources* texture, char* buffer)
+              struct textureResources* texture, char* buffer, int nightMode)
 {
-    drawBackground(gsGlobal, &texture->spriteSheet);
+    drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
 
-    drawPipes(gsGlobal, pipes, &texture->spriteSheet);
+    drawPipes(gsGlobal, pipes, &texture->spriteSheet, nightMode);
     drawBird(gsGlobal, b, &texture->spriteSheet);
     drawPlatform(gsGlobal, &texture->spriteSheet);
     drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
@@ -516,7 +516,7 @@ int main(int argc, char* argv[])
     struct controller pad1 = setupController(padBuf);
     struct bird* b = malloc(sizeof(struct bird));
     struct pipeList* pipes = setupPipes();
-    int score = 0, highScore = 0;
+    int score = 0, highScore = 0, nightMode = 0;
     
     highScore = getHighScore();
 
@@ -525,11 +525,11 @@ int main(int argc, char* argv[])
         score = 0;
         resetBird(b);
         resetPipes(pipes);
-        pregameLoop(gsGlobal, &pad1, b, &texture, l.buffer);
+        pregameLoop(gsGlobal, &pad1, b, &texture, l.buffer, nightMode);
         b->vy = -3;
         srand(time(0));
-        gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &audio, &texture, l.buffer);
-        postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &texture, l.buffer);
-        saveGame(gsGlobal, b, &score, &highScore, pipes, &texture, l.buffer);
+        gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &audio, &texture, l.buffer, nightMode);
+        postgameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &texture, l.buffer, nightMode);
+        saveGame(gsGlobal, b, &score, &highScore, pipes, &texture, l.buffer, nightMode);
     }
 }

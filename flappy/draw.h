@@ -12,7 +12,7 @@ void drawSaveIcon(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet);
 void drawNewLabel(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet);
 void drawMedal(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore);
 void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScore);
-void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* sprites);
+void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* sprites, int nightMode);
 void drawFont(GSGLOBAL* gsGlobal, GSTEXTURE* font);
 void drawScore(GSGLOBAL* gsGlobal, int score, GSTEXTURE* sprites);
 void drawTitleScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet);

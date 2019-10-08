@@ -246,11 +246,21 @@ void drawEnd(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet, int score, int highScor
     drawGameOver(gsGlobal, spriteSheet);
 }
 
-void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* sprites)
+void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* sprites, int nightMode)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    u64 skycolor, bushcolor;
 
-    u64 skycolor = GS_SETREG_RGBAQ(0x4E,0xC0,0xCA,0x00,0x00);
+    if(nightMode)
+    {
+        skycolor = GS_SETREG_RGBAQ(0x00,0x87,0x93,0x00,0x00);
+        bushcolor = GS_SETREG_RGBAQ(0x01,0xA3,0x00,0x00,0x00);
+    }
+    else
+    {
+        skycolor = GS_SETREG_RGBAQ(0x4E,0xC0,0xCA,0x00,0x00);
+        bushcolor = GS_SETREG_RGBAQ(0x5E,0xE2,0x70,0x00,0x00);
+    }
     gsKit_prim_quad(gsGlobal,
                     0,0,
                     0,512,
@@ -258,7 +268,6 @@ void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* sprites)
                     640,512,
                     0, skycolor);
 
-    u64 bushcolor = GS_SETREG_RGBAQ(0x5E,0xE2,0x70,0x00,0x00);
     gsKit_prim_quad(gsGlobal,
                     0,386,
                     0,512,
@@ -269,19 +278,38 @@ void drawBackground(GSGLOBAL* gsGlobal, GSTEXTURE* sprites)
     int i;
     for(i = 0; i < 320; i+=138)
     {
-        gsKit_prim_quad_texture(gsGlobal, sprites,
-                                0.0f+(2*i), 308.0f,   // x1, y1
-                                0.0f, 217.0f,         // u1, v1
+        if(nightMode)
+        {
+            gsKit_prim_quad_texture(gsGlobal, sprites,
+                                    0.0f+(2*i), 308.0f,   // x1, y1
+                                    101.0f, 99.0f,         // u1, v1
 
-                                0.0f+(2*i), 386.0f,   // x2, y2
-                                0.0f, 256.0f,         // u2, v2
+                                    0.0f+(2*i), 386.0f,   // x2, y2
+                                    101.0f, 138.0f,         // u2, v2
 
-                                276.0f+(2*i), 308.0f, // x3, y3
-                                138.0f, 217.0f,       // u3, v3
+                                    276.0f+(2*i), 308.0f, // x3, y3
+                                    245.0f, 99.0f,       // u3, v3
 
-                                276.0f+(2*i), 386.0f, // x4, y4
-                                138.0f, 256.0f,       // u4, v4
-                                0,TexCol);
+                                    276.0f+(2*i), 386.0f, // x4, y4
+                                    245.0f, 138.0f,       // u4, v4
+                                    0,TexCol);
+        }
+        else
+        {
+            gsKit_prim_quad_texture(gsGlobal, sprites,
+                                    0.0f+(2*i), 308.0f,   // x1, y1
+                                    0.0f, 217.0f,         // u1, v1
+
+                                    0.0f+(2*i), 386.0f,   // x2, y2
+                                    0.0f, 256.0f,         // u2, v2
+
+                                    276.0f+(2*i), 308.0f, // x3, y3
+                                    138.0f, 217.0f,       // u3, v3
+
+                                    276.0f+(2*i), 386.0f, // x4, y4
+                                    138.0f, 256.0f,       // u4, v4
+                                    0,TexCol);
+        }
     }
 }
 
