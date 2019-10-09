@@ -324,7 +324,7 @@ struct pipeList* setupPipes()
     return pipes;
 }
 
-void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, struct textureResources* texture, char* buffer, int nightMode)
+void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, struct textureResources* texture, char* buffer, int nightMode, u8 fontStyle)
 {
     while(1)
     {
@@ -335,6 +335,7 @@ void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, st
         drawBird(gsGlobal, b, &texture->spriteSheet);
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawGetReady(gsGlobal, &texture->spriteSheet);
+        drawBuffer(gsGlobal, &texture->font, buffer, fontStyle);
         updateFrame(gsGlobal, &texture->font, buffer);
     }
 }
@@ -487,7 +488,7 @@ int main(int argc, char* argv[])
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
     struct textureResources texture;
     texture.spriteSheet = loadTexture(gsGlobal, spritesheet_array, 256, 256, GS_PSM_CT32);
-    texture.font = loadTexture(gsGlobal, font_array, 256,128,GS_PSM_CT32);
+    texture.font = loadTexture(gsGlobal, font_array, 128,128,GS_PSM_CT32);
     
     drawTitleScreen(gsGlobal, &texture.spriteSheet);
 
@@ -519,15 +520,17 @@ int main(int argc, char* argv[])
     struct pipeList* pipes = setupPipes();
     int score = 0, highScore = 0, nightMode = 0;
     enum color{RED, YELLOW, BLUE};
+    enum fontstyle{PLAIN, OUTLINED};
     
     highScore = getHighScore();
 
     while(1)
     {
+        logMessage(gsGlobal, &texture.font, &l, "DEBUG: resetting score");
         score = 0;
         resetBird(b, BLUE);
         resetPipes(pipes);
-        pregameLoop(gsGlobal, &pad1, b, &texture, l.buffer, nightMode);
+        pregameLoop(gsGlobal, &pad1, b, &texture, l.buffer, nightMode, OUTLINED);
         b->vy = -3;
         srand(time(0));
         gameLoop(gsGlobal, &pad1, b, &score, &highScore, pipes, &audio, &texture, l.buffer, nightMode);

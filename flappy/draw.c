@@ -1,33 +1,35 @@
 #include "draw.h"
 
-void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y)
+void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 style)
 {
     ascii -= 32;
     u8 charWidth = 7, charHeight = 9;
-    u8 ascii_x = ascii % 9, ascii_y = ascii / 9;
+    u8 ascii_x = ascii % 18, ascii_y = ascii / 18;
+    int offset = 0;
+    if(style == 1)offset = 63;
     
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     gsKit_prim_quad_texture(gsGlobal, font,
                             x*charWidth, y*charHeight,     // x1, y1
-                            ascii_x*charWidth, ascii_y*charHeight,     // u1, v1
+                            ascii_x*charWidth, ascii_y*charHeight+offset,     // u1, v1
 
                             x*charWidth, (y+1)*charHeight,   // x2, y2
-                            ascii_x*charWidth, (ascii_y+1)*charHeight,   // u2, v2
+                            ascii_x*charWidth, (ascii_y+1)*charHeight+offset,   // u2, v2
 
                             (x+1)*charWidth, y*charHeight,   // x3, y3
-                            (ascii_x+1)*charWidth, ascii_y*charHeight,   // u3, v3
+                            (ascii_x+1)*charWidth, ascii_y*charHeight+offset,   // u3, v3
 
                             (x+1)*charWidth, (y+1)*charHeight, // x4, y4
-                            (ascii_x+1)* charWidth, (ascii_y+1)*charHeight, // u4, v4
+                            (ascii_x+1)* charWidth, (ascii_y+1)*charHeight+offset, // u4, v4
                             6,TexCol);
 }
 
-void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, char* buffer)
+void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, char* buffer, u8 style)
 {
     int i, j;
     for(i = 0; i < 52; i++)
     {
-        for(j = 0; j < 90; j++) drawChar(gsGlobal, font, buffer[(i*90)+j], j, i);
+        for(j = 0; j < 90; j++) drawChar(gsGlobal, font, buffer[(i*90)+j], j, i, style);
     }
 }
 

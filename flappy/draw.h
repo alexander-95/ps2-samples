@@ -3,8 +3,8 @@
 
 #include <gsKit.h>
 
-void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y);
-void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, char* buffer);
+void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 style);
+void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, char* buffer, u8 style);
 void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet);
 void drawGameOver(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet);
 void drawGetReady(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet);

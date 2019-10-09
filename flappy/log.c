@@ -12,8 +12,9 @@ void logMessage(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, char* msg)
     }
     if(l->logToScreen)
     {
+        printf("%s", msg);
         setLine(l->buffer, l->index, msg);
-        l->index = (l->index++) % 28;
+        l->index = (l->index++) % 56;
         updateFrame(gsGlobal, font, l->buffer);
     }
 }
@@ -23,7 +24,7 @@ void setLine(char* buffer, int lineNumber, char* str)
     int i;
     for(i = 0; str[i]; i++)
     {
-        buffer[i+lineNumber*45] = str[i];
+        buffer[i+lineNumber*90] = str[i];
         printf("%c",str[i]);
     }
     printf("\n");
