@@ -196,7 +196,7 @@ void ioInit(void)
     gIOThread.attr = 0;
     gIOThread.stack_size = THREAD_STACK_SIZE;
     gIOThread.gp_reg = &_gp;
-    gIOThread.func = &ioWorkerThread;
+    gIOThread.func = (void*)&ioWorkerThread;
     gIOThread.stack = thread_stack;
     gIOThread.initial_priority = 30;
 
@@ -205,7 +205,7 @@ void ioInit(void)
     StartThread(gIOThreadId, NULL);
 }
 
-int ioPutRequest(int type, void *data)
+int ioPutRequest(int type, void (*data)(void))
 {
     if (isIOBlocked)
         return IO_ERR_IO_BLOCKED;
@@ -232,7 +232,7 @@ int ioPutRequest(int type, void *data)
 
     req->next = NULL;
     req->type = type;
-    req->data = data;
+    req->data = (void*)data;
 
     SignalSema(gEndSemaId);
 

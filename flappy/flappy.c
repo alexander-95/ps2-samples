@@ -308,14 +308,14 @@ void resetPipes(struct pipeList* pipes)
 struct pipeList* setupPipes()
 {
     int i;
-    struct pipeList* pipes = malloc(sizeof(struct pipeList));
+    struct pipeList* pipes = (struct pipeList*) malloc(sizeof(struct pipeList));
     pipes->gap = 200;
-    struct pipe* curr = malloc(sizeof(struct pipe));
+    struct pipe* curr = (struct pipe*) malloc(sizeof(struct pipe));
     pipes->head = curr;
     pipes->length = 4;
     for(i=0;i<pipes->length-1;i++)
     {
-        struct pipe* p = malloc(sizeof(struct pipe));
+        struct pipe* p = (struct pipe*) malloc(sizeof(struct pipe));
         curr->next = p;
         p->prev = curr;
         curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
@@ -375,7 +375,7 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, struct bird* b, int* 
 
         // deal with gravity
         b->vy += 0.3;
-        if(b->y + b->vy <= 380 )b->y += b->vy;
+        if(b->y + b->vy <= 380 )b->y += (int)b->vy;
         else b->y=380;
 
         drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
@@ -516,7 +516,7 @@ int main(int argc, char* argv[])
     ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playPointSound);    
     
     struct controller pad1 = setupController(padBuf);
-    struct bird* b = malloc(sizeof(struct bird));
+    struct bird* b = (struct bird*) malloc(sizeof(struct bird));
     struct pipeList* pipes = setupPipes();
     int score = 0, highScore = 0, nightMode = 0;
     enum color{RED, YELLOW, BLUE};

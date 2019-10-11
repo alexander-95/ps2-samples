@@ -33,7 +33,7 @@ int ioRegisterHandler(int type, io_request_handler_t handler);
 
 /** schedules a new request into the pending request list
 * @note The data are not freed! */
-int ioPutRequest(int type, void *data);
+int ioPutRequest(int type, void (*data)(void));
 
 /** removes all requests of a given type from the queue
 * @param type the type of the requests to remove

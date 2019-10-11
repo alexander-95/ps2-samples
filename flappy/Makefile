@@ -15,7 +15,6 @@ GSKIT_LIB      = $(GSKIT)/lib
 EE_LIB         = $(PS2SDK)/ee/lib
 CRT            = $(PS2SDK)/ee/startup/crt0.o
 LINKFILE       = $(PS2SDK)/ee/startup/linkfile
-IOP            = $(PS2SDK)/iop/include
 
 all:
 
@@ -41,15 +40,15 @@ all:
 	ee-as -G0 audsrv.s -o audsrv.o
 
 #	create object files
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c controller.c -o controller.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.c -o log.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.c -o graphics.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.c -o draw.o
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.c -o ioman.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c controller.c -o controller.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.c -o log.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.c -o graphics.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.c -o draw.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.c -o ioman.o
 
 #	compile game
-	ee-gcc -D_EE -O2 -G0 -Wall -g -fno-builtin-printf -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -I$(IOP) -I. -c flappy.c -o flappy.o
-	ee-gcc -T$(LINKFILE) -mno-crt0  -L$(GSKIT_LIB) -L$(EE_LIB) -o flappy.elf $(CRT) $(OBJS) $(TEX_OBJS) $(AUDIO_OBJS) $(IRX_OBJS) -Xlinker --start-group -laudsrv -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lkernel -lm -ldebug -lpatches -Xlinker --end-group
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -I. -c flappy.c -o flappy.o
+	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(GSKIT_LIB) -L$(EE_LIB) -o flappy.elf $(CRT) $(OBJS) $(TEX_OBJS) $(AUDIO_OBJS) $(IRX_OBJS) -Xlinker --start-group -laudsrv -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lkernel -lm -lpatches -lstdc++ -lfileXio --end-group
 
 clean:
 	rm -f $(BIN) $(OBJS) $(TEX_OBJS) $(AUDIO_OBJS) $(IRX_OBJS)
