@@ -40,14 +40,14 @@ all:
 	ee-as -G0 audsrv.s -o audsrv.o
 
 #	create object files
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c controller.c -o controller.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.c -o log.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.c -o graphics.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.c -o draw.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.c -o ioman.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c controller.cpp -o controller.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.cpp -o log.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.cpp -o graphics.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.cpp -o draw.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.cpp -o ioman.o
 
 #	compile game
-	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -I. -c flappy.c -o flappy.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -I. -c flappy.cpp -o flappy.o
 	ee-gcc -T$(LINKFILE) -mno-crt0 -L$(GSKIT_LIB) -L$(EE_LIB) -o flappy.elf $(CRT) $(OBJS) $(TEX_OBJS) $(AUDIO_OBJS) $(IRX_OBJS) -Xlinker --start-group -laudsrv -lgskit_toolkit -lgskit -ldmakit -lpad -lc -lkernel -lm -lpatches -lstdc++ -lfileXio --end-group
 
 clean:
