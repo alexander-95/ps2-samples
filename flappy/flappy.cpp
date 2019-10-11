@@ -14,15 +14,15 @@
 #include <gsToolkit.h>
 #include <malloc.h>
 
-#include "controller.h"
-#include "log.h"
+#include "controller.hpp"
+#include "log.hpp"
 
 #include "textures/spritesheet.h"
 #include "textures/font.h"
 
-#include "graphics.h"
-#include "draw.h"
-#include "thirdparty/ioman.h"
+#include "graphics.hpp"
+#include "draw.hpp"
+#include "thirdparty/ioman.hpp"
 #include "extern_irx.h"
 
 #include "audio/sfx_point.h"
