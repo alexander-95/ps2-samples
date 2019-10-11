@@ -3,7 +3,7 @@
   Also credit to other OPL developers: volca, polo35, izdubar, hominem.te.esse, SP193      
  */
 
-#include "ioman.h"
+#include "ioman.hpp"
 #include <kernel.h>
 #include <string.h>
 #include <malloc.h>

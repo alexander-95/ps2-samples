@@ -1,5 +1,5 @@
-#ifndef CONTROLLER_H_
-#define CONTROLLER_H_
+#ifndef CONTROLLER_HPP_
+#define CONTROLLER_HPP_
 #include <stdio.h>
 #include "libpad.h"
 #include <sifrpc.h>

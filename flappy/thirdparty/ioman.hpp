@@ -3,8 +3,8 @@
   Also credit to other OPL developers: volca, polo35, izdubar, hominem.te.esse, SP193
  */
 
-#ifndef __IOMAN_H
-#define __IOMAN_H
+#ifndef __IOMAN_HPP
+#define __IOMAN_HPP
 
 // Input output manager
 // asynchronous io handling thread with worker queue

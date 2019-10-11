@@ -1,5 +1,5 @@
-#ifndef DRAW_H_
-#define DRAW_H_
+#ifndef DRAW_HPP_
+#define DRAW_HPP_
 
 #include <gsKit.h>
 

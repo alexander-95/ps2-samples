@@ -1,5 +1,5 @@
-#include "log.h"
-#include "graphics.h"
+#include "log.hpp"
+#include "graphics.hpp"
 
 void logMessage(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, char* msg)
 {

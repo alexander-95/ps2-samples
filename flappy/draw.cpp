@@ -1,4 +1,4 @@
-#include "draw.h"
+#include "draw.hpp"
 
 void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 style)
 {

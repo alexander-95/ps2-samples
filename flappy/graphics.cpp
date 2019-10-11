@@ -1,5 +1,5 @@
-#include "graphics.h"
-#include "draw.h"
+#include "graphics.hpp"
+#include "draw.hpp"
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height, int psm)
 {

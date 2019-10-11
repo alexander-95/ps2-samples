@@ -1,5 +1,5 @@
-#ifndef LOG_H_
-#define LOG_H_
+#ifndef LOG_HPP_
+#define LOG_HPP_
 
 #include <gsKit.h>
 #include <stdio.h>

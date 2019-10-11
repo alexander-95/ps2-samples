@@ -1,5 +1,5 @@
-#ifndef GRAPHICS_H_
-#define GRAPHICS_H_
+#ifndef GRAPHICS_HPP_
+#define GRAPHICS_HPP_
 
 #include <gsKit.h>
 
