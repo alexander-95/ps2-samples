@@ -3,7 +3,7 @@
 # |     ___|   |____
 
 BIN        = flappy.elf
-OBJS       = flappy.o controller.o log.o graphics.o draw.o ioman.o
+OBJS       = flappy.o controller.o log.o graphics.o draw.o ioman.o bird.o
 TEX_OBJS   = spritesheet.o font.o
 AUDIO_OBJS = sfx_point.o sfx_wing.o sfx_hit.o sfx_die.o sfx_swooshing.o
 IRX_OBJS   = libsd.o audsrv.o
@@ -44,6 +44,7 @@ all:
 	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.cpp -o log.o
 	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.cpp -o graphics.o
 	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.cpp -o draw.o
+	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c bird.cpp -o bird.o
 	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.cpp -o ioman.o
 
 #	compile game
