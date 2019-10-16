@@ -43,26 +43,10 @@
 #include <unistd.h>
 
 #include "bird.hpp"
-
+#include "pipeList.hpp"
 
 static int padBuf[256] __attribute__((aligned(64)));
 #define IO_CUSTOM_SIMPLEACTION 1 // handler for parameter-less actions
-
-struct pipe
-{
-    int x, y;
-    int d;
-    struct pipe* next;
-    struct pipe* prev;
-};
-
-struct pipeList
-{
-    struct pipe* head;
-    struct pipe* tail;
-    int length;
-    int gap;
-};
 
 struct sound
 {
@@ -111,14 +95,14 @@ void loadSoundToSPU(struct sound* s)
     free(s->buffer);
 }
 
-int collision(Bird* b, struct pipeList* pipes)
+int collision(Bird* b, PipeList* pipes)
 {
-    struct pipe* curr = pipes->head;
-    while(curr!=NULL)
+    Pipe* curr = pipes->head;
+    for(int i=0; i<pipes->length; i++)
     {
         char xCollision = b->x+30 > curr->x && b->x < curr->x+curr->d;
         char yCollision = b->y + 24 > curr->y+50 || b->y < curr->y-50;
-        if(xCollision &&  yCollision)return 1;
+        if(xCollision && yCollision)return 1;
         curr = curr->next;
     }
     return 0;
@@ -147,83 +131,10 @@ void setHighScore(int score)
     }
 }
 
-void drawPipes(GSGLOBAL* gsGlobal, struct pipeList* ps, GSTEXTURE* spriteSheet, int nightMode)
+void movePipes(PipeList* ps, int val, Bird* b, int* score)
 {
-    int offset = 0;
-    if(nightMode)offset = 26;
-    struct pipe* curr = ps->head;
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    while(curr!=NULL)
-    {
-        //upper pipe
-        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                curr->x, curr->y-74,         // x2, y2
-                                0.0f+offset, 13.0f,          // u2, v2
-
-                                curr->x, curr->y-50,          // x1, y1
-                                0.0f+offset, 0.0f,            // u1, v1
-
-                                curr->x+curr->d, curr->y-74, // x4, y4
-                                26.0f+offset, 13.0f,         // u4, v4
-
-                                curr->x+curr->d, curr->y-50,  // x3, y3
-                                26.0f+offset, 0.0f,           // u3, v3
-
-                                1, TexCol);
-        
-        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                curr->x, curr->y-450,         // x2, y2
-                                0.0f+offset, 14.0f,          // u2, v2
-
-                                curr->x, curr->y-74,          // x1, y1
-                                0.0f+offset, 13.0f,            // u1, v1
-
-                                curr->x+curr->d, curr->y-450, // x4, y4
-                                26.0f+offset, 14.0f,         // u4, v4
-
-                                curr->x+curr->d, curr->y-74,  // x3, y3
-                                26.0f+offset, 13.0f,           // u3, v3
-                                1, TexCol);
-        
-        // lower pipe
-        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                curr->x, curr->y+50,          // x1, y1
-                                0.0f+offset, 0.0f,            // u1, v1
-
-                                curr->x, curr->y+74,         // x2, y2
-                                0.0f+offset, 13.0f,          // u2, v2
-
-                                curr->x+curr->d, curr->y+50,  // x3, y3
-                                26.0f+offset, 0.0f,           // u3, v3
-
-                                curr->x+curr->d, curr->y+74, // x4, y4
-                                26.0f+offset, 13.0f,         // u4, v4
-                                1, TexCol);
-        
-        gsKit_prim_quad_texture(gsGlobal, spriteSheet,
-                                curr->x, curr->y+74,          // x1, y1
-                                0.0f+offset, 13.0f,            // u1, v1
-
-                                curr->x, curr->y+450,         // x2, y2
-                                0.0f+offset, 14.0f,          // u2, v2
-
-                                curr->x+curr->d, curr->y+74,  // x3, y3
-                                26.0f+offset, 13.0f,           // u3, v3
-
-                                curr->x+curr->d, curr->y+450, // x4, y4
-                                26.0f+offset, 14.0f,         // u4, v4
-                                1, TexCol);
-        
-        curr = curr->next;
-    }
-    return;
-}
-
-void movePipes(struct pipeList* ps, int val, Bird* b, int* score)
-{
-    struct pipe* curr = ps->head;
-    int i;
-    for(i=0;i<ps->length;i++)
+    Pipe* curr = ps->head;
+    for(int i=0;i<ps->length;i++)
     {
         if(b->x >= curr->x && b->x < curr->x+val)(*score)++;
         curr->x -= val;
@@ -244,36 +155,6 @@ void movePipes(struct pipeList* ps, int val, Bird* b, int* score)
     return;
 }
 
-void resetPipes(struct pipeList* pipes)
-{
-    struct pipe* curr = pipes->head;
-    int i;
-    for(i=0;i<pipes->length;i++)
-    {
-        curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
-        curr = curr->next;
-    }
-}
-
-struct pipeList* setupPipes()
-{
-    int i;
-    struct pipeList* pipes = (struct pipeList*) malloc(sizeof(struct pipeList));
-    pipes->gap = 200;
-    struct pipe* curr = (struct pipe*) malloc(sizeof(struct pipe));
-    pipes->head = curr;
-    pipes->length = 4;
-    for(i=0;i<pipes->length-1;i++)
-    {
-        struct pipe* p = (struct pipe*) malloc(sizeof(struct pipe));
-        curr->next = p;
-        p->prev = curr;
-        curr->x = 640+pipes->gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
-        curr = curr->next;
-    }
-    return pipes;
-}
-
 void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, struct textureResources* texture, char* buffer, int nightMode, u8 fontStyle)
 {
     while(1)
@@ -290,8 +171,9 @@ void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, struct te
     }
 }
 
-void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, int* highScore, struct pipeList* pipes,
-              struct audioResources* audio, struct textureResources* texture, char* buffer, int nightMode)
+void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, int* highScore,
+              PipeList* pipes, struct audioResources* audio, struct textureResources* texture,
+              char* buffer, int nightMode)
 {
     int collided = 0;
     while(1)
@@ -317,7 +199,6 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, 
         
         int oldScore = *score;
 	if(!collided)movePipes(pipes, 2, b, score);
-
         if(*score!=oldScore)
         {
             ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playPointSound);
@@ -327,9 +208,9 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, 
         b->vy += 0.3;
         if(b->y + b->vy <= 380 )b->y += (int)b->vy;
         else b->y=380;
-
+        
         drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
-        drawPipes(gsGlobal, pipes, &texture->spriteSheet, nightMode);
+        pipes->draw();
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawScore(gsGlobal, *score, &texture->spriteSheet);
@@ -337,8 +218,8 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, 
     }
 }
 
-void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, int* highScore, struct pipeList* pipes,
-                  struct textureResources* texture, char* buffer, int nightMode)
+void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, int* highScore,
+                  PipeList* pipes, struct textureResources* texture, char* buffer, int nightMode)
 {
     while(1)
     {
@@ -346,7 +227,7 @@ void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* sco
         if(pad1->new_pad & PAD_CROSS) return;
 
         drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
-        drawPipes(gsGlobal, pipes, &texture->spriteSheet, nightMode);
+        pipes->draw();
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
@@ -354,12 +235,11 @@ void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* sco
     }
 }
 
-void saveGame(GSGLOBAL* gsGlobal, Bird* b, int* score, int* highScore, struct pipeList* pipes,
+void saveGame(GSGLOBAL* gsGlobal, Bird* b, int* score, int* highScore, PipeList* pipes,
               struct textureResources* texture, char* buffer, int nightMode)
 {
     drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
-
-    drawPipes(gsGlobal, pipes, &texture->spriteSheet, nightMode);
+    pipes->draw();
     b->draw();
     drawPlatform(gsGlobal, &texture->spriteSheet);
     drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
@@ -469,7 +349,10 @@ int main(int argc, char* argv[])
     Bird bird;
     bird.gsGlobal = gsGlobal;
     bird.spritesheet = &texture.spriteSheet;
-    struct pipeList* pipes = setupPipes();
+    PipeList pipes;
+    pipes.gsGlobal = gsGlobal;
+    pipes.spritesheet = &texture.spriteSheet;
+    pipes.setup();
     int score = 0, highScore = 0, nightMode = 0;
     enum color{RED, YELLOW, BLUE};
     enum fontstyle{PLAIN, OUTLINED};
@@ -481,12 +364,12 @@ int main(int argc, char* argv[])
         logMessage(gsGlobal, &texture.font, &l, "DEBUG: resetting score");
         score = 0;
         bird.reset(BLUE);
-        resetPipes(pipes);
+        pipes.reset();
         pregameLoop(gsGlobal, &pad1, &bird, &texture, l.buffer, nightMode, OUTLINED);
         bird.vy = -3;
         srand(time(0));
-        gameLoop(gsGlobal, &pad1, &bird, &score, &highScore, pipes, &audio, &texture, l.buffer, nightMode);
-        postgameLoop(gsGlobal, &pad1, &bird, &score, &highScore, pipes, &texture, l.buffer, nightMode);
-        saveGame(gsGlobal, &bird, &score, &highScore, pipes, &texture, l.buffer, nightMode);
+        gameLoop(gsGlobal, &pad1, &bird, &score, &highScore, &pipes, &audio, &texture, l.buffer, nightMode);
+        postgameLoop(gsGlobal, &pad1, &bird, &score, &highScore, &pipes, &texture, l.buffer, nightMode);
+        saveGame(gsGlobal, &bird, &score, &highScore, &pipes, &texture, l.buffer, nightMode);
     }
 }
