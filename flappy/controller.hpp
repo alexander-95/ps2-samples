@@ -27,10 +27,10 @@ public:
     void openPad(int port, int slot, int padBuf[256]);
     void stabilise(int port, int slot);
     void read();
-    int up();
-    int down();
-    int left();
-    int right();
+    int up(u8 singlePress);
+    int down(u8 singlePress);
+    int left(u8 singlePress);
+    int right(u8 singlePress);
     int x(u8 singlePress);
     int square(u8 singlePress);
     int circle(u8 singlePress);

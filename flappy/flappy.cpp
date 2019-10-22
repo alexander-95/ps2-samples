@@ -156,10 +156,41 @@ void movePipes(PipeList* ps, int val, Bird* b, int* score)
 
 void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureResources* texture, struct log* l, int nightMode, u8 fontStyle)
 {
+    u8 menuActive = 0;
+    int cursor = 0;
+    int menuItemCount = 17;
+    
     while(1)
     {
         pad->read();
         if(pad->x(1)) return;
+
+        // DEBUG MENU LOGIC
+        if(pad->triangle(1))
+        {
+            if(!menuActive)
+            {
+                drawMenu(l, 10, 10, 30, 20, "DEBUG MENU", cursor);
+                menuActive = 1;
+            }
+            else
+            {
+                clearMenu(l, 10, 10, 30, 20);
+                menuActive = 0;
+            }
+        }
+        if(pad->down(1))
+        {
+            cursor++;
+            if(cursor == menuItemCount) cursor = 0;
+            setCursor(l, 10, 10, 30, 20, cursor);
+        }
+        if(pad->up(1))
+        {
+            cursor--;
+            if(cursor == -1) cursor = menuItemCount-1;
+            setCursor(l, 10, 10, 30, 20, cursor);
+        }// END DEBUG MENU LOGIC
         
         drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
         b->draw();

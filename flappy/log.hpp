@@ -18,6 +18,8 @@ void logMessage(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, char* msg);
 void setLine(char* buffer, int lineNumber, char* str);
 void clearLine(char* buffer, int lineNumber);
 void clearBuffer(struct log* l);
-void drawMenu(struct log* l, int x, int y, int w, int h);
+void drawMenu(struct log* l, int x, int y, int w, int h, char* title, int cursor);
+void clearMenu(struct log* l, int x, int y, int w, int h);
+void setCursor(struct log* l, int x, int y, int w, int h, int cursor);
 
 #endif

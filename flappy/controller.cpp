@@ -190,24 +190,28 @@ void controller::read()
     }
 }
 
-int controller::left()
+int controller::left(u8 singlePress)
 {
-    return old_pad & PAD_LEFT;
+    if(singlePress)return new_pad & PAD_LEFT;
+    else return old_pad & PAD_LEFT;
 }
 
-int controller::right()
+int controller::right(u8 singlePress)
 {
-    return old_pad & PAD_RIGHT;
+    if(singlePress)return new_pad & PAD_RIGHT;
+    else return old_pad & PAD_RIGHT;
 }
 
-int controller::up()
+int controller::up(u8 singlePress)
 {
-    return old_pad & PAD_UP;
+    if(singlePress)return new_pad & PAD_UP;
+    else return old_pad & PAD_UP;
 }
 
-int controller::down()
+int controller::down(u8 singlePress)
 {
-    return old_pad & PAD_DOWN;
+    if(singlePress)return new_pad & PAD_DOWN;
+    else return old_pad & PAD_DOWN;
 }
 
 int controller::x(u8 singlePress)
