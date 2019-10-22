@@ -154,12 +154,12 @@ void movePipes(PipeList* ps, int val, Bird* b, int* score)
     return;
 }
 
-void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, struct textureResources* texture, struct log* l, int nightMode, u8 fontStyle)
+void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureResources* texture, struct log* l, int nightMode, u8 fontStyle)
 {
     while(1)
     {
-        padUpdate(pad1);
-        if(pad1->new_pad & PAD_CROSS) return;
+        pad->read();
+        if(pad->x(1)) return;
         
         drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
         b->draw();
@@ -170,15 +170,15 @@ void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, struct te
     }
 }
 
-void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, int* highScore,
+void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, int* score, int* highScore,
               PipeList* pipes, struct audioResources* audio, struct textureResources* texture,
               struct log* l, int nightMode)
 {
     int collided = 0;
     while(1)
     {
-        padUpdate(pad1);
-        if(!collided && pad1->new_pad & PAD_CROSS)
+        pad->read();
+        if(!collided && pad->x(1))
         {
             b->vy = -5;
             ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playWingSound);
@@ -217,13 +217,13 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, 
     }
 }
 
-void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, int* highScore,
+void postgameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, int* score, int* highScore,
                   PipeList* pipes, struct textureResources* texture, struct log* l, int nightMode)
 {
     while(1)
     {
-        padUpdate(pad1);
-        if(pad1->new_pad & PAD_CROSS) return;
+        pad->read();
+        if(pad->x(1)) return;
 
         drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
         pipes->draw();
@@ -344,7 +344,13 @@ int main(int argc, char* argv[])
     
     ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playPointSound);    
     
-    struct controller pad1 = setupController(padBuf);
+    //controller setup
+    int port=0, slot=0;
+    controller pad;
+    //pad.loadModules();
+    padInit(0);
+    pad.openPad(port,slot, padBuf);
+    
     Bird bird;
     bird.gsGlobal = gsGlobal;
     bird.spritesheet = &texture.spriteSheet;
@@ -365,11 +371,11 @@ int main(int argc, char* argv[])
         score = 0;
         bird.reset(BLUE);
         pipes.reset();
-        pregameLoop(gsGlobal, &pad1, &bird, &texture, &l, nightMode, OUTLINED);
+        pregameLoop(gsGlobal, &pad, &bird, &texture, &l, nightMode, OUTLINED);
         bird.vy = -3;
         srand(time(0));
-        gameLoop(gsGlobal, &pad1, &bird, &score, &highScore, &pipes, &audio, &texture, &l, nightMode);
-        postgameLoop(gsGlobal, &pad1, &bird, &score, &highScore, &pipes, &texture, &l, nightMode);
+        gameLoop(gsGlobal, &pad, &bird, &score, &highScore, &pipes, &audio, &texture, &l, nightMode);
+        postgameLoop(gsGlobal, &pad, &bird, &score, &highScore, &pipes, &texture, &l, nightMode);
         saveGame(gsGlobal, &bird, &score, &highScore, &pipes, &texture, &l, nightMode);
     }
 }

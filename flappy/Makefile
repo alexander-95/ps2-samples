@@ -40,7 +40,7 @@ all:
 	ee-as -G0 audsrv.s -o audsrv.o
 
 #	create object files
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c controller.cpp -o controller.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c controller.cpp -o controller.o
 	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.cpp -o log.o
 	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.cpp -o graphics.o
 	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.cpp -o draw.o
