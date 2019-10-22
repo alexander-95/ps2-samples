@@ -12,7 +12,6 @@
 #include <libpad.h>
 #include <dmaKit.h>
 #include <gsToolkit.h>
-#include <malloc.h>
 
 #include "controller.hpp"
 #include "log.hpp"
@@ -155,25 +154,25 @@ void movePipes(PipeList* ps, int val, Bird* b, int* score)
     return;
 }
 
-void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, struct textureResources* texture, char* buffer, int nightMode, u8 fontStyle)
+void pregameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, struct textureResources* texture, struct log* l, int nightMode, u8 fontStyle)
 {
     while(1)
     {
         padUpdate(pad1);
         if(pad1->new_pad & PAD_CROSS) return;
-
+        
         drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawGetReady(gsGlobal, &texture->spriteSheet);
-        drawBuffer(gsGlobal, &texture->font, buffer, fontStyle);
-        updateFrame(gsGlobal, &texture->font, buffer);
+        drawBuffer(gsGlobal, &texture->font, l, fontStyle);
+        updateFrame(gsGlobal, &texture->font, l->buffer);
     }
 }
 
 void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, int* highScore,
               PipeList* pipes, struct audioResources* audio, struct textureResources* texture,
-              char* buffer, int nightMode)
+              struct log* l, int nightMode)
 {
     int collided = 0;
     while(1)
@@ -214,12 +213,12 @@ void gameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, 
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawScore(gsGlobal, *score, &texture->spriteSheet);
-        updateFrame(gsGlobal, &texture->font, buffer);
+        updateFrame(gsGlobal, &texture->font, l->buffer);
     }
 }
 
 void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* score, int* highScore,
-                  PipeList* pipes, struct textureResources* texture, char* buffer, int nightMode)
+                  PipeList* pipes, struct textureResources* texture, struct log* l, int nightMode)
 {
     while(1)
     {
@@ -231,12 +230,12 @@ void postgameLoop(GSGLOBAL* gsGlobal, struct controller* pad1, Bird* b, int* sco
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
-        updateFrame(gsGlobal, &texture->font, buffer);
+        updateFrame(gsGlobal, &texture->font, l->buffer);
     }
 }
 
 void saveGame(GSGLOBAL* gsGlobal, Bird* b, int* score, int* highScore, PipeList* pipes,
-              struct textureResources* texture, char* buffer, int nightMode)
+              struct textureResources* texture, struct log* l, int nightMode)
 {
     drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
     pipes->draw();
@@ -244,7 +243,7 @@ void saveGame(GSGLOBAL* gsGlobal, Bird* b, int* score, int* highScore, PipeList*
     drawPlatform(gsGlobal, &texture->spriteSheet);
     drawEnd(gsGlobal, &texture->spriteSheet, *score, *highScore);
     drawSaveIcon(gsGlobal, &texture->spriteSheet);
-    updateFrame(gsGlobal, &texture->font, buffer);
+    updateFrame(gsGlobal, &texture->font, l->buffer);
 
     if(*score > *highScore)*highScore = *score;
     setHighScore(*highScore);
@@ -361,15 +360,16 @@ int main(int argc, char* argv[])
 
     while(1)
     {
+        clearBuffer(&l);
         logMessage(gsGlobal, &texture.font, &l, "DEBUG: resetting score");
         score = 0;
         bird.reset(BLUE);
         pipes.reset();
-        pregameLoop(gsGlobal, &pad1, &bird, &texture, l.buffer, nightMode, OUTLINED);
+        pregameLoop(gsGlobal, &pad1, &bird, &texture, &l, nightMode, OUTLINED);
         bird.vy = -3;
         srand(time(0));
-        gameLoop(gsGlobal, &pad1, &bird, &score, &highScore, &pipes, &audio, &texture, l.buffer, nightMode);
-        postgameLoop(gsGlobal, &pad1, &bird, &score, &highScore, &pipes, &texture, l.buffer, nightMode);
-        saveGame(gsGlobal, &bird, &score, &highScore, &pipes, &texture, l.buffer, nightMode);
+        gameLoop(gsGlobal, &pad1, &bird, &score, &highScore, &pipes, &audio, &texture, &l, nightMode);
+        postgameLoop(gsGlobal, &pad1, &bird, &score, &highScore, &pipes, &texture, &l, nightMode);
+        saveGame(gsGlobal, &bird, &score, &highScore, &pipes, &texture, &l, nightMode);
     }
 }

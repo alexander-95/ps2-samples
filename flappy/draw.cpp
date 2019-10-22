@@ -24,12 +24,24 @@ void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 st
                             6,TexCol);
 }
 
-void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, char* buffer, u8 style)
+void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, u8 style)
 {
     int i, j;
-    for(i = 0; i < 52; i++)
+    enum mode{WRAP_AROUND, SCROLLING};
+    u8 scrollingMode = l->wrap;
+    if(scrollingMode == WRAP_AROUND)
     {
-        for(j = 0; j < 90; j++) drawChar(gsGlobal, font, buffer[(i*90)+j], j, i, style);
+        for(i = 0; i < 56; i++)
+        {
+            for(j = 0; j < 90; j++) drawChar(gsGlobal, font, l->buffer[(i*90)+j], j, i, style);
+        }
+    }
+    else if(scrollingMode == SCROLLING)
+    {
+        for(i = l->index; i < l->index+56; i++)
+        {
+            for(j = 0; j < 90; j++) drawChar(gsGlobal, font, l->buffer[((i%56)*90)+j], j, (i-l->index), style);
+        }
     }
 }
 

@@ -2,9 +2,10 @@
 #define DRAW_HPP_
 
 #include <gsKit.h>
+#include "log.hpp"
 
 void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 style);
-void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, char* buffer, u8 style);
+void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, u8 style);
 void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet);
 void drawGameOver(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet);
 void drawGetReady(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet);

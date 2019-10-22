@@ -7,13 +7,16 @@
 struct log
 {
     int index;
-    char buffer[28*45];
+    char buffer[56*90];
     char* logfile;
     u8 logToFile;
     u8 logToScreen;
+    u8 wrap; // bool to indicate whether we've filled up the screen
 };
 
 void logMessage(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, char* msg);
 void setLine(char* buffer, int lineNumber, char* str);
+void clearLine(char* buffer, int lineNumber);
+void clearBuffer(struct log* l);
 
 #endif
