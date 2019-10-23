@@ -23,7 +23,7 @@ void PipeList::draw()
 {
 
     int offset = 0;
-    if(nightMode)offset = 26;
+    if(*nightMode)offset = 26;
     Pipe* curr = head;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     while(curr!=NULL)

@@ -12,7 +12,7 @@ public:
     Pipe* tail;
     int length;
     int gap;
-    int nightMode;
+    int* nightMode;
     GSGLOBAL* gsGlobal;
     GSTEXTURE* spritesheet;
 

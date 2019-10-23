@@ -58,7 +58,7 @@ void clearBuffer(struct log* l)
     l->wrap = 0;
 }
 
-void drawMenu(struct log* l, int x, int y, int w, int h, char* title, int cursor)
+void drawMenu(struct log* l, int x, int y, int w, int h, char* title, int cursor, struct menuItem* item)
 {
     // variables related to the buffer
     int bufWidth = 90, bufHeight = 56;
@@ -91,9 +91,29 @@ void drawMenu(struct log* l, int x, int y, int w, int h, char* title, int cursor
     for(i = topLeft+(2*bufWidth)+1; i < topRight+(2*bufWidth); i++) l->buffer[i] = '-';
     l->buffer[topLeft+(2*bufWidth)] = '+';
     l->buffer[topRight+(2*bufWidth)] = '+';
-
+    
     // set the cursor location
-    l->buffer[topLeft+1+((3+cursor)*bufWidth)] = '>';
+    l->buffer[topLeft+2+((3+cursor)*bufWidth)] = '>';
+    
+    // fill in the menu items
+    for(i = 0; i < 3; i++)
+    {
+        // fill out the menu item names
+        for(j = 0; item[i].name[j]; j++) l->buffer[topLeft+(bufWidth*(3+i))+j+4] = item[i].name[j];
+
+        if(item[i].label)
+        {
+            for(j = 0; item[i].label[item[i].val][j]; j++) l->buffer[topLeft+(bufWidth*(3+i))+j+14] = item[i].label[item[i].val][j];
+        }
+        else
+        {
+            char label[3];
+            sprintf(label, "%d", item[i].val);
+            for(j = 0; label[j]; j++) l->buffer[topLeft+(bufWidth*(3+i))+j+14] = label[j];
+        }
+    }
+    
+    
 }
 
 void clearMenu(struct log* l, int x, int y, int w, int h)
@@ -128,10 +148,30 @@ void setCursor(struct log* l, int x, int y, int w, int h, int cursor)
     int i;
     for(int i = 0; i < h-3; i++)
     {
-        l->buffer[(x+1)+((y+3+i)*bufWidth)] = ' ';
+        l->buffer[(x+2)+((y+3+i)*bufWidth)] = ' ';
     }
 
     // draw the new cursor
-    l->buffer[(y*bufWidth+x)+1+((3+cursor)*bufWidth)] = '>';
+    l->buffer[(y*bufWidth+x)+2+((3+cursor)*bufWidth)] = '>';
 }
 
+void refreshLabel(struct log* l, int x, int y, int w, int h, int cursor, struct menuItem* item)
+{
+    // variables related to the buffer
+    int bufWidth = 90, bufHeight = 56;
+    
+    int i, j;
+    for(i = 0; i < (w-6)/2; i++)l->buffer[(x+y*bufWidth) + bufWidth*(3+cursor) + 14+i] = ' ';
+    if(item[cursor].label)
+    {
+        for(j = 0; item[cursor].label[item[cursor].val][j]; j++) l->buffer[(x+y*bufWidth)+(bufWidth*(3+cursor))+j+14] = item[cursor].label[item[cursor].val][j];
+    }
+    else
+    {
+        char label[3];
+        sprintf(label, "%d", item[cursor].val);
+        for(j = 0; label[j]; j++) l->buffer[(x+y*bufWidth)+(bufWidth*(3+cursor))+j+14] = label[j];
+    }
+
+
+}

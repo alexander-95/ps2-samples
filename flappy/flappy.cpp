@@ -154,11 +154,55 @@ void movePipes(PipeList* ps, int val, Bird* b, int* score)
     return;
 }
 
-void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureResources* texture, struct log* l, int nightMode, u8 fontStyle)
+void updateDay(int val, struct settings* s)
+{
+    printf("updating time\n");
+    *(s->time) = val;
+}
+
+void updateColor(int val, struct settings* s)
+{
+    (s->bird)->color = val;
+}
+
+void updateScore(int val, struct settings* s)
+{
+    *(s->score) = val;
+}
+
+void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureResources* texture, struct log* l, int* nightMode, u8 fontStyle, struct settings* s)
 {
     u8 menuActive = 0;
     int cursor = 0;
     int menuItemCount = 17;
+    
+    struct menuItem* item = (struct menuItem*)malloc(3*sizeof(struct menuItem));
+    item[0].name = "time";
+    item[0].val = *nightMode;
+    item[0].label = (char**)malloc(2*sizeof(char*));
+    item[0].label[0] = "day";
+    item[0].label[1] = "night";
+    item[0].min = 0;
+    item[0].max = 1;
+    item[0].functionPointer = updateDay;
+
+    item[1].name = "color";
+    item[1].val = b->color;
+    item[1].label = (char**)malloc(3*sizeof(char*));
+    item[1].label[0] = "red";
+    item[1].label[1] = "yellow";
+    item[1].label[2] = "blue";
+    item[1].min = 0;
+    item[1].max = 2;
+
+    item[1].functionPointer = updateColor;
+    
+    item[2].name = "score";
+    item[2].val = 0;
+    item[2].label = NULL;
+    item[2].min = 0;
+    item[2].max = 255;
+    item[2].functionPointer = updateScore;
     
     while(1)
     {
@@ -170,7 +214,7 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureRes
         {
             if(!menuActive)
             {
-                drawMenu(l, 10, 10, 30, 20, "DEBUG MENU", cursor);
+                drawMenu(l, 10, 10, 30, 20, "DEBUG MENU", cursor, item);
                 menuActive = 1;
             }
             else
@@ -190,9 +234,27 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureRes
             cursor--;
             if(cursor == -1) cursor = menuItemCount-1;
             setCursor(l, 10, 10, 30, 20, cursor);
+        }
+        if(pad->left(1))
+        {
+            item[cursor].val--;
+            if(item[cursor].val < item[cursor].min) item[cursor].val = item[cursor].max;
+            item[cursor].functionPointer(item[cursor].val, s);
+            refreshLabel(l, 10, 10, 30, 20, cursor, item);
+        }
+        if(pad->right(1))
+        {
+            item[cursor].val++;
+            printf("item.val = %d", item[cursor].val);
+            if(item[cursor].val > item[cursor].max) item[cursor].val = item[cursor].min;
+            item[cursor].functionPointer(item[cursor].val, s);
+            refreshLabel(l, 10, 10, 30, 20, cursor, item);
         }// END DEBUG MENU LOGIC
         
-        drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
+        
+        
+        
+        drawBackground(gsGlobal, &texture->spriteSheet, *nightMode);
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawGetReady(gsGlobal, &texture->spriteSheet);
@@ -203,7 +265,7 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureRes
 
 void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, int* score, int* highScore,
               PipeList* pipes, struct audioResources* audio, struct textureResources* texture,
-              struct log* l, int nightMode)
+              struct log* l, int* nightMode)
 {
     int collided = 0;
     while(1)
@@ -239,7 +301,7 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, int* score, int* hig
         if(b->y + b->vy <= 380 )b->y += (int)b->vy;
         else b->y=380;
         
-        drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
+        drawBackground(gsGlobal, &texture->spriteSheet, *nightMode);
         pipes->draw();
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
@@ -249,14 +311,14 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, int* score, int* hig
 }
 
 void postgameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, int* score, int* highScore,
-                  PipeList* pipes, struct textureResources* texture, struct log* l, int nightMode)
+                  PipeList* pipes, struct textureResources* texture, struct log* l, int* nightMode)
 {
     while(1)
     {
         pad->read();
         if(pad->x(1)) return;
 
-        drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
+        drawBackground(gsGlobal, &texture->spriteSheet, *nightMode);
         pipes->draw();
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
@@ -266,9 +328,9 @@ void postgameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, int* score, int*
 }
 
 void saveGame(GSGLOBAL* gsGlobal, Bird* b, int* score, int* highScore, PipeList* pipes,
-              struct textureResources* texture, struct log* l, int nightMode)
+              struct textureResources* texture, struct log* l, int* nightMode)
 {
-    drawBackground(gsGlobal, &texture->spriteSheet, nightMode);
+    drawBackground(gsGlobal, &texture->spriteSheet, *nightMode);
     pipes->draw();
     b->draw();
     drawPlatform(gsGlobal, &texture->spriteSheet);
@@ -381,20 +443,29 @@ int main(int argc, char* argv[])
     //pad.loadModules();
     padInit(0);
     pad.openPad(port,slot, padBuf);
-    
+
+    int score = 0, highScore = 0, nightMode = 0;
+
     Bird bird;
     bird.gsGlobal = gsGlobal;
     bird.spritesheet = &texture.spriteSheet;
     PipeList pipes;
     pipes.gsGlobal = gsGlobal;
     pipes.spritesheet = &texture.spriteSheet;
+    pipes.nightMode = &nightMode;
     pipes.setup();
-    int score = 0, highScore = 0, nightMode = 0;
+    
     enum color{RED, YELLOW, BLUE};
     enum fontstyle{PLAIN, OUTLINED};
     
     highScore = getHighScore();
 
+    struct settings s;
+    s.bird = &bird;
+    s.time = &nightMode;
+    s.score = &score;
+    s.highScore = &highScore;
+    
     while(1)
     {
         clearBuffer(&l);
@@ -402,11 +473,11 @@ int main(int argc, char* argv[])
         score = 0;
         bird.reset(BLUE);
         pipes.reset();
-        pregameLoop(gsGlobal, &pad, &bird, &texture, &l, nightMode, OUTLINED);
+        pregameLoop(gsGlobal, &pad, &bird, &texture, &l, &nightMode, OUTLINED, &s);
         bird.vy = -3;
         srand(time(0));
-        gameLoop(gsGlobal, &pad, &bird, &score, &highScore, &pipes, &audio, &texture, &l, nightMode);
-        postgameLoop(gsGlobal, &pad, &bird, &score, &highScore, &pipes, &texture, &l, nightMode);
-        saveGame(gsGlobal, &bird, &score, &highScore, &pipes, &texture, &l, nightMode);
+        gameLoop(gsGlobal, &pad, &bird, &score, &highScore, &pipes, &audio, &texture, &l, &nightMode);
+        postgameLoop(gsGlobal, &pad, &bird, &score, &highScore, &pipes, &texture, &l, &nightMode);
+        saveGame(gsGlobal, &bird, &score, &highScore, &pipes, &texture, &l, &nightMode);
     }
 }
