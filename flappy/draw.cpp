@@ -31,16 +31,16 @@ void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, u8 style)
     u8 scrollingMode = l->wrap;
     if(scrollingMode == WRAP_AROUND)
     {
-        for(i = 0; i < 56; i++)
+        for(i = 0; i < l->bufHeight; i++)
         {
-            for(j = 0; j < 90; j++) drawChar(gsGlobal, font, l->buffer[(i*90)+j], j, i, style);
+            for(j = 0; j < l->bufWidth; j++) drawChar(gsGlobal, font, l->buffer[(i*l->bufWidth)+j], j, i, style);
         }
     }
     else if(scrollingMode == SCROLLING)
     {
-        for(i = l->index; i < l->index+56; i++)
+        for(i = l->index; i < l->index+l->bufHeight; i++)
         {
-            for(j = 0; j < 90; j++) drawChar(gsGlobal, font, l->buffer[((i%56)*90)+j], j, (i-l->index), style);
+            for(j = 0; j < l->bufWidth; j++) drawChar(gsGlobal, font, l->buffer[((i%l->bufHeight)*l->bufWidth)+j], j, (i-l->index), style);
         }
     }
 }

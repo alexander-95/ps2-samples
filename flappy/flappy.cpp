@@ -43,6 +43,7 @@
 
 #include "bird.hpp"
 #include "pipeList.hpp"
+#include "debugMenu.hpp"
 
 static int padBuf[256] __attribute__((aligned(64)));
 #define IO_CUSTOM_SIMPLEACTION 1 // handler for parameter-less actions
@@ -172,11 +173,10 @@ void updateScore(int val, struct settings* s)
 
 void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureResources* texture, struct log* l, int* nightMode, u8 fontStyle, struct settings* s)
 {
-    u8 menuActive = 0;
-    int cursor = 0;
-    int menuItemCount = 17;
+    DebugMenu menu(l, "DEBUG MENU");
+    menu.itemCount = 3;
     
-    struct menuItem* item = (struct menuItem*)malloc(3*sizeof(struct menuItem));
+    struct menuItem* item = (struct menuItem*)malloc(menu.itemCount*sizeof(struct menuItem));
     item[0].name = "time";
     item[0].val = *nightMode;
     item[0].label = (char**)malloc(2*sizeof(char*));
@@ -194,7 +194,6 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureRes
     item[1].label[2] = "blue";
     item[1].min = 0;
     item[1].max = 2;
-
     item[1].functionPointer = updateColor;
     
     item[2].name = "score";
@@ -203,6 +202,9 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureRes
     item[2].min = 0;
     item[2].max = 255;
     item[2].functionPointer = updateScore;
+
+    menu.item = item;
+    //menu.title = "DEBUG MENU";
     
     while(1)
     {
@@ -212,47 +214,27 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureRes
         // DEBUG MENU LOGIC
         if(pad->triangle(1))
         {
-            if(!menuActive)
-            {
-                drawMenu(l, 10, 10, 30, 20, "DEBUG MENU", cursor, item);
-                menuActive = 1;
-            }
-            else
-            {
-                clearMenu(l, 10, 10, 30, 20);
-                menuActive = 0;
-            }
+            if(!menu.active) menu.draw();
+            else menu.clear();
         }
         if(pad->down(1))
         {
-            cursor++;
-            if(cursor == menuItemCount) cursor = 0;
-            setCursor(l, 10, 10, 30, 20, cursor);
+            menu.nextItem();
         }
         if(pad->up(1))
         {
-            cursor--;
-            if(cursor == -1) cursor = menuItemCount-1;
-            setCursor(l, 10, 10, 30, 20, cursor);
+            menu.prevItem();
         }
         if(pad->left(1))
         {
-            item[cursor].val--;
-            if(item[cursor].val < item[cursor].min) item[cursor].val = item[cursor].max;
-            item[cursor].functionPointer(item[cursor].val, s);
-            refreshLabel(l, 10, 10, 30, 20, cursor, item);
+            menu.prevValue();
+            menu.currentItem()->functionPointer(menu.currentItem()->val, s);   
         }
         if(pad->right(1))
         {
-            item[cursor].val++;
-            printf("item.val = %d", item[cursor].val);
-            if(item[cursor].val > item[cursor].max) item[cursor].val = item[cursor].min;
-            item[cursor].functionPointer(item[cursor].val, s);
-            refreshLabel(l, 10, 10, 30, 20, cursor, item);
+            menu.nextValue();
+            menu.currentItem()->functionPointer(menu.currentItem()->val, s);
         }// END DEBUG MENU LOGIC
-        
-        
-        
         
         drawBackground(gsGlobal, &texture->spriteSheet, *nightMode);
         b->draw();
@@ -419,6 +401,9 @@ int main(int argc, char* argv[])
     l.logfile = "mass:flappy/log.txt";
     l.logToFile = 0;
     l.logToScreen = 1;
+    l.bufWidth = 90;
+    l.bufHeight = 56;
+    l.buffer = (char*)malloc(l.bufWidth*l.bufHeight*sizeof(char*));
     if(l.logToFile)
     {
         FILE* f = fopen(l.logfile, "w");

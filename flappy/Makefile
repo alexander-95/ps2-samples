@@ -3,7 +3,7 @@
 # |     ___|   |____
 
 BIN        = flappy.elf
-OBJS       = flappy.o controller.o log.o graphics.o draw.o ioman.o bird.o pipe.o pipeList.o
+OBJS       = flappy.o controller.o log.o debugMenu.o graphics.o draw.o ioman.o bird.o pipe.o pipeList.o
 TEX_OBJS   = spritesheet.o font.o
 AUDIO_OBJS = sfx_point.o sfx_wing.o sfx_hit.o sfx_die.o sfx_swooshing.o
 IRX_OBJS   = libsd.o audsrv.o
@@ -41,13 +41,14 @@ all:
 
 #	create object files
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c controller.cpp -o controller.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.cpp -o log.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.cpp -o graphics.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.cpp -o draw.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c bird.cpp -o bird.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c pipe.cpp -o pipe.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c pipeList.cpp -o pipeList.o
-	ee-g++ -D_EE -O2 -G0 -Wall -g -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.cpp -o ioman.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.cpp -o log.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c debugMenu.cpp -o debugMenu.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c graphics.cpp -o graphics.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c draw.cpp -o draw.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c bird.cpp -o bird.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c pipe.cpp -o pipe.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c pipeList.cpp -o pipeList.o
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c thirdparty/ioman.cpp -o ioman.o
 
 #	compile game
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -I. -c flappy.cpp -o flappy.o
