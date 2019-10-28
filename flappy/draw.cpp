@@ -48,8 +48,7 @@ void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, u8 style)
 void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    int i = 0;
-    while(i < 640)
+    for(int i = 0; i < 640; i+=24)
     {
             gsKit_prim_quad_texture(gsGlobal, spriteSheet,
                                 i, 400.0f,   // x1, y1
@@ -64,7 +63,6 @@ void drawPlatform(GSGLOBAL* gsGlobal, GSTEXTURE* spriteSheet)
                                 i+24, 422.0f, // x4, y4
                                 12, 211.0f, // u4, v4
                                 1, TexCol);
-            i+=24;
     }
     u64 groundColor = GS_SETREG_RGBAQ(0xDE,0xD8,0x94,0x00,0x00);
     gsKit_prim_quad(gsGlobal,

@@ -30,10 +30,12 @@ struct menuItem
 
 struct settings
 {
+    GSGLOBAL* gsGlobal;
     Bird* bird;
     int* time;
     int* score;
     int* highScore;
+    u8* font;
 };
 
 void logMessage(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, char* msg);

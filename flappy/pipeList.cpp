@@ -93,12 +93,12 @@ void PipeList::draw()
 void PipeList::setup()
 {
     gap = 200;
-    Pipe* curr = (Pipe*) malloc(sizeof(Pipe));
+    Pipe* curr = new Pipe();
     head = curr;
     length = 4;
     for(int i=0; i<length-1; i++)
     {
-        Pipe* p = (Pipe*) malloc(sizeof(Pipe));
+        Pipe* p = new Pipe();
         curr->next = p;
         p->prev = curr;
         curr->x = 640+gap*(i), curr->y = rand() % 300 + 50, curr->d = 52;
