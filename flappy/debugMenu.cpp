@@ -33,22 +33,22 @@ void DebugMenu::draw()
     int i, j;
 
     // set the corners of the debug menu
-    l->buffer[topLeft] = '+';
-    l->buffer[topRight] = '+';
-    l->buffer[bottomLeft] = '+';
-    l->buffer[bottomRight] = '+';
+    l->buffer[topLeft] = 127;
+    l->buffer[topRight] = 128;
+    l->buffer[bottomLeft] = 129;
+    l->buffer[bottomRight] = 130;
 
     // set the borders of the debug menu
-    for(i = topLeft+1; i < topRight; i++) l->buffer[i] = '-';
-    for(i = bottomLeft+1; i < bottomRight; i++) l->buffer[i] = '-';
-    for(i = topLeft+l->bufWidth; i < bottomLeft; i+=l->bufWidth) l->buffer[i] = '|';
-    for(i = topRight+l->bufWidth; i < bottomRight; i+=l->bufWidth) l->buffer[i] = '|';
+    for(i = topLeft+1; i < topRight; i++) l->buffer[i] = 137;
+    for(i = bottomLeft+1; i < bottomRight; i++) l->buffer[i] = 137;
+    for(i = topLeft+l->bufWidth; i < bottomLeft; i+=l->bufWidth) l->buffer[i] = 136;
+    for(i = topRight+l->bufWidth; i < bottomRight; i+=l->bufWidth) l->buffer[i] = 136;
 
     // set the title bar of the debug menu
     for(i = 0; title[i]; i++) l->buffer[topLeft+l->bufWidth+i+2] = title[i];
-    for(i = topLeft+(2*l->bufWidth)+1; i < topRight+(2*l->bufWidth); i++) l->buffer[i] = '-';
-    l->buffer[topLeft+(2*l->bufWidth)] = '+';
-    l->buffer[topRight+(2*l->bufWidth)] = '+';
+    for(i = topLeft+(2*l->bufWidth)+1; i < topRight+(2*l->bufWidth); i++) l->buffer[i] = 137;
+    l->buffer[topLeft+(2*l->bufWidth)] = 131;
+    l->buffer[topRight+(2*l->bufWidth)] = 132;
     
     // set the cursor location
     l->buffer[topLeft+2+((3+cursor)*l->bufWidth)] = '>';
