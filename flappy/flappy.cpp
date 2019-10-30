@@ -167,7 +167,7 @@ void updateScore(int val, struct settings* s)
     *(s->score) = val;
 }
 
-void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureResources* texture, struct log* l, struct settings* s)
+void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureResources* texture, Log* l, struct settings* s)
 {
     DebugMenu menu(l, "DEBUG MENU");
     menu.itemCount = 3;
@@ -248,7 +248,7 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureRes
 
 void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
               struct audioResources* audio, struct textureResources* texture,
-              struct log* l, struct settings* s)
+              Log* l, struct settings* s)
 {
     int collided = 0;
     while(1)
@@ -258,7 +258,6 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
         {
             b->vy = -5;
             ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playWingSound);
-            
         }
         if(b->touchingGround())
         {
@@ -294,7 +293,7 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
 }
 
 void postgameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b,
-                  PipeList* pipes, struct textureResources* texture, struct log* l, struct settings* s)
+                  PipeList* pipes, struct textureResources* texture, Log* l, struct settings* s)
 {
     while(1)
     {
@@ -311,7 +310,7 @@ void postgameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b,
 }
 
 void saveGame(GSGLOBAL* gsGlobal, Bird* b, PipeList* pipes,
-              struct textureResources* texture, struct log* l, struct settings* s)
+              struct textureResources* texture, Log* l, struct settings* s)
 {
     drawBackground(gsGlobal, &texture->spriteSheet, *s->time);
     pipes->draw();
@@ -324,7 +323,6 @@ void saveGame(GSGLOBAL* gsGlobal, Bird* b, PipeList* pipes,
     if(*s->score > *s->highScore)*s->highScore = *s->score;
     setHighScore(*s->highScore);
 }
-
 
 static void deferredAudioInit(void)
 {
@@ -342,7 +340,6 @@ static void init(void)
     ioInit();
     ioPutRequest(IO_CUSTOM_SIMPLEACTION, &deferredAudioInit);
 }
-
 
 void sysReset()
 {
@@ -396,27 +393,30 @@ int main(int argc, char* argv[])
     texture.font = loadTexture(gsGlobal, font_array, 128,128,GS_PSM_CT32);
     
     drawTitleScreen(gsGlobal, &texture.spriteSheet);
-
-    struct log l;
-    l.index = 0;
-    l.logfile = "mass:flappy/log.txt";
-    l.logToFile = 0;
-    l.logToScreen = 1;
-    l.bufWidth = 90;
-    l.bufHeight = 56;
-    l.buffer = (char*)malloc(l.bufWidth*l.bufHeight*sizeof(char*));
-    if(l.logToFile)
+    
+    Log log;
+    log.index = 0;
+    log.logfile = "mass:flappy/log.txt";
+    log.logToFile = 0;
+    log.logToScreen = 1;
+    log.bufWidth = 90;
+    log.bufHeight = 56;
+    log.buffer = new char[log.bufWidth*log.bufHeight];
+    if(log.logToFile)
     {
-        FILE* f = fopen(l.logfile, "w");
+        FILE* f = fopen(log.logfile, "w");
         fprintf(f, "log initialised\n");
         fclose(f);
     }
+    log.clearBuffer();
 
     loadSound(&audio.point, sfx_point_array, 50736);
     loadSound(&audio.wing, sfx_wing_array, 8560);
     loadSound(&audio.hit, sfx_hit_array, 27632);
     loadSound(&audio.die, sfx_die_array, 38160);
     loadSound(&audio.swooshing, sfx_swooshing_array, 101360);
+
+    log.logMessage("DEBUG: audio loaded");
     
     sysReset();
     init();
@@ -430,6 +430,8 @@ int main(int argc, char* argv[])
     padInit(0);
     pad.openPad(port,slot, padBuf);
 
+    log.logMessage("DEBUG: controller initialized");
+   
     int score = 0, highScore = 0, nightMode = 0;
 
     Bird bird;
@@ -440,7 +442,9 @@ int main(int argc, char* argv[])
     pipes.spritesheet = &texture.spriteSheet;
     pipes.nightMode = &nightMode;
     pipes.setup();
-    
+
+    log.logMessage("DEBUG: pipes setup");
+
     enum color{RED, YELLOW, BLUE};
     enum fontstyle{PLAIN, OUTLINED};
 
@@ -458,16 +462,15 @@ int main(int argc, char* argv[])
     
     while(1)
     {
-        clearBuffer(&l);
-        logMessage(gsGlobal, &texture.font, &l, "DEBUG: resetting score");
+        log.logMessage("DEBUG: resetting score");
         score = 0;
         bird.reset(BLUE);
         pipes.reset();
-        pregameLoop(gsGlobal, &pad, &bird, &texture, &l, &s);
+        pregameLoop(gsGlobal, &pad, &bird, &texture, &log, &s);
         bird.vy = -3;
         srand(time(0));
-        gameLoop(gsGlobal, &pad, &bird, &pipes, &audio, &texture, &l, &s);
-        postgameLoop(gsGlobal, &pad, &bird, &pipes, &texture, &l, &s);
-        saveGame(gsGlobal, &bird, &pipes, &texture, &l, &s);
+        gameLoop(gsGlobal, &pad, &bird, &pipes, &audio, &texture, &log, &s);
+        postgameLoop(gsGlobal, &pad, &bird, &pipes, &texture, &log, &s);
+        saveGame(gsGlobal, &bird, &pipes, &texture, &log, &s);
     }
 }

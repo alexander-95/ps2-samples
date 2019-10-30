@@ -4,12 +4,12 @@
 
 #include "debugMenu.hpp"
 
-DebugMenu::DebugMenu(struct log* l, char* title)
+DebugMenu::DebugMenu(Log* l, char* title)
 {
     this->l = l;
     this->title = title;
     
-    x = 10;
+    x = 45;
     y = 10;
     w = 30;
     h = 20;

@@ -21,9 +21,9 @@ public:
     u8 itemCount;
     u8 active;
     struct menuItem* item;
-    struct log* l;
+    Log* l;
 
-    DebugMenu(struct log* l, char* title);
+    DebugMenu(Log* l, char* title);
     ~DebugMenu();
     void draw();
     void clear();

@@ -1,55 +1,60 @@
 #include "log.hpp"
 #include "graphics.hpp"
 
-void logMessage(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, char* msg)
-{
+Log::Log()
+{}
 
-    if(l->logToFile)
+Log::~Log()
+{}
+
+void Log::logMessage(char* msg)
+{
+    if(logToFile)
     {
-        FILE* f = fopen(l->logfile, "a");
+        FILE* f = fopen(logfile, "a");
         fprintf(f, "%s\n",msg);
         fclose(f);
     }
-    if(l->logToScreen)
+    if(logToScreen)
     {
         printf("%s", msg);
-        clearLine(l, l->index);
-        setLine(l, l->index, msg);
-        (l->index)++;// = (l->index+1) % 56;
-        if(l->index == l->bufHeight)
+        clearLine(index);
+        setLine(index, msg);
+        index++;// = (l->index+1) % 56;
+        if(index == bufHeight)
         {
-            l->wrap = 1;
-            l->index = 0;
+            wrap = 1;
+            index = 0;
         }
-        printf("index = %d\n", l->index);
+        printf("index = %d\n", index);
         //updateFrame(gsGlobal, font, l->buffer);
     }
 }
 
-void setLine(struct log* l, int lineNumber, char* str)
+void Log::setLine(int lineNumber, char* msg)
 {
-    for(int i = 0; str[i]; i++)
+    for(int i = 0; msg[i]; i++)
     {
-        l->buffer[i+lineNumber*l->bufWidth] = str[i];
-        printf("%c",str[i]);
+        buffer[i+lineNumber*bufWidth] = msg[i];
+        printf("%c", msg[i]);
     }
     printf("\n");
 }
 
-void clearLine(struct log* l, int lineNumber)
+void Log::clearLine(int lineNumber)
 {
-    for(int i = 0; i < l->bufWidth; i++)
+    for(int i = 0; i < bufWidth; i++)
     {
-        l->buffer[i+lineNumber*l->bufWidth] = 0;
+        buffer[i+lineNumber*bufWidth] = 0;
     }
 }
 
-void clearBuffer(struct log* l)
+void Log::clearBuffer()
 {
-    for(int i = 0; i < l->bufHeight; i++)
+    for(int i = 0; i < bufHeight; i++)
     {
-        clearLine(l, i);
+        clearLine(i);
     }
-    l->index = 0;
-    l->wrap = 0;
+    index = 0;
+    wrap = 0;
 }

@@ -8,7 +8,11 @@ void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 st
     int offset = 0;
     if(style == 1)offset = 63;
     
-    u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    u64 WHITE = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
+    // u64 RED = GS_SETREG_RGBAQ(0x80,0x00,0x00,0x80,0x00);
+    // u64 GREEN = GS_SETREG_RGBAQ(0x00,0x80,0x00,0x80,0x00);
+    // u64 BLUE = GS_SETREG_RGBAQ(0x00,0x00,0x80,0x80,0x00);
+    
     gsKit_prim_quad_texture(gsGlobal, font,
                             x*charWidth, y*charHeight,     // x1, y1
                             ascii_x*charWidth, ascii_y*charHeight+offset,     // u1, v1
@@ -21,10 +25,10 @@ void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 st
 
                             (x+1)*charWidth, (y+1)*charHeight, // x4, y4
                             (ascii_x+1)* charWidth, (ascii_y+1)*charHeight+offset, // u4, v4
-                            6,TexCol);
+                            6,WHITE);
 }
 
-void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, struct log* l, u8 style)
+void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font,Log* l, u8 style)
 {
     int i, j;
     enum mode{WRAP_AROUND, SCROLLING};
