@@ -4,42 +4,35 @@
 
 #include <gsKit.h>
 #include <time.h>
-
 #include <stdio.h>
 #include <kernel.h>
 #include <sifrpc.h>
 #include <libpad.h>
 #include <dmaKit.h>
 #include <gsToolkit.h>
+#include <audsrv.h>
+#include <iopcontrol.h>
+#include <iopheap.h>
+#include <sbv_patches.h>
 
 #include "controller.hpp"
 #include "log.hpp"
-
-#include "textures/spritesheet.h"
-#include "textures/font.h"
-
 #include "graphics.hpp"
 #include "draw.hpp"
 #include "thirdparty/ioman.hpp"
 #include "extern_irx.h"
+#include "bird.hpp"
+#include "pipeList.hpp"
+#include "debugMenu.hpp"
+
+#include "textures/spritesheet.h"
+#include "textures/font.h"
 
 #include "audio/sfx_point.h"
 #include "audio/sfx_wing.h"
 #include "audio/sfx_hit.h"
 #include "audio/sfx_die.h"
 #include "audio/sfx_swooshing.h"
-
-#include <loadfile.h>
-#include <tamtypes.h>
-#include <audsrv.h>
-
-#include <iopcontrol.h>
-#include <iopheap.h>
-#include <sbv_patches.h>
-
-#include "bird.hpp"
-#include "pipeList.hpp"
-#include "debugMenu.hpp"
 
 static int padBuf[256] __attribute__((aligned(64)));
 #define IO_CUSTOM_SIMPLEACTION 1 // handler for parameter-less actions
@@ -62,7 +55,6 @@ struct textureResources
 };
 
 struct audioResources audio;
-
 
 static void playPointSound(void)
 {

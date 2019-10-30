@@ -10,7 +10,7 @@ class Bird;
 class Log
 {
 public:
-    int index;
+    s8 index;
     char* buffer;
     char* logfile;
     u8 logToFile;
@@ -25,18 +25,6 @@ public:
     void setLine(int lineNumber, char* msg);
     void clearLine(int lineNumber);
     void clearBuffer();
-};
-
-struct log
-{
-    int index;
-    char* buffer;
-    char* logfile;
-    u8 logToFile;
-    u8 logToScreen;
-    u8 bufWidth;
-    u8 bufHeight;
-    u8 wrap; // bool to indicate whether we've filled up the screen
 };
 
 struct menuItem
