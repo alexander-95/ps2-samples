@@ -33,7 +33,7 @@ typedef struct menuItem
     char* name;
     char** label;
     int min, max;
-    void (*functionPointer)(int, struct settings*);
+    void (*functionPointer)(int, settings*);
 }menuItem;
 
 typedef struct settings
