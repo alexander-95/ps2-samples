@@ -27,16 +27,16 @@ public:
     void clearBuffer();
 };
 
-struct menuItem
+typedef struct menuItem
 {
     int val;
     char* name;
     char** label;
     int min, max;
     void (*functionPointer)(int, struct settings*);
-};
+}menuItem;
 
-struct settings
+typedef struct settings
 {
     GSGLOBAL* gsGlobal;
     Bird* bird;
@@ -44,6 +44,6 @@ struct settings
     int* score;
     int* highScore;
     u8* font;
-};
+}settings;
 
 #endif

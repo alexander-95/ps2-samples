@@ -37,24 +37,24 @@
 static int padBuf[256] __attribute__((aligned(64)));
 #define IO_CUSTOM_SIMPLEACTION 1 // handler for parameter-less actions
 
-struct sound
+typedef struct sound
 {
     audsrv_adpcm_t s;
     int size;
     u8* buffer;
-};
+}sound;
 
-struct audioResources
+typedef struct audioResources
 {
-    struct sound point, die, hit, swooshing, wing;
-};
+    sound point, die, hit, swooshing, wing;
+}audioResources;
 
-struct textureResources
+typedef struct textureResources
 {
     GSTEXTURE spriteSheet, font;
-};
+}textureResources;
 
-struct audioResources audio;
+audioResources audio;
 
 static void playPointSound(void)
 {
@@ -77,7 +77,7 @@ static void playSwooshingSound(void)
     audsrv_ch_play_adpcm(4, &audio.swooshing.s);
 }
 
-void loadSoundToSPU(struct sound* s)
+void loadSoundToSPU(sound* s)
 {
     audsrv_load_adpcm(&s->s, s->buffer, s->size);
     free(s->buffer);
@@ -143,28 +143,28 @@ void movePipes(PipeList* ps, int val, Bird* b, int* score)
     return;
 }
 
-void updateDay(int val, struct settings* s)
+void updateDay(int val, settings* s)
 {
     printf("updating time\n");
     *(s->time) = val;
 }
 
-void updateColor(int val, struct settings* s)
+void updateColor(int val, settings* s)
 {
     (s->bird)->color = val;
 }
 
-void updateScore(int val, struct settings* s)
+void updateScore(int val, settings* s)
 {
     *(s->score) = val;
 }
 
-void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureResources* texture, Log* l, struct settings* s)
+void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, textureResources* texture, Log* l, settings* s)
 {
     DebugMenu menu(l, "DEBUG MENU");
     menu.itemCount = 3;
     
-    struct menuItem* item = new struct menuItem[menu.itemCount];
+    menuItem* item = new menuItem[menu.itemCount];
     item[0].name = "time";
     item[0].val = *s->time;
     item[0].label = new char*[2];
@@ -239,8 +239,8 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, struct textureRes
 }
 
 void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
-              struct audioResources* audio, struct textureResources* texture,
-              Log* l, struct settings* s)
+              audioResources* audio, textureResources* texture,
+              Log* l, settings* s)
 {
     int collided = 0;
     while(1)
@@ -285,7 +285,7 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
 }
 
 void postgameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b,
-                  PipeList* pipes, struct textureResources* texture, Log* l, struct settings* s)
+                  PipeList* pipes, textureResources* texture, Log* l, settings* s)
 {
     while(1)
     {
@@ -302,7 +302,7 @@ void postgameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b,
 }
 
 void saveGame(GSGLOBAL* gsGlobal, Bird* b, PipeList* pipes,
-              struct textureResources* texture, Log* l, struct settings* s)
+              textureResources* texture, Log* l, settings* s)
 {
     drawBackground(gsGlobal, &texture->spriteSheet, *s->time);
     pipes->draw();
@@ -359,7 +359,7 @@ void sysReset()
     SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
 }
 
-void loadSound(struct sound* s, u8* data, int size)
+void loadSound(sound* s, u8* data, int size)
 {
     s->size = size;
     s->buffer = data;
@@ -380,7 +380,7 @@ int main(int argc, char* argv[])
     dmaKit_chan_init(DMA_CHANNEL_GIF);
     gsKit_init_screen(gsGlobal);
     gsKit_set_clamp(gsGlobal, GS_CMODE_CLAMP);
-    struct textureResources texture;
+    textureResources texture;
     texture.spriteSheet = loadTexture(gsGlobal, spritesheet_array, 256, 256, GS_PSM_CT32);
     texture.font = loadTexture(gsGlobal, font_array, 128,128,GS_PSM_CT32);
     
@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
     highScore = getHighScore();
 
     // a collection of variables that can be changed using the debug menu
-    struct settings s;
+    settings s;
     s.gsGlobal = gsGlobal;
     s.bird = &bird;
     s.time = &nightMode;
