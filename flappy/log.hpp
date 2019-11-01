@@ -27,15 +27,6 @@ public:
     void clearBuffer();
 };
 
-typedef struct menuItem
-{
-    int val;
-    char* name;
-    char** label;
-    int min, max;
-    void (*functionPointer)(int, settings*);
-}menuItem;
-
 typedef struct settings
 {
     GSGLOBAL* gsGlobal;
@@ -45,5 +36,14 @@ typedef struct settings
     int* highScore;
     u8* font;
 }settings;
+
+typedef struct menuItem
+{
+    int val;
+    char* name;
+    char** label;
+    int min, max;
+    void (*functionPointer)(int, settings*);
+}menuItem;
 
 #endif
