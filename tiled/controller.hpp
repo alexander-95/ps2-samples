@@ -2,6 +2,9 @@
 //  ____|   |    ____|
 // |     ___|   |____
 
+#ifndef CONTROLLER_HPP
+#define CONTROLLER_HPP
+
 #include <stdio.h>
 #include <libpad.h>
 #include <sifrpc.h>
@@ -36,3 +39,5 @@ public:
     int circle(u8 singlePress);
     int triangle(u8 singlePress);
 };
+
+#endif

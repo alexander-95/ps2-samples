@@ -5,6 +5,7 @@
 #include <gsKit.h>
 #include "map.hpp"
 #include "pickup.hpp"
+#include "controller.hpp"
 
 class character
 {
@@ -23,6 +24,7 @@ public:
     int pickedup(pickup* p);
     u8 standingOnPipe(map* level);
     u8 pipeOnRight(map* level);
+    void reactToControllerInput(controller* pad, u8 tick, map* level, u8* solid, int* screenx, int* screeny, int scale_factor, u8* superMario, u8* frameByFrame);
     void print();
     int x;
     int y;
@@ -38,4 +40,5 @@ public:
     u8 collisionDetection;
     u8 activated;
     GSTEXTURE spritesheet;
+    GSGLOBAL* gsGlobal;
 };

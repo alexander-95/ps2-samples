@@ -266,3 +266,97 @@ void character::print()
 {
     printf("position: <%d, %d> vy: %d\n", x, y, vy);
 }
+
+void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8* solid, int* screenx, int* screeny, int scale_factor, u8* superMario, u8* frameByFrame)
+{
+    if(animationMode) return;
+    if(pad->left())
+    {
+        hflip = 1;
+        if(tick&1) gate++;
+        gate &= 3;
+        if(!canMoveDown(level, solid, 2))
+        {
+            if(gate & 1) sprite = 2;
+            else
+            {
+                if(gate)sprite = 1;
+                else sprite = 3;
+            }
+        }
+        if(canMoveLeft(level, solid, 2))
+        {
+            x-=2;
+            if(*screenx > 0 && *screeny == 0)(*screenx)-=2;
+        }
+    }
+    if(pad->right())
+    {
+        hflip = 0;
+        if(tick&1)gate++;
+        gate &= 3;
+        if(!canMoveDown(level, solid, 2))
+        {
+            if(gate & 1)sprite = 2;
+            else
+            {
+                if(!gate) sprite = 1;
+                else sprite = 3;
+            }
+        }
+        if(canMoveRight(level, solid, 2))
+        {
+            x+=2;
+            if(*screenx+(gsGlobal->Width/(2*scale_factor)) < (level->width*level->tile_width) &&
+               x > (gsGlobal->Width/(2*scale_factor)) &&
+               *screeny == 0) (*screenx)+=2;
+        }
+    }
+    if(pad->up() || pad->x(1))
+    {
+        sprite = 5;
+        if(y > 0)
+        {
+            if(canMoveUp(level, solid, 2) &&
+               !canMoveDown(level, solid, 2))vy = -6;//mario.y-=2;
+        }
+    }
+    if(pad->down())
+    {
+        if(standingOnPipe(level))
+        {
+            printf("standing on pipe\n");
+            animationMode = 1;
+        }
+    }
+    if(pad->triangle(1))
+    {
+        if((*superMario))
+        {
+            *superMario = 0;
+            height = 16;
+            width = 16;
+            y+=16;
+        }
+        else
+        {
+            *superMario = 1;
+            height = 32;
+            width = 18;
+            y -= 16;
+        }
+    }
+    if(pad->square(1))
+    {
+        collisionDetection ^= 1;
+    }
+    
+    if(pad->circle(1))
+    {
+        if(!(*frameByFrame))*frameByFrame = 1;
+    }
+    if(*frameByFrame)
+    {
+        while(!pad->circle(1))pad->read();
+    }
+}

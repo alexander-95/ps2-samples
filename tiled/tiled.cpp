@@ -231,6 +231,7 @@ int main()
     level1.data = map_data;
     
     character mario;
+    mario.gsGlobal = gsGlobal;
     mario.spritesheet.Width = 512;
     mario.spritesheet.Height = 32;
     mario.spritesheet.PSM = GS_PSM_CT32;
@@ -373,9 +374,11 @@ int main()
     
     while(1)
     {
-        if(y == 0)bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
-        else bg_color = GS_SETREG_RGBAQ(0x00,0x00,0x00,0x00,0x00);
+        // set the background color
+        if(y == 0)bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00); // above ground
+        else bg_color = GS_SETREG_RGBAQ(0x00,0x00,0x00,0x00,0x00); // underground (in cave)
         gsKit_clear(gsGlobal, bg_color);
+
         pad.read();
         if(!mario.canMoveDown(&level1, solid, 1) && !mario.animationMode)mario.sprite = 0;
         else if(!mario.animationMode) mario.sprite = 5;
@@ -389,95 +392,7 @@ int main()
 
         if(!mario.animationMode)
         {
-            if(pad.left())
-            {
-                mario.hflip = 1;
-                if(tick&1)mario.gate++;
-                mario.gate &= 3;
-                if(!mario.canMoveDown(&level1, solid, 2))
-                {
-                    if(mario.gate & 1)mario.sprite = 2;
-                    else
-                    {
-                        if(!mario.gate) mario.sprite = 1;
-                        else mario.sprite = 3;
-                    }
-                }
-                if(mario.canMoveLeft(&level1, solid, 2))
-                {
-                    mario.x-=2;
-                    if(x > 0 && y == 0)x-=2;
-                }
-            }
-            if(pad.right())
-            {
-                mario.hflip = 0;
-                if(tick&1)mario.gate++;
-                mario.gate &= 3;
-                if(!mario.canMoveDown(&level1, solid, 2))
-                {
-                    if(mario.gate & 1)mario.sprite = 2;
-                    else
-                    {
-                        if(!mario.gate) mario.sprite = 1;
-                        else mario.sprite = 3;
-                    }
-                }
-                if(mario.canMoveRight(&level1, solid, 2))
-                {
-                    mario.x+=2;
-                    if(x+(gsGlobal->Width/(2*scale_factor)) < (level1.width*level1.tile_width) &&
-                       mario.x > (gsGlobal->Width/(2*scale_factor)) &&
-                       y == 0) x+=2;
-                }
-            }
-            if(pad.up() || pad.x(1))
-            {
-                mario.sprite = 5;
-                if(mario.y > 0)
-                {
-                    if(mario.canMoveUp(&level1, solid, 2) &&
-                       !mario.canMoveDown(&level1, solid, 2))mario.vy = -6;//mario.y-=2;
-                }
-            }
-            if(pad.down())
-            {
-                if(mario.standingOnPipe(&level1))
-                {
-                    printf("standing on pipe\n");
-                    mario.animationMode = 1;
-                }
-            }
-            if(pad.triangle(1))
-            {
-                if(superMario)
-                {
-                    superMario = 0;
-                    mario.height = 16;
-                    mario.width = 16;
-                    mario.y+=16;
-                }
-                else
-                {
-                    superMario = 1;
-                    mario.height = 32;
-                    mario.width = 18;
-                    mario.y -= 16;
-                }
-            }
-            if(pad.square(1))
-            {
-                mario.collisionDetection ^= 1;
-            }
-            
-            if(pad.circle(1))
-            {
-                if(!frameByFrame)frameByFrame = 1;
-            }
-            if(frameByFrame)
-            {
-                while(!pad.circle(1))pad.read();
-            }
+            mario.reactToControllerInput(&pad, tick, &level1, solid, &x, &y, scale_factor, &superMario, &frameByFrame);
         }
         // mario is entering a pipe
         else if(mario.animationMode == 1)
