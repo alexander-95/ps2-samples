@@ -26,7 +26,7 @@ character::~character()
     
 }
 
-void character::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
+void character::draw(int screen_x, int screen_y)
 {
     if(!activated)return;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color

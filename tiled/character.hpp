@@ -12,7 +12,7 @@ class character
 public:
     character();
     ~character();
-    void draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y);
+    void draw(int screen_x, int screen_y);
     int canMoveDown(map* level, u8* solid, int n);
     int canMoveUp(map* level, u8* solid, int n);
     int canMoveLeft(map* level, u8* solid, int n);
@@ -40,5 +40,5 @@ public:
     u8 collisionDetection;
     u8 activated;
     GSTEXTURE spritesheet;
-    GSGLOBAL* gsGlobal;
+    static GSGLOBAL* gsGlobal;
 };

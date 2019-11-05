@@ -114,7 +114,7 @@ void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, character* mario, int score, i
         hud->draw(gsGlobal, 0, 0);
         hud->drawScore(gsGlobal, score);
         hud->drawWorld(gsGlobal, 1, 1);
-        mario->draw(gsGlobal, 0, 0);
+        mario->draw(0, 0);
         hud->drawLives(gsGlobal, lives);
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
@@ -183,6 +183,8 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1,
     }
 }
 
+GSGLOBAL* character::gsGlobal;
+
 int main()
 {   
     GSGLOBAL* gsGlobal = gsKit_init_global();
@@ -229,9 +231,10 @@ int main()
     level1.spritesheet.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &level1.spritesheet, spritesheet_array, level1.spritesheet.Width, level1.spritesheet.Height );
     level1.data = map_data;
+
+    character::gsGlobal = gsGlobal;
     
     character mario;
-    mario.gsGlobal = gsGlobal;
     mario.spritesheet.Width = 512;
     mario.spritesheet.Height = 32;
     mario.spritesheet.PSM = GS_PSM_CT32;
@@ -604,7 +607,7 @@ int main()
         }
         if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data, solid);
-        mario.draw(gsGlobal, x, y);
+        mario.draw(x, y);
         for(int i = 0; i < 32; i++)
         {
             coin[i].draw(gsGlobal, x, y);
@@ -642,9 +645,9 @@ int main()
         }
         for(int i = 0;i < 16; i++)
         {
-            if(goomba[i].isOnScreen(x))goomba[i].draw(gsGlobal, x, y);
+            if(goomba[i].isOnScreen(x))goomba[i].draw(x, y);
         }
-        if(koopa.isOnScreen(x))koopa.draw(gsGlobal, x, y);
+        if(koopa.isOnScreen(x))koopa.draw(x, y);
 
         if(box)
         {
