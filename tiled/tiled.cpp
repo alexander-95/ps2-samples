@@ -146,48 +146,64 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1,
     GSTEXTURE cursor;
     gsKit_texture_abgr(gsGlobal, &title, title_array, 176, 88 );
     gsKit_texture_abgr(gsGlobal, &cursor, cursor_array, 8, 8 );
-    int x1 = 160, y1 = 60;
-    int x2 = 210, y2 = 250;
+    point p1; p1.x = 160, p1.y = 60;
+    point p2; p2.x = 210, p2.y = 250;
+
+    point start; start.x = 0, start.y = 0;
+
+    int x1 = 160;
+    int y1 = 60;
+    int u1 = 0;
+    int v1 = 0;
+
+    int x2 = x1+(title.Width * 2);
+    int y2 = y1+(title.Height * 2);
+    int u2 = title.Width;
+    int v2 = title.Height;
+
+    int x3 = 210;
+    int y3 = 250;
+    int u3 = 0;
+    int v3 = 0;
+
+    int x4 = x3+(cursor.Width * 2);
+    int y4 = y3+(cursor.Height * 2);
+    int u4 = cursor.Width;
+    int v4 = cursor.Height;
 
     u8 menu_option = 0;
     while(1)
     {
-        if(menu_option == 0) y2 = 250;
-        else if(menu_option == 1) y2 = 282;
         pad->read();
-        if(pad->down())menu_option = 1;
-        else if(pad->up())menu_option = 0;
+        if(pad->down())
+        {
+            menu_option = 1;
+            y3 = 282;
+            y4 = y3 + (cursor.Height * 2);
+        }
+        else if(pad->up())
+        {
+            menu_option = 0;
+            y3 = 250;
+            y4 = y3 + (cursor.Height * 2);
+        }
         if(pad->x(1) && menu_option == 0)break;
+
+        // draw "SUPER MARIO BROS." logo
         gsKit_prim_quad_texture(gsGlobal, &title,
-                                x1,y1,         // x1, y1
-                                0, 0,         // u1, v1
-
-                                x1,y1+(title.Height * 2),         // x2, y2
-                                0, title.Height,         // u2, v2
-
-                                x1+(title.Width * 2),y1,         // x3, y3
-                                title.Width, 0,         // u3, v3
-
-                                x1+(title.Width * 2),y1+(title.Height * 2),         // x4, y4
-                                title.Width, title.Height,         // u4, v4
+                                x1, y1, u1, v1,
+                                x1, y2, u1, v2,
+                                x2, y1, u2, v1,
+                                x2, y2, u2, v2,
                                 5, TexCol);
+
+        // draw goomba cursor
         gsKit_prim_quad_texture(gsGlobal, &cursor,
-                                x2,y2,         // x1, y1
-                                0, 0,         // u1, v1
-
-                                x2,y2+(cursor.Height * 2),         // x2, y2
-                                0, cursor.Height,         // u2, v2
-
-                                x2+(cursor.Width * 2),y2,         // x3, y3
-                                cursor.Width, 0,         // u3, v3
-
-                                x2+(cursor.Width * 2),y2+(cursor.Height * 2),         // x4, y4
-                                cursor.Width, cursor.Height,         // u4, v4
+                                x3, y3, u3, v3,
+                                x3, y4, u3, v4,
+                                x4, y3, u4, v3,
+                                x4, y4, u4, v4,
                                 5, TexCol);
-
-        point start;
-        start.x = 0;
-        start.y = 0;
         
         drawScreen(gsGlobal, &level1->spritesheet, 2, level1, start, map_data, solid);
         hud->drawDigit(gsGlobal, 250,250, 1);
