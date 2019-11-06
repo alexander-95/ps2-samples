@@ -21,6 +21,12 @@
 #include "pickup.hpp"
 #include "HUD.hpp"
 
+typedef struct point
+{
+    int x;
+    int y;
+}point;
+
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
     u32 VramTextureSize = gsKit_texture_size(width, height, GS_PSM_CT32);
@@ -49,59 +55,62 @@ void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width,
     gsKit_texture_upload(gsGlobal, tex);
 }
 
-void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, int start_x, int start_y, int value, int z)
+void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, point start, int value, int z)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int index_x = value % 8; // 8 is the width of the tilesheet, in tiles
     int index_y = value / 8; // 8 is the width of the tilesheet, in tiles
                 
     gsKit_prim_quad_texture(gsGlobal, spritesheet,
-                            start_x*scale_factor, start_y*scale_factor,                                // x1, y1
+                            start.x*scale_factor, start.y*scale_factor,                                // x1, y1
                             level->tile_width*index_x, level->tile_height*index_y,         // u1, v1
                                     
-                            start_x*scale_factor, (start_y + level->tile_height)*scale_factor,                  // x2, y2
+                            start.x*scale_factor, (start.y + level->tile_height)*scale_factor,                  // x2, y2
                             level->tile_width*index_x, level->tile_height*(index_y+1),     // u2, y2
 
-                            (start_x + level->tile_width)*scale_factor, start_y*scale_factor,                   // x3, y3
+                            (start.x + level->tile_width)*scale_factor, start.y*scale_factor,                   // x3, y3
                             level->tile_width*(index_x+1), level->tile_height*index_y,     // u3, v3
                             
-                            (start_x + level->tile_width)*scale_factor, (start_y + level->tile_height)*scale_factor,     // x4, y4
+                            (start.x + level->tile_width)*scale_factor, (start.y + level->tile_height)*scale_factor,     // x4, y4
                             level->tile_width*(index_x+1), level->tile_height*(index_y+1), // u4, v4
                             z,TexCol);
 }
 
-void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, int x, int y, u8* map_data, u8* solid)
+void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, point viewport, u8* map_data, u8* solid)
 {
     // figure out the tile to draw
-    int tile_x = x / level->tile_width;
-    int tile_y = y / level->tile_height;
+    point tile;
+    tile.x = viewport.x / level->tile_width;
+    tile.y = viewport.y / level->tile_height;
 
     // where do we start in the tile
-    int point_x = x % level->tile_width;
-    int point_y = y % level->tile_height;
+    point point1;
+    point1.x = viewport.x % level->tile_width;
+    point1.y = viewport.y % level->tile_height;
 
     // position of the top left corner of the current tile
-    int start_x = 0 - point_x;
-    int start_y = 0 - point_y;
+    point start;
+    start.x = 0 - point1.x;
+    start.y = 0 - point1.y;
 
     u8 rowsDrawn = 0;
 
-    while(start_y < gsGlobal->Height && tile_y < level->absoluteHeight && rowsDrawn < level->height)
+    while(start.y < gsGlobal->Height && tile.y < level->absoluteHeight && rowsDrawn < level->height)
     {
-        while(start_x < gsGlobal->Width && tile_x < level->width)
+        while(start.x < gsGlobal->Width && tile.x < level->width)
         {
-            int index = tile_y * level->width + tile_x;
+            int index = tile.y * level->width + tile.x;
             int value = map_data[index];
             int z = solid[value]*2;
-            drawTile(gsGlobal, spritesheet, scale_factor, level, start_x, start_y, value, z);
-            start_x += level->tile_width;
-            tile_x++;
+            drawTile(gsGlobal, spritesheet, scale_factor, level, start, value, z);
+            start.x += level->tile_width;
+            tile.x++;
         }
-        start_x = 0 - point_x;
-        tile_x = x / level->tile_width;
-        start_y += level->tile_height;
+        start.x = 0 - point1.x;
+        tile.x = viewport.x / level->tile_width;
+        start.y += level->tile_height;
         rowsDrawn++;
-        tile_y++;
+        tile.y++;
     }
 }
 
@@ -170,7 +179,11 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1,
                                 cursor.Width, cursor.Height,         // u4, v4
                                 5, TexCol);
 
-        drawScreen(gsGlobal, &level1->spritesheet, 2, level1, 0, 0, map_data, solid);
+        point start;
+        start.x = 0;
+        start.y = 0;
+        
+        drawScreen(gsGlobal, &level1->spritesheet, 2, level1, start, map_data, solid);
         hud->drawDigit(gsGlobal, 250,250, 1);
         hud->drawString(gsGlobal, 282,250, "PLAYER GAME");
         hud->drawDigit(gsGlobal, 250,280, 2);
@@ -215,7 +228,11 @@ int main()
     pad.openPad(port,slot, padBuf);
 
     // place the top corner of the screen at this location of the map and render the first tile.
-    int x = 0, y=0; // top left corner of the screen
+    // int x = 0, y=0; // top left corner of the screen
+    point viewport;
+    viewport.x = 0;
+    viewport.y = 0;
+    
     int scale_factor = 2;
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
 
@@ -378,7 +395,7 @@ int main()
     while(1)
     {
         // set the background color
-        if(y == 0)bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00); // above ground
+        if(viewport.y == 0)bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00); // above ground
         else bg_color = GS_SETREG_RGBAQ(0x00,0x00,0x00,0x00,0x00); // underground (in cave)
         gsKit_clear(gsGlobal, bg_color);
 
@@ -386,7 +403,7 @@ int main()
         if(!mario.canMoveDown(&level1, solid, 1) && !mario.animationMode)mario.sprite = 0;
         else if(!mario.animationMode) mario.sprite = 5;
         // mario fell into a pit
-        if(!mario.animationMode && mario.y > y + 208)
+        if(!mario.animationMode && mario.y > viewport.y + 208)
         {
             printf("fell\n");
             mario.animationMode = 4;
@@ -395,7 +412,7 @@ int main()
 
         if(!mario.animationMode)
         {
-            mario.reactToControllerInput(&pad, tick, &level1, solid, &x, &y, scale_factor, &superMario, &frameByFrame);
+            mario.reactToControllerInput(&pad, tick, &level1, solid, &viewport.x, &viewport.y, scale_factor, &superMario, &frameByFrame);
         }
         // mario is entering a pipe
         else if(mario.animationMode == 1)
@@ -414,8 +431,8 @@ int main()
                 mario.animationFrame = 0;
                 //mario.x = 0; // respawn mario
                 //x = 0; // re-position camera
-                x = 2368;
-                y = 240;
+                viewport.x = 2368;
+                viewport.y = 240;
                 mario.x = 2384;
                 mario.y = 240;
             }
@@ -488,7 +505,7 @@ int main()
                 mario.sprite = 0;
                 drawLevelStart(gsGlobal, &hud, &mario, score, lives);
                 mario.x = 0;
-                x = 0;
+                viewport.x = 0;
                 mario.y = 192;
                 mario.collisionDetection = 1;
             }
@@ -508,8 +525,8 @@ int main()
             {
                 mario.animationMode = 0;
                 mario.animationFrame = 0;
-                x = 0;
-                y = 0;
+                viewport.x = 0;
+                viewport.y = 0;
                 mario.x = 0;
                 mario.y = 192;
             }
@@ -523,7 +540,7 @@ int main()
             // did mario stomp any goombas?
             for(int i = 0; i < 16; i++)
             {
-                if(goomba[i].isOnScreen(x) && mario.isTouching(&goomba[i]))
+                if(goomba[i].isOnScreen(viewport.x) && mario.isTouching(&goomba[i]))
                 {
                     goomba[i].sprite = 1;
                     mario.vy = -6;
@@ -594,7 +611,7 @@ int main()
         {
             for(int i = 0; i < 16; i++)
             {
-                if(mario.animationMode == 0 && goomba[i].isOnScreen(x) && mario.isTouching(&goomba[i]))
+                if(mario.animationMode == 0 && goomba[i].isOnScreen(viewport.x) && mario.isTouching(&goomba[i]))
                 {
                     printf("touching a goomba\n");
                     //mario.x = 0;
@@ -606,11 +623,11 @@ int main()
             }
         }
         if(superMario)mario.sprite+=15;
-        drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, x, y, map_data, solid);
-        mario.draw(x, y);
+        drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, viewport, map_data, solid);
+        mario.draw(viewport.x, viewport.y);
         for(int i = 0; i < 32; i++)
         {
-            coin[i].draw(gsGlobal, x, y);
+            coin[i].draw(gsGlobal, viewport.x, viewport.y);
             if(i < 10)coin[i].update();
             if(mario.pickedup(&coin[i]))
             {
@@ -627,12 +644,12 @@ int main()
                 mushroom[i].activated = 0;
                 mario.animationMode = 2;
             }
-            mushroom[i].draw(gsGlobal, x, y);
+            mushroom[i].draw(gsGlobal, viewport.x, viewport.y);
             mushroom[i].update();
         }
         for(int i = 0; i < 2; i++)
         {
-            flower[i].draw(gsGlobal, x, y);
+            flower[i].draw(gsGlobal, viewport.x, viewport.y);
             if((tick & 7)==0)
             {
                 flower[i].update();
@@ -645,13 +662,13 @@ int main()
         }
         for(int i = 0;i < 16; i++)
         {
-            if(goomba[i].isOnScreen(x))goomba[i].draw(x, y);
+            if(goomba[i].isOnScreen(viewport.x))goomba[i].draw(viewport.x, viewport.y);
         }
-        if(koopa.isOnScreen(x))koopa.draw(x, y);
+        if(koopa.isOnScreen(viewport.x))koopa.draw(viewport.x, viewport.y);
 
         if(box)
         {
-            box->draw(gsGlobal, x, y);
+            box->draw(gsGlobal, viewport.x, viewport.y);
             if(tick&1)
             {
                 if(box->update())
@@ -677,7 +694,7 @@ int main()
             {
                 for(int i = 0; i < 16; i++)
                 {
-                    if(goomba[i].x > x && goomba[i].x < x + 320)goomba[i].hflip^=1;
+                    if(goomba[i].x > viewport.x && goomba[i].x < viewport.x + 320)goomba[i].hflip^=1;
                 }
                 for(int i = 0; i < 32; i++)
                 {
@@ -689,7 +706,7 @@ int main()
             {
                 printf("%d: ", i);
                 goomba[i].print();
-                if(goomba[i].x > x && goomba[i].x < x + 320)
+                if(goomba[i].x > viewport.x && goomba[i].x < viewport.x + 320)
                 {
                     goomba[i].traverse(&level1, solid);
                     goomba[i].gravity(&level1, solid, tick, gravity);
