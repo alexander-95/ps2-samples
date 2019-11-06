@@ -60,19 +60,24 @@ void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map*
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int index_x = value % 8; // 8 is the width of the tilesheet, in tiles
     int index_y = value / 8; // 8 is the width of the tilesheet, in tiles
-                
-    gsKit_prim_quad_texture(gsGlobal, spritesheet,
-                            start.x*scale_factor, start.y*scale_factor,                                // x1, y1
-                            level->tile_width*index_x, level->tile_height*index_y,         // u1, v1
-                                    
-                            start.x*scale_factor, (start.y + level->tile_height)*scale_factor,                  // x2, y2
-                            level->tile_width*index_x, level->tile_height*(index_y+1),     // u2, y2
 
-                            (start.x + level->tile_width)*scale_factor, start.y*scale_factor,                   // x3, y3
-                            level->tile_width*(index_x+1), level->tile_height*index_y,     // u3, v3
-                            
-                            (start.x + level->tile_width)*scale_factor, (start.y + level->tile_height)*scale_factor,     // x4, y4
-                            level->tile_width*(index_x+1), level->tile_height*(index_y+1), // u4, v4
+    int x1 = start.x*scale_factor;
+    int y1 = start.y*scale_factor;
+
+    int x2 = (start.x + level->tile_width)*scale_factor;
+    int y2 = (start.y + level->tile_height)*scale_factor;
+
+    int u1 = level->tile_width*index_x;
+    int v1 = level->tile_height*index_y;
+
+    int u2 = level->tile_width*(index_x+1);
+    int v2 = level->tile_height*(index_y+1);
+    
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
+                            x1, y1, u1, v1, 
+                            x1, y2, u1, v2,
+                            x2, y1, u2, v1,
+                            x2, y2, u2, v2,
                             z,TexCol);
 }
 
@@ -143,6 +148,7 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1,
     gsKit_texture_abgr(gsGlobal, &cursor, cursor_array, 8, 8 );
     int x1 = 160, y1 = 60;
     int x2 = 210, y2 = 250;
+
     u8 menu_option = 0;
     while(1)
     {
@@ -471,7 +477,7 @@ int main()
                 superMario = 1;
             }
         }
-        // skrinking back down to small mario
+        // shrinking back down to small mario
         else if(mario.animationMode == 3)
         {
             
@@ -688,9 +694,9 @@ int main()
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
         gsKit_clear(gsGlobal, 0);
-        if((tick&3) == 0)
+        if((tick&3) == 0) // every 4 frames
         {
-            if((tick&7) == 0)
+            if((tick&7) == 0) // every 8 frames
             {
                 for(int i = 0; i < 16; i++)
                 {
@@ -719,7 +725,7 @@ int main()
             else koopa.sprite = 3;
             
         }
-        if((tick&31) == 0)time--;
+        if((tick&31) == 0)time--; // every 32 frames
         tick++;
     }
     return 0;
