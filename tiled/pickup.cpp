@@ -27,7 +27,7 @@ void pickup::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
     int u1 = width*sprite, v1 = type*height, u2 = width*(sprite+1), v2 = (type+1)*height;
     int x1 = x*2 - screen_x*2, y1 = y*2 - screen_y*2;
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             x1,y1,                      // x1, y1
                             u1, v1,                     // u1, v1
 

@@ -22,7 +22,8 @@ public:
     u8 activated;
     u8 phase;
     u8 type;
-    GSTEXTURE spritesheet;
+    GSTEXTURE* spritesheet;
+    static GSGLOBAL* gsGlobal;
 };
 
 #endif
