@@ -20,5 +20,4 @@ public:
     void draw();
     void reset(int color);
     int touchingGround();
-    //int collision(struct pipeList* pipes);
 };

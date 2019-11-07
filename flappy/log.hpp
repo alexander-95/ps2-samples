@@ -46,4 +46,6 @@ typedef struct menuItem
     void (*functionPointer)(int, settings*);
 }menuItem;
 
+menuItem getItem(char* name, int val, char** label, int min, int max, void (*functionPointer)(int, settings*));
+
 #endif

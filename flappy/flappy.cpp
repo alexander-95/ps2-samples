@@ -165,32 +165,15 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, textureResources*
     menu.itemCount = 3;
     
     menuItem* item = new menuItem[menu.itemCount];
-    item[0].name = "time";
-    item[0].val = *s->time;
-    item[0].label = new char*[2];
-    item[0].label[0] = "day";
-    item[0].label[1] = "night";
-    item[0].min = 0;
-    item[0].max = 1;
-    item[0].functionPointer = updateDay;
 
-    item[1].name = "color";
-    item[1].val = b->color;
-    item[1].label = new char*[3];
-    item[1].label[0] = "red";
-    item[1].label[1] = "yellow";
-    item[1].label[2] = "blue";
-    item[1].min = 0;
-    item[1].max = 2;
-    item[1].functionPointer = updateColor;
+    char* labels1[2] = {"day", "night"};
+    item[0] = getItem("time", *s->time, labels1, 0, 1, updateDay);
+
+    char* labels2[3] = {"red", "yellow", "blue"};
+    item[1] = getItem("color", b->color, labels2, 0, 2, updateColor);
+
+    item[2] = getItem("color", *s->score, NULL, 0, 255, updateScore);
     
-    item[2].name = "score";
-    item[2].val = 0;
-    item[2].label = NULL;
-    item[2].min = 0;
-    item[2].max = 255;
-    item[2].functionPointer = updateScore;
-
     menu.item = item;
     //menu.title = "DEBUG MENU";
     

@@ -58,3 +58,15 @@ void Log::clearBuffer()
     index = 0;
     wrap = 0;
 }
+
+menuItem getItem(char* name, int val, char** label, int min, int max, void (*functionPointer)(int, settings*))
+{
+    menuItem item;
+    item.name = name;
+    item.val = val;
+    item.label = label;
+    item.min = min;
+    item.max = max;
+    item.functionPointer = functionPointer;
+    return item;
+}
