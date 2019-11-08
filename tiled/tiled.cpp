@@ -228,7 +228,7 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1,
     }
 }
 
-void loadCoins(GSGLOBAL* gsGlobal, pickup* coin)
+void loadCoins(pickup* coin)
 {
     for(int i = 0; i < 32; i++)
     {
@@ -267,6 +267,51 @@ void loadCoins(GSGLOBAL* gsGlobal, pickup* coin)
     coin[26].x = 2484; coin[26].y = 320; coin[26].activated = 1;
     coin[27].x = 2500; coin[27].y = 320; coin[27].activated = 1;
     coin[28].x = 2516; coin[28].y = 320; coin[28].activated = 1;
+}
+
+void loadMushrooms(pickup* mushroom)
+{
+    for(int i = 0; i < 4; i++)
+    {
+        mushroom[i].width = 16;
+        mushroom[i].height = 16;
+        mushroom[i].type = 1;
+        mushroom[i].activated = 0;
+    }
+    mushroom[0].x = 336; mushroom[0].y = 144;
+    mushroom[1].x = 1024; mushroom[1].y = 128; mushroom[1].sprite = 1;
+}
+
+void loadFlowers(pickup* flower)
+{
+    for(int i = 0; i < 2; i++)
+    {
+        flower[i].width = 16;
+        flower[i].height = 16;
+        flower[i].type = 2;
+    }
+    flower[0].x = 1248; flower[0].y = 144;
+    flower[1].x = 1744; flower[1].y = 80;
+}
+
+void loadGoombas(character* goomba)
+{    
+    goomba[0].x = 352; goomba[0].y = 192;goomba[0].direction = 0;
+    goomba[1].x = 640; goomba[1].y = 192;
+    goomba[2].x = 816; goomba[2].y = 192;
+    goomba[3].x = 848; goomba[3].y = 192;
+    goomba[4].x = 1280; goomba[4].y = 64;
+    goomba[5].x = 1312; goomba[5].y = 64;
+    goomba[6].x = 1552; goomba[6].y = 192;
+    goomba[7].x = 1576; goomba[7].y = 192;
+    goomba[8].x = 1824; goomba[8].y = 192;
+    goomba[9].x = 1848; goomba[9].y = 192;
+    goomba[10].x = 1984; goomba[10].y = 192;
+    goomba[11].x = 2008; goomba[11].y = 192;
+    goomba[12].x = 2048; goomba[12].y = 192;
+    goomba[13].x = 2072; goomba[13].y = 192;
+    goomba[14].x = 2784; goomba[14].y = 192;
+    goomba[15].x = 2808; goomba[15].y = 192;
 }
 
 GSGLOBAL* character::gsGlobal;
@@ -340,32 +385,15 @@ int main()
     
     pickup coin[32];
     for(int i = 0; i < 32; i++) coin[i].spritesheet = &pickupTexture;
-    loadCoins(gsGlobal, &coin[0]);    
+    loadCoins(&coin[0]);    
     
     pickup mushroom[4];
-    for(int i = 0; i < 4; i++)
-    {
-        mushroom[i].width = 16;
-        mushroom[i].height = 16;
-        mushroom[i].type = 1;
-        mushroom[i].activated = 0;
-    }
     for(int i = 0; i < 4; i++)mushroom[i].spritesheet = &pickupTexture;
-    mushroom[0].x = 336; mushroom[0].y = 144;
-    mushroom[1].x = 1024; mushroom[1].y = 128; mushroom[1].sprite = 1;
-
-
+    loadMushrooms(&mushroom[0]);
     
     pickup flower[2];
-    for(int i = 0; i < 2; i++)
-    {
-        flower[i].width = 16;
-        flower[i].height = 16;
-        flower[i].type = 2;
-    }
     for(int i = 0; i < 2; i++)flower[i].spritesheet = &pickupTexture;
-    flower[0].x = 1248; flower[0].y = 144;
-    flower[1].x = 1744; flower[1].y = 80;
+    loadFlowers(&flower[0]);
     
     character goomba[16];
     GSTEXTURE goombaSprites = loadTexture(gsGlobal, goomba_array, 32, 16);
@@ -374,23 +402,7 @@ int main()
         goomba[i].spritesheet = &goombaSprites;
         goomba[i].direction = 1;
     }
-
-    goomba[0].x = 352; goomba[0].y = 192;goomba[0].direction = 0;
-    goomba[1].x = 640; goomba[1].y = 192;
-    goomba[2].x = 816; goomba[2].y = 192;
-    goomba[3].x = 848; goomba[3].y = 192;
-    goomba[4].x = 1280; goomba[4].y = 64;
-    goomba[5].x = 1312; goomba[5].y = 64;
-    goomba[6].x = 1552; goomba[6].y = 192;
-    goomba[7].x = 1576; goomba[7].y = 192;
-    goomba[8].x = 1824; goomba[8].y = 192;
-    goomba[9].x = 1848; goomba[9].y = 192;
-    goomba[10].x = 1984; goomba[10].y = 192;
-    goomba[11].x = 2008; goomba[11].y = 192;
-    goomba[12].x = 2048; goomba[12].y = 192;
-    goomba[13].x = 2072; goomba[13].y = 192;
-    goomba[14].x = 2784; goomba[14].y = 192;
-    goomba[15].x = 2808; goomba[15].y = 192;
+    loadGoombas(&goomba[0]);
 
     // this will represent the box that was hit
     block block1;
