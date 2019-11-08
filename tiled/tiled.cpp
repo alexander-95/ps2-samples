@@ -398,8 +398,9 @@ int main()
     goomba[13].x = 2072; goomba[13].y = 192;
     goomba[14].x = 2784; goomba[14].y = 192;
     goomba[15].x = 2808; goomba[15].y = 192;
-    
-    block* box = NULL;
+
+    // this will represent the box that was hit
+    block block1;
     
     u8 solid[64] = {0,1,0,0,0,0,0,0,
                     0,0,0,1,1,1,0,0,
@@ -514,13 +515,12 @@ int main()
                     printf("hit box %d (%d) coin location: <%d, %d>\n", index,level1.data[index], coinx, coiny);
                     if(level1.data[index] == 11 || level1.data[index] == 33)
                     {
-                        block block1; // this will represent the box that was hit
-                        block1.sprite = 12;//32;
+                        block1.sprite = 32;
                         block1.x = ((mario.x + 8) >> 4)<<4;
                         block1.y = ((mario.y - 1) >> 4)<<4;
                         block1.spritesheet = level1.spritesheet;
                         level1.data[index] = 0;
-                        box = &block1;
+                        block1.active = 1;
                         printf("viewport: <%d, %d>", viewport.x, viewport.y);
                         printf("<%d, %d>\n", block1.x, block1.y);
                         if(index == 2032){coin[0].activated = 1;score+=200;}
@@ -597,17 +597,18 @@ int main()
         }
         if(koopa.isOnScreen(viewport.x))koopa.draw(viewport.x, viewport.y);
 
-        if(box)
+        if(block1.active)
         {
-            box->draw(gsGlobal, viewport.x, viewport.y);
+            block1.draw(gsGlobal, viewport.x, viewport.y);
             if(tick&1)
             {
-                if(box->update())
+                if(block1.update())
                 {
-                    int index_x = box->x / level1.tile_width;
-                    int index_y = box->y / level1.tile_height;
-                    printf("box location: <%d, %d>\n", box->x, box->y);
-
+                    int index_x = block1.x / level1.tile_width;
+                    int index_y = block1.y / level1.tile_height;
+                    printf("box location: <%d, %d>\n", block1.x, block1.y);
+                    block1.active = 0;
+                    block1.phase = 0;
                     level1.data[(index_y*level1.width)+index_x] = 32;
                 }
             }
