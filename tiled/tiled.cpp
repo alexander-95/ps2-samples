@@ -215,7 +215,7 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1,
                                 x4, y4, u4, v4,
                                 5, TexCol);
         
-        drawScreen(gsGlobal, &level1->spritesheet, 2, level1, start, map_data, solid);
+        drawScreen(gsGlobal, level1->spritesheet, 2, level1, start, map_data, solid);
         hud->drawDigit(gsGlobal, 250,250, 1);
         hud->drawString(gsGlobal, 282,250, "PLAYER GAME");
         hud->drawDigit(gsGlobal, 250,280, 2);
@@ -311,31 +311,23 @@ int main()
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
 
     HUD hud;
-    hud.spritesheet.Width = 128;
-    hud.spritesheet.Height = 128;
-    hud.spritesheet.PSM = GS_PSM_CT32;
-    gsKit_texture_abgr(gsGlobal, &hud.spritesheet, hud_array, hud.spritesheet.Width, hud.spritesheet.Height );
+    GSTEXTURE hudTexture = loadTexture(gsGlobal, hud_array, 128, 128);
+    hud.spritesheet = &hudTexture;
     
     map level1;
-    level1.spritesheet.Width = 128;
-    level1.spritesheet.Height = 128;
-    level1.spritesheet.PSM = GS_PSM_CT32;
-    gsKit_texture_abgr(gsGlobal, &level1.spritesheet, spritesheet_array, level1.spritesheet.Width, level1.spritesheet.Height );
+    GSTEXTURE tilesheet = loadTexture(gsGlobal, spritesheet_array, 128, 128 );
+    level1.spritesheet = &tilesheet;
     level1.data = map_data;
 
     character::gsGlobal = gsGlobal;
     
     character mario;
-    mario.spritesheet.Width = 512;
-    mario.spritesheet.Height = 32;
-    mario.spritesheet.PSM = GS_PSM_CT32;
-    gsKit_texture_abgr(gsGlobal, &mario.spritesheet, mario_array, mario.spritesheet.Width, mario.spritesheet.Height );
+    GSTEXTURE marioSprites = loadTexture(gsGlobal, mario_array, 512, 32 );
+    mario.spritesheet = &marioSprites;
 
     character koopa;
-    koopa.spritesheet.Width = 96;
-    koopa.spritesheet.Height = 24;
-    koopa.spritesheet.PSM = GS_PSM_CT32;
-    gsKit_texture_abgr(gsGlobal, &koopa.spritesheet, koopa_array, koopa.spritesheet.Width, koopa.spritesheet.Height );
+    GSTEXTURE koopaSprites = loadTexture(gsGlobal, koopa_array, 96, 24 );
+    koopa.spritesheet = &koopaSprites;
     koopa.height = 24;
     koopa.x = 1712;
     koopa.y = 184;
@@ -373,15 +365,13 @@ int main()
     flower[1].x = 1744; flower[1].y = 80;
     
     character goomba[16];
+    GSTEXTURE goombaSprites = loadTexture(gsGlobal, goomba_array, 32, 16);
     for(int i = 0; i < 16; i++)
     {
-        goomba[i].spritesheet.Width = 32;
-        goomba[i].spritesheet.Height = 16;
-        goomba[i].spritesheet.PSM = GS_PSM_CT32;
+        goomba[i].spritesheet = &goombaSprites;
         goomba[i].direction = 1;
     }
-    gsKit_texture_abgr(gsGlobal, &goomba[0].spritesheet, goomba_array, goomba[0].spritesheet.Width, goomba[0].spritesheet.Height );
-    for(int i = 1; i < 16; i++)goomba[i].spritesheet = goomba[0].spritesheet;
+
     goomba[0].x = 352; goomba[0].y = 192;goomba[0].direction = 0;
     goomba[1].x = 640; goomba[1].y = 192;
     goomba[2].x = 816; goomba[2].y = 192;
@@ -554,7 +544,7 @@ int main()
             }
         }
         if(superMario)mario.sprite+=15;
-        drawScreen(gsGlobal, &level1.spritesheet, scale_factor, &level1, viewport, map_data, solid);
+        drawScreen(gsGlobal, level1.spritesheet, scale_factor, &level1, viewport, map_data, solid);
         mario.draw(viewport.x, viewport.y);
         for(int i = 0; i < 32; i++)
         {

@@ -18,5 +18,5 @@ public:
     int sprite;
     int phase;
     u8 active;
-    GSTEXTURE spritesheet;
+    GSTEXTURE* spritesheet;
 };

@@ -24,7 +24,7 @@ void HUD::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
     int width = 39, height = 7;
     int u1 = 0, v1 = 0, u2 = width, v2 = height;
     int x1 = x*2, y1 = y*2;
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             x1,y1,                      // x1, y1
                             u1, v1,                     // u1, v1
 
@@ -44,7 +44,7 @@ void HUD::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
     width = 39, height = 7;
     u1 = 0, v1 = height, u2 = width, v2 = height*2;
     x1 = (x+100)*2, y1 = y*2;
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             x1,y1,                      // x1, y1
                             u1, v1,                     // u1, v1
 
@@ -62,7 +62,7 @@ void HUD::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
     width = 31, height = 7;
     u1 = 0, v1 = height*2, u2 = width, v2 = height*3;
     x1 = (x+200)*2, y1 = y*2;
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             x1,y1,                      // x1, y1
                             u1, v1,                     // u1, v1
 
@@ -86,7 +86,7 @@ void HUD::drawScore(GSGLOBAL* gsGlobal, int score)
     do
     {
         curr = score%10;
-        gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+        gsKit_prim_quad_texture(gsGlobal, spritesheet,
                                 (x+90)-offset, y+22,       // x1, y1
                                 0.0f+(8*curr), 35.0f,  // u1, v1
 
@@ -114,7 +114,7 @@ void HUD::drawTime(GSGLOBAL* gsGlobal, int time)
     do
     {
         curr = time%10;
-        gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+        gsKit_prim_quad_texture(gsGlobal, spritesheet,
                                 (x+490)-offset, y+22,       // x1, y1
                                 0.0f+(8*curr), 35.0f,  // u1, v1
 
@@ -137,7 +137,7 @@ void HUD::drawTime(GSGLOBAL* gsGlobal, int time)
 void HUD::drawWorld(GSGLOBAL* gsGlobal, int world, int level)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             240,27,                // x1, y1
                             0.0f+(8*world), 35.0f, // u1, v1
 
@@ -151,7 +151,7 @@ void HUD::drawWorld(GSGLOBAL* gsGlobal, int world, int level)
                             7.0f+(8*world), 42.0f, // u4, v4
                             3, TexCol);
 
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             256,27,                // x1, y1
                             8, 56, // u1, v1
 
@@ -165,7 +165,7 @@ void HUD::drawWorld(GSGLOBAL* gsGlobal, int world, int level)
                             14, 64, // u4, v4
                             3, TexCol);
 
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             272,27,                // x1, y1
                             0.0f+(8*level), 35.0f, // u1, v1
 
@@ -185,7 +185,7 @@ void HUD::drawLives(GSGLOBAL* gsGlobal, int lives)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int x1 = 300, y1 = 266;
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             x1,y1,                // x1, y1
                             16, 56, // u1, v1
 
@@ -204,7 +204,7 @@ void HUD::drawLives(GSGLOBAL* gsGlobal, int lives)
     do
     {
         curr = lives%10;
-        gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+        gsKit_prim_quad_texture(gsGlobal, spritesheet,
                                 (x2)-offset, y2,       // x1, y1
                                 0.0f+(8*curr), 35.0f,  // u1, v1
 
@@ -236,7 +236,7 @@ void HUD::drawString(GSGLOBAL* gsGlobal, int screen_x, int screen_y, char* str)
         if(curr < 16) v1 = 42;
         else v1 = 49;
         curr%=16;
-        gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+        gsKit_prim_quad_texture(gsGlobal, spritesheet,
                                 (screen_x)+offset, screen_y,       // x1, y1
                                 0.0f+(8*curr), v1,  // u1, v1
 
@@ -259,7 +259,7 @@ void HUD::drawDigit(GSGLOBAL* gsGlobal, int screen_x, int screen_y, u8 digit)
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int offset = 0;
     u8 v1 = 35;
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             (screen_x)+offset, screen_y,       // x1, y1
                             0.0f+(8*digit), v1,  // u1, v1
                             

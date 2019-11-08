@@ -19,7 +19,7 @@ public:
     int absoluteHeight;
     int tile_width;
     int tile_height;
-    GSTEXTURE spritesheet;
+    GSTEXTURE* spritesheet;
     u8* data;
 };
 

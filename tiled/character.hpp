@@ -41,6 +41,6 @@ public:
     u8 animationFrame;
     u8 collisionDetection;
     u8 activated;
-    GSTEXTURE spritesheet;
+    GSTEXTURE* spritesheet;
     static GSGLOBAL* gsGlobal;
 };

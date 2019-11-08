@@ -38,7 +38,7 @@ void character::draw(int screen_x, int screen_y)
         u2^=u1;
         u1^=u2;
     }
-    gsKit_prim_quad_texture(gsGlobal, &spritesheet,
+    gsKit_prim_quad_texture(gsGlobal, spritesheet,
                             x1,y1,         // x1, y1
                             u1, v1,         // u1, v1
 

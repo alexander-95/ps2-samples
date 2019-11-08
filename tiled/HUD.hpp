@@ -20,5 +20,5 @@ public:
     int y;
     int width;
     int height;
-    GSTEXTURE spritesheet;
+    GSTEXTURE* spritesheet;
 };
