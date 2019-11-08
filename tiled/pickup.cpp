@@ -69,3 +69,17 @@ void pickup::update()
         }
     }
 }
+
+void pickup::print()
+{
+    printf("x           = %d\n", x);
+    printf("y           = %d\n", y);
+    printf("width       = %d\n", width);
+    printf("height      = %d\n", height);
+    printf("sprite      = %d\n", sprite);
+    printf("activated   = %d\n", activated);
+    printf("phase       = %d\n", phase);
+    printf("type        = %d\n", type);
+    printf("gsGlobal    = %p\n", gsGlobal);
+    printf("spritesheet = %p\n\n", spritesheet);
+}

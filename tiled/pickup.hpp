@@ -14,6 +14,7 @@ public:
     ~pickup();
     void draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y);
     void update();
+    void print();
     int x;
     int y;
     int width;

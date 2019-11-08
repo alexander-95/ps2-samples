@@ -55,6 +55,16 @@ void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width,
     gsKit_texture_upload(gsGlobal, tex);
 }
 
+GSTEXTURE loadTexture(GSGLOBAL* gsGlobal, u32* tex_array, int width, int height)
+{
+    GSTEXTURE tex;
+    tex.Width=width;
+    tex.Height=height;
+    tex.PSM = GS_PSM_CT32;;
+    gsKit_texture_abgr(gsGlobal, &tex, tex_array, width, height );
+    return tex;
+}
+
 void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, point start, int value, int z)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
@@ -222,13 +232,9 @@ void loadCoins(GSGLOBAL* gsGlobal, pickup* coin)
 {
     for(int i = 0; i < 32; i++)
     {
-        coin[i].spritesheet->Width = 64;
-        coin[i].spritesheet->Height = 64;
-        coin[i].spritesheet->PSM = GS_PSM_CT32;
         coin[i].width = 8;
         coin[i].height = 16;
     }
-
     coin[0].x = 260; coin[0].y = 144;
     coin[1].x = 372; coin[1].y = 144;
     coin[2].x = 356; coin[2].y = 80;
@@ -334,40 +340,35 @@ int main()
     koopa.x = 1712;
     koopa.y = 184;
 
+    GSTEXTURE pickupTexture = loadTexture(gsGlobal, pickups_array, 64, 64);
     pickup::gsGlobal = gsGlobal;
     
     pickup coin[32];
-    loadCoins(gsGlobal, &coin[0]);
-    gsKit_texture_abgr(gsGlobal, coin[0].spritesheet, pickups_array, coin[0].spritesheet->Width, coin[0].spritesheet->Height );
-    for(int i = 1; i < 32; i++)coin[i].spritesheet = coin[0].spritesheet;
-
+    for(int i = 0; i < 32; i++) coin[i].spritesheet = &pickupTexture;
+    loadCoins(gsGlobal, &coin[0]);    
     
     pickup mushroom[4];
     for(int i = 0; i < 4; i++)
     {
-        mushroom[i].spritesheet->Width = 64;
-        mushroom[i].spritesheet->Height = 64;
-        mushroom[i].spritesheet->PSM = GS_PSM_CT32;
         mushroom[i].width = 16;
         mushroom[i].height = 16;
         mushroom[i].type = 1;
         mushroom[i].activated = 0;
     }
-    for(int i = 0; i < 4; i++)mushroom[i].spritesheet = coin[0].spritesheet;
+    for(int i = 0; i < 4; i++)mushroom[i].spritesheet = &pickupTexture;
     mushroom[0].x = 336; mushroom[0].y = 144;
     mushroom[1].x = 1024; mushroom[1].y = 128; mushroom[1].sprite = 1;
 
+
+    
     pickup flower[2];
     for(int i = 0; i < 2; i++)
     {
-        flower[i].spritesheet->Width = 64;
-        flower[i].spritesheet->Height = 64;
-        flower[i].spritesheet->PSM = GS_PSM_CT32;
         flower[i].width = 16;
         flower[i].height = 16;
         flower[i].type = 2;
     }
-    for(int i = 0; i < 2; i++)flower[i].spritesheet = coin[0].spritesheet;
+    for(int i = 0; i < 2; i++)flower[i].spritesheet = &pickupTexture;
     flower[0].x = 1248; flower[0].y = 144;
     flower[1].x = 1744; flower[1].y = 80;
     
@@ -417,7 +418,8 @@ int main()
     int score = 0;
     int lives = 3;
     u8 frameByFrame = 0;
-
+    u8 restart = 0;
+    
     drawStartScreen(gsGlobal, & pad, &hud, &level1, map_data, solid);
     
     drawLevelStart(gsGlobal, &hud, &mario, score, lives);
@@ -446,126 +448,25 @@ int main()
         {
             mario.reactToControllerInput(&pad, tick, &level1, solid, &viewport.x, &viewport.y, scale_factor, &superMario, &frameByFrame);
         }
-        // mario is entering a pipe
-        else if(mario.animationMode == 1)
+        else
         {
-            if(mario.animationFrame < 10)
-            {
-                if((tick & 7) == 0)
-                {
-                    mario.y+=2;
-                    mario.animationFrame++;
-                }
-            }
-            else
-            {
-                mario.animationMode = 0;
-                mario.animationFrame = 0;
-                //mario.x = 0; // respawn mario
-                //x = 0; // re-position camera
-                viewport.x = 2368;
-                viewport.y = 240;
-                mario.x = 2384;
-                mario.y = 240;
-            }
-        }
-        // growing into big mario
-        else if(mario.animationMode == 2)
-        {
-            u8 arr1[10] = {0, 13, 0, 13, 0, 13, 15, 0, 13, 15};
-            char arr2[10] = {0, -16, 16,-16,16,-16,0,16,-16,0};
-            
-            if(mario.animationFrame < 10)
-            {
-                if((tick & 3) == 0)
-                {
-                    mario.sprite = arr1[mario.animationFrame];
-                    mario.y += arr2[mario.animationFrame];
-                    if(mario.sprite == 0)
-                    {
-                        mario.height = 16;
-                        mario.width = 16;
-                    }
-                    else
-                    {
-                        mario.height = 32;
-                        mario.width = 18;
-                        
-                    }
-                    mario.animationFrame++;
-                }
-            }
-            else
-            {
-                mario.animationMode = 0;
-                mario.animationFrame = 0;
-                mario.sprite = 0;
-                superMario = 1;
-            }
-        }
-        // shrinking back down to small mario
-        else if(mario.animationMode == 3)
-        {
-            
-        }
-        // death animation
-        else if(mario.animationMode == 4)
-        {
-            //u8 arr[10] = {10,10,10,10,10,-20,-20,-20,-20,-20};
-            mario.sprite = 13;
-            mario.collisionDetection = 0;
-            if(mario.animationFrame < 15)
-            {
-                if((tick & 1) == 0)
-                {
-                    mario.y -= 5;
-                    mario.animationFrame++;
-                }
-            }
-            else if(mario.animationFrame < 80)
-            {
-                if((tick & 1) == 0)
-                {
-                    mario.y += 5;
-                    mario.animationFrame++;
-                }
-            }
-            else
-            {
-                mario.animationMode = 0;
-                mario.animationFrame = 0;
-                mario.sprite = 0;
-                drawLevelStart(gsGlobal, &hud, &mario, score, lives);
-                mario.x = 0;
-                viewport.x = 0;
-                mario.y = 192;
-                mario.collisionDetection = 1;
-            }
-        }
-        else if(mario.animationMode == 5)
-        {
-            mario.vy = 0;
-            if(mario.animationFrame < 10)
-            {
-                if((tick & 7) == 0)
-                {
-                    mario.x+=2;
-                    mario.animationFrame++;
-                }
-            }
-            else
-            {
-                mario.animationMode = 0;
-                mario.animationFrame = 0;
-                viewport.x = 0;
-                viewport.y = 0;
-                mario.x = 0;
-                mario.y = 192;
-            }
+            mario.doAnimation(tick, &viewport.x, &viewport.y, &superMario, &restart);
         }
         
-        
+        if(restart)
+        {
+            mario.animationMode = 0;
+            mario.animationFrame = 0;
+            mario.sprite = 0;
+            drawLevelStart(gsGlobal, &hud, &mario, score, lives);
+            mario.x = 0;
+            viewport.x = 0;
+            mario.y = 192;
+            mario.collisionDetection = 1;
+            restart = 0;
+        }
 
+                
         // dealing with gravity
         if(mario.vy > 0)
         {
@@ -613,13 +514,15 @@ int main()
                     printf("hit box %d (%d) coin location: <%d, %d>\n", index,level1.data[index], coinx, coiny);
                     if(level1.data[index] == 11 || level1.data[index] == 33)
                     {
-                        block block1;
-                        block1.sprite = 32;
+                        block block1; // this will represent the box that was hit
+                        block1.sprite = 12;//32;
                         block1.x = ((mario.x + 8) >> 4)<<4;
                         block1.y = ((mario.y - 1) >> 4)<<4;
                         block1.spritesheet = level1.spritesheet;
                         level1.data[index] = 0;
                         box = &block1;
+                        printf("viewport: <%d, %d>", viewport.x, viewport.y);
+                        printf("<%d, %d>\n", block1.x, block1.y);
                         if(index == 2032){coin[0].activated = 1;score+=200;}
                         else if(index == 2037)mushroom[0].activated = 1;
                         else if(index == 2039){coin[1].activated = 1;score+=200;}
@@ -646,11 +549,7 @@ int main()
                 if(mario.animationMode == 0 && goomba[i].isOnScreen(viewport.x) && mario.isTouching(&goomba[i]))
                 {
                     printf("touching a goomba\n");
-                    //mario.x = 0;
-                    //x = 0;
-                    //mario.y = 192;
                     mario.animationMode = 4;
-                    //drawLevelStart(gsGlobal, &hud, &mario, score, lives);
                 }
             }
         }
@@ -707,6 +606,8 @@ int main()
                 {
                     int index_x = box->x / level1.tile_width;
                     int index_y = box->y / level1.tile_height;
+                    printf("box location: <%d, %d>\n", box->x, box->y);
+
                     level1.data[(index_y*level1.width)+index_x] = 32;
                 }
             }
@@ -736,8 +637,8 @@ int main()
             }
             for(int i = 0; i < 16; i++)
             {
-                printf("%d: ", i);
-                goomba[i].print();
+                //printf("%d: ", i);
+                //goomba[i].print();
                 if(goomba[i].x > viewport.x && goomba[i].x < viewport.x + 320)
                 {
                     goomba[i].traverse(&level1, solid);

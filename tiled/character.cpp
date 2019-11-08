@@ -360,3 +360,114 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8*
         while(!pad->circle(1))pad->read();
     }
 }
+
+void character::doAnimation(u8 tick, int* screenx, int* screeny, u8* superMario, u8* restart)
+{
+    // mario is entering a pipe
+    if(animationMode == 1)
+    {
+        if(animationFrame < 10)
+        {
+            if((tick & 7) == 0)
+            {
+                y+=2;
+                animationFrame++;
+            }
+        }
+        else
+        {
+            animationMode = 0;
+            animationFrame = 0;
+            *screenx = 2368;
+            *screeny = 240;
+            x = 2384;
+            y = 240;
+        }
+    }
+    // growing into big mario
+    else if(animationMode == 2)
+    {
+        u8 arr1[10] = {0, 13, 0, 13, 0, 13, 15, 0, 13, 15};
+        char arr2[10] = {0, -16, 16,-16,16,-16,0,16,-16,0};
+        
+        if(animationFrame < 10)
+        {
+            if((tick & 3) == 0)
+            {
+                sprite = arr1[animationFrame];
+                y += arr2[animationFrame];
+                if(sprite == 0)
+                {
+                    height = 16;
+                    width = 16;
+                }
+                else
+                {
+                    height = 32;
+                    width = 18;                    
+                }
+                animationFrame++;
+            }
+        }
+        else
+        {
+            animationMode = 0;
+            animationFrame = 0;
+            sprite = 0;
+            *superMario = 1;
+        }
+    }
+    // shrinking back down to small mario
+    else if(animationMode == 3)
+    {
+        
+    }
+    // death animation
+    else if(animationMode == 4)
+    {
+        //u8 arr[10] = {10,10,10,10,10,-20,-20,-20,-20,-20};
+        sprite = 13;
+        collisionDetection = 0;
+        if(animationFrame < 15)
+        {
+            if((tick & 1) == 0)
+            {
+                y -= 5;
+                animationFrame++;
+            }
+        }
+        else if(animationFrame < 80)
+        {
+            if((tick & 1) == 0)
+            {
+                y += 5;
+                animationFrame++;
+            }
+        }
+        else
+        {
+            *restart = 1;
+        }
+    }
+    else if(animationMode == 5)
+    {
+        vy = 0;
+        if(animationFrame < 10)
+        {
+            if((tick & 7) == 0)
+            {
+                x+=2;
+                animationFrame++;
+            }
+        }
+        else
+        {
+            animationMode = 0;
+            animationFrame = 0;
+            *screenx = 0;
+            *screeny = 0;
+            x = 0;
+            y = 192;
+        }
+    }
+}
