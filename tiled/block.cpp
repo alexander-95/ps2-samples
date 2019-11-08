@@ -18,7 +18,7 @@ block::~block()
     printf("block destructor\n");
 }
 
-void block::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
+void block::draw(int screen_x, int screen_y)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     u8 spritex = sprite % 8; // 8 is the width of the tilesheet in tiles

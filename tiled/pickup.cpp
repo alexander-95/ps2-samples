@@ -21,7 +21,7 @@ pickup::~pickup()
 
 }
 
-void pickup::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
+void pickup::draw(int screen_x, int screen_y)
 {
     if(!activated)return;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
@@ -61,8 +61,7 @@ void pickup::update()
         {
             if(phase < 8)y-=2;
             else
-            {
-                
+            {        
                 //printf("mushroom\n");
             }
             if(phase < 9)phase++;

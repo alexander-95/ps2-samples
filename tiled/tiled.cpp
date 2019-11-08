@@ -135,11 +135,11 @@ void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, character* mario, int score, i
     mario->y = 128;
     for(u16 tick = 0; tick < 128; tick++)
     {
-        hud->draw(gsGlobal, 0, 0);
-        hud->drawScore(gsGlobal, score);
-        hud->drawWorld(gsGlobal, 1, 1);
+        hud->draw(0, 0);
+        hud->drawScore(score);
+        hud->drawWorld(1, 1);
         mario->draw(0, 0);
-        hud->drawLives(gsGlobal, lives);
+        hud->drawLives(lives);
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
         gsKit_queue_reset(gsGlobal->Per_Queue);
@@ -216,10 +216,10 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1,
                                 5, TexCol);
         
         drawScreen(gsGlobal, level1->spritesheet, 2, level1, start, map_data, solid);
-        hud->drawDigit(gsGlobal, 250,250, 1);
-        hud->drawString(gsGlobal, 282,250, "PLAYER GAME");
-        hud->drawDigit(gsGlobal, 250,280, 2);
-        hud->drawString(gsGlobal, 282,280, "PLAYER GAME");
+        hud->drawDigit(250,250, 1);
+        hud->drawString(282,250, "PLAYER GAME");
+        hud->drawDigit(250,280, 2);
+        hud->drawString(282,280, "PLAYER GAME");
         
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
@@ -271,6 +271,8 @@ void loadCoins(GSGLOBAL* gsGlobal, pickup* coin)
 
 GSGLOBAL* character::gsGlobal;
 GSGLOBAL* pickup::gsGlobal;
+GSGLOBAL* block::gsGlobal;
+GSGLOBAL* HUD::gsGlobal;
 
 int main()
 {   
@@ -311,6 +313,7 @@ int main()
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
 
     HUD hud;
+    HUD::gsGlobal = gsGlobal;
     GSTEXTURE hudTexture = loadTexture(gsGlobal, hud_array, 128, 128);
     hud.spritesheet = &hudTexture;
     
@@ -391,6 +394,7 @@ int main()
 
     // this will represent the box that was hit
     block block1;
+    block::gsGlobal = gsGlobal;
     
     u8 solid[64] = {0,1,0,0,0,0,0,0,
                     0,0,0,1,1,1,0,0,
@@ -548,7 +552,7 @@ int main()
         mario.draw(viewport.x, viewport.y);
         for(int i = 0; i < 32; i++)
         {
-            coin[i].draw(gsGlobal, viewport.x, viewport.y);
+            coin[i].draw(viewport.x, viewport.y);
             if(i < 10)coin[i].update();
             if(mario.pickedup(&coin[i]))
             {
@@ -565,12 +569,12 @@ int main()
                 mushroom[i].activated = 0;
                 mario.animationMode = 2;
             }
-            mushroom[i].draw(gsGlobal, viewport.x, viewport.y);
+            mushroom[i].draw(viewport.x, viewport.y);
             mushroom[i].update();
         }
         for(int i = 0; i < 2; i++)
         {
-            flower[i].draw(gsGlobal, viewport.x, viewport.y);
+            flower[i].draw(viewport.x, viewport.y);
             if((tick & 7)==0)
             {
                 flower[i].update();
@@ -589,7 +593,7 @@ int main()
 
         if(block1.active)
         {
-            block1.draw(gsGlobal, viewport.x, viewport.y);
+            block1.draw(viewport.x, viewport.y);
             if(tick&1)
             {
                 if(block1.update())
@@ -603,10 +607,10 @@ int main()
                 }
             }
         }
-        hud.draw(gsGlobal, 0, 0);
-        hud.drawTime(gsGlobal, time);
-        hud.drawScore(gsGlobal, score);
-        hud.drawWorld(gsGlobal, 1, 1);
+        hud.draw(0, 0);
+        hud.drawTime(time);
+        hud.drawScore(score);
+        hud.drawWorld(1, 1);
         
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);

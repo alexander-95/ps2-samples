@@ -16,7 +16,7 @@ HUD::~HUD()
     
 }
 
-void HUD::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
+void HUD::draw(int screen_x, int screen_y)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
 
@@ -78,7 +78,7 @@ void HUD::draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y)
 
 }
 
-void HUD::drawScore(GSGLOBAL* gsGlobal, int score)
+void HUD::drawScore(int score)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int offset = 0,curr=0, i=0;
@@ -106,7 +106,7 @@ void HUD::drawScore(GSGLOBAL* gsGlobal, int score)
     while(i < 6);
 }
 
-void HUD::drawTime(GSGLOBAL* gsGlobal, int time)
+void HUD::drawTime(int time)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int offset = 0,curr=0, i=0;
@@ -134,7 +134,7 @@ void HUD::drawTime(GSGLOBAL* gsGlobal, int time)
     while(time);
 }
 
-void HUD::drawWorld(GSGLOBAL* gsGlobal, int world, int level)
+void HUD::drawWorld(int world, int level)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     gsKit_prim_quad_texture(gsGlobal, spritesheet,
@@ -181,7 +181,7 @@ void HUD::drawWorld(GSGLOBAL* gsGlobal, int world, int level)
 }
 
 
-void HUD::drawLives(GSGLOBAL* gsGlobal, int lives)
+void HUD::drawLives(int lives)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int x1 = 300, y1 = 266;
@@ -224,7 +224,7 @@ void HUD::drawLives(GSGLOBAL* gsGlobal, int lives)
     while(lives);
 }
 
-void HUD::drawString(GSGLOBAL* gsGlobal, int screen_x, int screen_y, char* str)
+void HUD::drawString(int screen_x, int screen_y, char* str)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int offset = 0;
@@ -254,7 +254,7 @@ void HUD::drawString(GSGLOBAL* gsGlobal, int screen_x, int screen_y, char* str)
     
 }
 
-void HUD::drawDigit(GSGLOBAL* gsGlobal, int screen_x, int screen_y, u8 digit)
+void HUD::drawDigit(int screen_x, int screen_y, u8 digit)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int offset = 0;
@@ -273,4 +273,3 @@ void HUD::drawDigit(GSGLOBAL* gsGlobal, int screen_x, int screen_y, u8 digit)
                             7.0f+(8*digit), v1+7.0f,  // u4, v4
                             3, TexCol);
 }
-    

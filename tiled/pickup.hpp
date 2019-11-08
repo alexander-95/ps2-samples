@@ -12,7 +12,7 @@ class pickup
 public:
     pickup();
     ~pickup();
-    void draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y);
+    void draw(int screen_x, int screen_y);
     void update();
     void print();
     int x;

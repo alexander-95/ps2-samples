@@ -10,7 +10,7 @@ class block
 public:
     block();
     ~block();
-    void draw(GSGLOBAL* gsGlobal, int screen_x, int screen_y);
+    void draw(int screen_x, int screen_y);
     int update();
     int x;
     int y;
@@ -19,4 +19,5 @@ public:
     int phase;
     u8 active;
     GSTEXTURE* spritesheet;
+    static GSGLOBAL* gsGlobal;
 };
