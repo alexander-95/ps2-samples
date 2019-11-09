@@ -4,6 +4,12 @@
 
 #include "debugMenu.hpp"
 
+DebugMenu& DebugMenu::getInstance(Log* l, char* title)
+{
+    static DebugMenu instance(l, title);
+    return instance;
+}
+
 DebugMenu::DebugMenu(Log* l, char* title)
 {
     this->l = l;

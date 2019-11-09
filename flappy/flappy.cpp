@@ -161,7 +161,20 @@ void updateScore(int val, settings* s)
 
 void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, textureResources* texture, Log* l, settings* s)
 {
-    DebugMenu menu(l, "DEBUG MENU");
+    DebugMenu& menu = DebugMenu::getInstance(l, "DEBUG MENU");
+
+    /*
+     * create a second instance of the DebugMenu and print both pointers
+     * The identical pointers verify the singleton pattern.
+     * This should be added as a test.
+     */
+    DebugMenu& second_menu = DebugMenu::getInstance(l, "SECOND DEBUG MENU");
+    char buf[16];
+    sprintf(buf, "%p", &menu);
+    l->logMessage(buf);
+    sprintf(buf, "%p", &second_menu);
+    l->logMessage(buf);
+    
     menu.itemCount = 3;
     
     menuItem* item = new menuItem[menu.itemCount];

@@ -23,15 +23,19 @@ public:
     struct menuItem* item;
     Log* l;
 
-    DebugMenu(Log* l, char* title);
     ~DebugMenu();
     void draw();
     void clear();
     void setCursor();
     void refreshLabel();
+    static DebugMenu& getInstance(Log* l, char* title);
     struct menuItem* currentItem();
     void nextValue();
     void prevValue();
     void nextItem();
     void prevItem();
+
+private:
+    DebugMenu(Log* l, char* title);
+    static DebugMenu* instance;
 };
