@@ -3,6 +3,7 @@
 // |     ___|   |____
 
 #include <gsKit.h>
+#include "utils.h"
 
 #ifndef PICKUP_HPP
 #define PICKUP_HPP
@@ -25,6 +26,7 @@ public:
     u8 type;
     GSTEXTURE* spritesheet;
     static GSGLOBAL* gsGlobal;
+    static point* viewport;
 };
 
 #endif

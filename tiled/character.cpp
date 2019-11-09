@@ -26,12 +26,12 @@ character::~character()
     
 }
 
-void character::draw(int screen_x, int screen_y)
+void character::draw()
 {
     if(!activated)return;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int u1 = width*sprite, v1 = 0, u2 = width*(sprite+1), v2 = height;
-    int x1 = x*2 - screen_x*2, y1 = y*2 - screen_y*2;
+    int x1 = x*2 - viewport->x*2, y1 = y*2 - viewport->y*2;
     if(hflip)
     {
         u1^=u2;
@@ -194,9 +194,9 @@ void character::gravity(map* level, u8* solid, u8 tick, int gravity )
     }
 }
 
-int character::isOnScreen(int screen_x)
+int character::isOnScreen()
 {
-    if(x > screen_x && x < screen_x + 320)return 1;
+    if(x > viewport->x && x < viewport->x + 320)return 1;
     else return 0;
 }
 
@@ -267,7 +267,7 @@ void character::print()
     printf("position: <%d, %d> vy: %d\n", x, y, vy);
 }
 
-void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8* solid, int* screenx, int* screeny, int scale_factor, u8* superMario, u8* frameByFrame)
+void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8* solid, int scale_factor, u8* superMario, u8* frameByFrame)
 {
     if(animationMode) return;
     if(pad->left())
@@ -287,7 +287,7 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8*
         if(canMoveLeft(level, solid, 2))
         {
             x-=2;
-            if(*screenx > 0 && *screeny == 0)(*screenx)-=2;
+            if(viewport->x > 0 && viewport->y == 0)viewport->x-=2;
         }
     }
     if(pad->right())
@@ -307,9 +307,9 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8*
         if(canMoveRight(level, solid, 2))
         {
             x+=2;
-            if(*screenx+(gsGlobal->Width/(2*scale_factor)) < (level->width*level->tile_width) &&
+            if(viewport->x+(gsGlobal->Width/(2*scale_factor)) < (level->width*level->tile_width) &&
                x > (gsGlobal->Width/(2*scale_factor)) &&
-               *screeny == 0) (*screenx)+=2;
+               viewport->y == 0) viewport->x+=2;
         }
     }
     if(pad->up() || pad->x(1))
@@ -361,7 +361,7 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8*
     }
 }
 
-void character::doAnimation(u8 tick, int* screenx, int* screeny, u8* superMario, u8* restart)
+void character::doAnimation(u8 tick, u8* superMario, u8* restart)
 {
     // mario is entering a pipe
     if(animationMode == 1)
@@ -378,8 +378,8 @@ void character::doAnimation(u8 tick, int* screenx, int* screeny, u8* superMario,
         {
             animationMode = 0;
             animationFrame = 0;
-            *screenx = 2368;
-            *screeny = 240;
+            viewport->x = 2368;
+            viewport->y = 240;
             x = 2384;
             y = 240;
         }
@@ -464,8 +464,8 @@ void character::doAnimation(u8 tick, int* screenx, int* screeny, u8* superMario,
         {
             animationMode = 0;
             animationFrame = 0;
-            *screenx = 0;
-            *screeny = 0;
+            viewport->x = 0;
+            viewport->y = 0;
             x = 0;
             y = 192;
         }

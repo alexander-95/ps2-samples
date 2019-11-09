@@ -4,6 +4,7 @@
 
 #include <gsKit.h>
 #include "map.hpp"
+#include "utils.h"
 
 class block
 {
@@ -20,4 +21,5 @@ public:
     u8 active;
     GSTEXTURE* spritesheet;
     static GSGLOBAL* gsGlobal;
+    static point* viewport;
 };

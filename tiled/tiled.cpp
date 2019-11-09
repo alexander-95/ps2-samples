@@ -21,11 +21,7 @@
 #include "pickup.hpp"
 #include "HUD.hpp"
 
-typedef struct point
-{
-    int x;
-    int y;
-}point;
+#include "utils.h"
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
 {
@@ -138,7 +134,7 @@ void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, character* mario, int score, i
         hud->draw(0, 0);
         hud->drawScore(score);
         hud->drawWorld(1, 1);
-        mario->draw(0, 0);
+        mario->draw();
         hud->drawLives(lives);
         gsKit_sync_flip(gsGlobal);
         gsKit_queue_exec(gsGlobal);
@@ -319,6 +315,10 @@ GSGLOBAL* pickup::gsGlobal;
 GSGLOBAL* block::gsGlobal;
 GSGLOBAL* HUD::gsGlobal;
 
+point* character::viewport;
+point* pickup::viewport;
+point* block::viewport;
+
 int main()
 {   
     GSGLOBAL* gsGlobal = gsKit_init_global();
@@ -368,6 +368,7 @@ int main()
     level1.data = map_data;
 
     character::gsGlobal = gsGlobal;
+    character::viewport = &viewport;
     
     character mario;
     GSTEXTURE marioSprites = loadTexture(gsGlobal, mario_array, 512, 32 );
@@ -382,6 +383,7 @@ int main()
 
     GSTEXTURE pickupTexture = loadTexture(gsGlobal, pickups_array, 64, 64);
     pickup::gsGlobal = gsGlobal;
+    pickup::viewport = &viewport;
     
     pickup coin[32];
     for(int i = 0; i < 32; i++) coin[i].spritesheet = &pickupTexture;
@@ -407,6 +409,7 @@ int main()
     // this will represent the box that was hit
     block block1;
     block::gsGlobal = gsGlobal;
+    block::viewport = &viewport;
     
     u8 solid[64] = {0,1,0,0,0,0,0,0,
                     0,0,0,1,1,1,0,0,
@@ -453,11 +456,11 @@ int main()
 
         if(!mario.animationMode)
         {
-            mario.reactToControllerInput(&pad, tick, &level1, solid, &viewport.x, &viewport.y, scale_factor, &superMario, &frameByFrame);
+            mario.reactToControllerInput(&pad, tick, &level1, solid, scale_factor, &superMario, &frameByFrame);
         }
         else
         {
-            mario.doAnimation(tick, &viewport.x, &viewport.y, &superMario, &restart);
+            mario.doAnimation(tick, &superMario, &restart);
         }
         
         if(restart)
@@ -480,7 +483,7 @@ int main()
             // did mario stomp any goombas?
             for(int i = 0; i < 16; i++)
             {
-                if(goomba[i].isOnScreen(viewport.x) && mario.isTouching(&goomba[i]))
+                if(goomba[i].isOnScreen() && mario.isTouching(&goomba[i]))
                 {
                     goomba[i].sprite = 1;
                     mario.vy = -6;
@@ -552,7 +555,7 @@ int main()
         {
             for(int i = 0; i < 16; i++)
             {
-                if(mario.animationMode == 0 && goomba[i].isOnScreen(viewport.x) && mario.isTouching(&goomba[i]))
+                if(mario.animationMode == 0 && goomba[i].isOnScreen() && mario.isTouching(&goomba[i]))
                 {
                     printf("touching a goomba\n");
                     mario.animationMode = 4;
@@ -561,7 +564,7 @@ int main()
         }
         if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, level1.spritesheet, scale_factor, &level1, viewport, map_data, solid);
-        mario.draw(viewport.x, viewport.y);
+        mario.draw();
         for(int i = 0; i < 32; i++)
         {
             coin[i].draw(viewport.x, viewport.y);
@@ -599,9 +602,9 @@ int main()
         }
         for(int i = 0;i < 16; i++)
         {
-            if(goomba[i].isOnScreen(viewport.x))goomba[i].draw(viewport.x, viewport.y);
+            if(goomba[i].isOnScreen())goomba[i].draw();
         }
-        if(koopa.isOnScreen(viewport.x))koopa.draw(viewport.x, viewport.y);
+        if(koopa.isOnScreen())koopa.draw();
 
         if(block1.active)
         {
@@ -644,8 +647,6 @@ int main()
             }
             for(int i = 0; i < 16; i++)
             {
-                //printf("%d: ", i);
-                //goomba[i].print();
                 if(goomba[i].x > viewport.x && goomba[i].x < viewport.x + 320)
                 {
                     goomba[i].traverse(&level1, solid);
