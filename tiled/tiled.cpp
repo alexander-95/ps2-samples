@@ -567,7 +567,7 @@ int main()
         mario.draw();
         for(int i = 0; i < 32; i++)
         {
-            coin[i].draw(viewport.x, viewport.y);
+            coin[i].draw();
             if(i < 10)coin[i].update();
             if(mario.pickedup(&coin[i]))
             {
@@ -584,12 +584,12 @@ int main()
                 mushroom[i].activated = 0;
                 mario.animationMode = 2;
             }
-            mushroom[i].draw(viewport.x, viewport.y);
+            mushroom[i].draw();
             mushroom[i].update();
         }
         for(int i = 0; i < 2; i++)
         {
-            flower[i].draw(viewport.x, viewport.y);
+            flower[i].draw();
             if((tick & 7)==0)
             {
                 flower[i].update();
@@ -608,7 +608,7 @@ int main()
 
         if(block1.active)
         {
-            block1.draw(viewport.x, viewport.y);
+            block1.draw();
             if(tick&1)
             {
                 if(block1.update())

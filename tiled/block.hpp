@@ -11,7 +11,7 @@ class block
 public:
     block();
     ~block();
-    void draw(int screen_x, int screen_y);
+    void draw();
     int update();
     int x;
     int y;

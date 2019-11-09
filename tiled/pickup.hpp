@@ -13,7 +13,7 @@ class pickup
 public:
     pickup();
     ~pickup();
-    void draw(int screen_x, int screen_y);
+    void draw();
     void update();
     void print();
     int x;
