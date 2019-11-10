@@ -53,7 +53,7 @@ void character::draw()
                             1, TexCol);
 }
 
-int character::canMoveDown(map* level, u8* solid, int n )
+int character::canMoveDown(map* level, int n )
 {
     if(!collisionDetection)return 1;
     int x1 = x;
@@ -72,11 +72,11 @@ int character::canMoveDown(map* level, u8* solid, int n )
     int index2 = tile_y2 * level->width + tile_x2;
     int value2 = level->data[index2];
 
-    if(!solid[value1] && !solid[value2]) return 1;
+    if(!level->solid[value1] && !level->solid[value2]) return 1;
     else return 0;
 }
 
-int character::canMoveUp(map* level, u8* solid, int n )
+int character::canMoveUp(map* level, int n )
 {
     if(!collisionDetection)return 1;
     int x1 = x;
@@ -95,11 +95,11 @@ int character::canMoveUp(map* level, u8* solid, int n )
     int index2 = tile_y2 * level->width + tile_x2;
     int value2 = level->data[index2];
 
-    if(!solid[value1] && !solid[value2]) return 1;
+    if(!level->solid[value1] && !level->solid[value2]) return 1;
     else return 0;
 }
 
-int character::canMoveRight(map* level, u8* solid, int n )
+int character::canMoveRight(map* level, int n )
 {
     if(!collisionDetection)return 1;
     int x1 = x+n+(width-1);
@@ -120,11 +120,11 @@ int character::canMoveRight(map* level, u8* solid, int n )
     int index2 = tile_y2 * level->width + tile_x2;
     int value2 = level->data[index2];
 
-    if(!solid[value1] && !solid[value2]) return 1;
+    if(!level->solid[value1] && !level->solid[value2]) return 1;
     else return 0;
 }
 
-int character::canMoveLeft(map* level, u8* solid, int n )
+int character::canMoveLeft(map* level, int n )
 {
     if(!collisionDetection)return 1;
     int x1 = x-n;
@@ -143,52 +143,52 @@ int character::canMoveLeft(map* level, u8* solid, int n )
     int index2 = tile_y2 * level->width + tile_x2;
     int value2 = level->data[index2];
 
-    if(!solid[value1] && !solid[value2] && x-n >= 0) return 1;
+    if(!level->solid[value1] && !level->solid[value2] && x-n >= 0) return 1;
     else return 0;
 }
 
-void character::traverse(map* level, u8* solid)
+void character::traverse(map* level)
 {
     if(!activated)return;
     if(direction)
     {
-        if(canMoveRight(level,solid, 1))x++;
+        if(canMoveRight(level, 1))x++;
         else direction = 0;
     }
     else
     {
-        if(canMoveLeft(level, solid,1))x--;
+        if(canMoveLeft(level, 1))x--;
         else direction = 1;
     }
 }
 
-void character::gravity(map* level, u8* solid, u8 tick, int gravity )
+void character::gravity(map* level, u8 tick, int gravity )
 {
     if(!activated)return;
     if(vy > 0)
     {
-        if(canMoveDown(level, solid, vy))
+        if(canMoveDown(level, vy))
         {
             y += vy;
             if((tick & 3) == 0)vy += gravity;
         }
         else
         {
-            while(vy > 0 && !canMoveDown(level, solid, vy))vy--;
+            while(vy > 0 && !canMoveDown(level, vy))vy--;
             y += vy;
             vy = 0;
         }
     }
-    else if(vy < 0 || canMoveDown(level, solid, 1)) // jumping
+    else if(vy < 0 || canMoveDown(level, 1)) // jumping
     {
-        if(canMoveUp(level, solid, vy*(-1)))
+        if(canMoveUp(level, vy*(-1)))
         {
             y += vy;
             if((tick & 3) == 0)vy += gravity;
         }
         else
         {
-            while(vy < 0 && !canMoveUp(level, solid, vy*(-1)))vy++;
+            while(vy < 0 && !canMoveUp(level, vy*(-1)))vy++;
             y += vy;
         }
     }
@@ -267,7 +267,7 @@ void character::print()
     printf("position: <%d, %d> vy: %d\n", x, y, vy);
 }
 
-void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8* solid, int scale_factor, u8* superMario, u8* frameByFrame)
+void character::reactToControllerInput(controller* pad, u8 tick, map* level, int scale_factor, u8* superMario, u8* frameByFrame)
 {
     if(animationMode) return;
     if(pad->left())
@@ -275,7 +275,7 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8*
         hflip = 1;
         if(tick&1) gate++;
         gate &= 3;
-        if(!canMoveDown(level, solid, 2))
+        if(!canMoveDown(level, 2))
         {
             if(gate & 1) sprite = 2;
             else
@@ -284,7 +284,7 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8*
                 else sprite = 3;
             }
         }
-        if(canMoveLeft(level, solid, 2))
+        if(canMoveLeft(level, 2))
         {
             x-=2;
             if(viewport->x > 0 && viewport->y == 0)viewport->x-=2;
@@ -295,7 +295,7 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8*
         hflip = 0;
         if(tick&1)gate++;
         gate &= 3;
-        if(!canMoveDown(level, solid, 2))
+        if(!canMoveDown(level, 2))
         {
             if(gate & 1)sprite = 2;
             else
@@ -304,7 +304,7 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8*
                 else sprite = 3;
             }
         }
-        if(canMoveRight(level, solid, 2))
+        if(canMoveRight(level, 2))
         {
             x+=2;
             if(viewport->x+(gsGlobal->Width/(2*scale_factor)) < (level->width*level->tile_width) &&
@@ -317,8 +317,8 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, u8*
         sprite = 5;
         if(y > 0)
         {
-            if(canMoveUp(level, solid, 2) &&
-               !canMoveDown(level, solid, 2))vy = -6;//mario.y-=2;
+            if(canMoveUp(level, 2) &&
+               !canMoveDown(level, 2))vy = -6;//mario.y-=2;
         }
     }
     if(pad->down())

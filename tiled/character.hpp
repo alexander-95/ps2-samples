@@ -14,18 +14,18 @@ public:
     character();
     ~character();
     void draw();
-    int canMoveDown(map* level, u8* solid, int n);
-    int canMoveUp(map* level, u8* solid, int n);
-    int canMoveLeft(map* level, u8* solid, int n);
-    int canMoveRight(map* level, u8* solid, int n);
-    void traverse(map* level, u8* solid);
-    void gravity(map* level, u8* solid, u8 tick, int gravity);
+    int canMoveDown(map* level, int n);
+    int canMoveUp(map* level, int n);
+    int canMoveLeft(map* level, int n);
+    int canMoveRight(map* level, int n);
+    void traverse(map* level);
+    void gravity(map* level, u8 tick, int gravity);
     int isOnScreen();
     int isTouching(character* c);
     int pickedup(pickup* p);
     u8 standingOnPipe(map* level);
     u8 pipeOnRight(map* level);
-    void reactToControllerInput(controller* pad, u8 tick, map* level, u8* solid, int scale_factor, u8* superMario, u8* frameByFrame);
+    void reactToControllerInput(controller* pad, u8 tick, map* level, int scale_factor, u8* superMario, u8* frameByFrame);
     void doAnimation(u8 tick, u8* superMario, u8* restart);
     void print();
     

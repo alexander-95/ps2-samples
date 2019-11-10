@@ -87,7 +87,7 @@ void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map*
                             z,TexCol);
 }
 
-void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, point viewport, u8* map_data, u8* solid)
+void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, point viewport)
 {
     // figure out the tile to draw
     point tile;
@@ -111,8 +111,8 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
         while(start.x < gsGlobal->Width && tile.x < level->width)
         {
             int index = tile.y * level->width + tile.x;
-            int value = map_data[index];
-            int z = solid[value]*2;
+            int value = level->data[index];
+            int z = level->solid[value]*2;
             drawTile(gsGlobal, spritesheet, scale_factor, level, start, value, z);
             start.x += level->tile_width;
             tile.x++;
@@ -144,7 +144,7 @@ void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, character* mario, int score, i
     printf("game started\n");
 }
 
-void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1, u8* map_data, u8* solid)
+void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1)
 {
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
@@ -211,7 +211,7 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1,
                                 x4, y4, u4, v4,
                                 5, TexCol);
         
-        drawScreen(gsGlobal, level1->spritesheet, 2, level1, start, map_data, solid);
+        drawScreen(gsGlobal, level1->spritesheet, 2, level1, start);
         hud->drawDigit(250,250, 1);
         hud->drawString(282,250, "PLAYER GAME");
         hud->drawDigit(250,280, 2);
@@ -357,31 +357,44 @@ int main()
     int scale_factor = 2;
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
 
+    GSTEXTURE hudTexture = loadTexture(gsGlobal, hud_array, 128, 128);
+    GSTEXTURE tilesheet = loadTexture(gsGlobal, spritesheet_array, 128, 128 );
+    GSTEXTURE marioSprites = loadTexture(gsGlobal, mario_array, 512, 32 );
+    GSTEXTURE pickupTexture = loadTexture(gsGlobal, pickups_array, 64, 64);
+    GSTEXTURE koopaSprites = loadTexture(gsGlobal, koopa_array, 96, 24 );
+    GSTEXTURE goombaSprites = loadTexture(gsGlobal, goomba_array, 32, 16);
+    u8 tilesheet_solid[64] = {0,1,0,0,0,0,0,0,
+                              0,0,0,1,1,1,0,0,
+                              1,1,0,0,0,0,0,0,
+                              1,1,0,0,0,0,0,0,
+                              1,1,1,1,0,0,0,0,
+                              1,1,1,0,0,0,0,0,
+                              1,1,1,0,0,0,0,0,
+                              0,0,0,0,0,0,0,0};
+    
     HUD hud;
     HUD::gsGlobal = gsGlobal;
-    GSTEXTURE hudTexture = loadTexture(gsGlobal, hud_array, 128, 128);
     hud.spritesheet = &hudTexture;
     
     map level1;
-    GSTEXTURE tilesheet = loadTexture(gsGlobal, spritesheet_array, 128, 128 );
     level1.spritesheet = &tilesheet;
     level1.data = map_data;
-
+    level1.solid = tilesheet_solid;
+    
+    
     character::gsGlobal = gsGlobal;
     character::viewport = &viewport;
     
     character mario;
-    GSTEXTURE marioSprites = loadTexture(gsGlobal, mario_array, 512, 32 );
     mario.spritesheet = &marioSprites;
 
     character koopa;
-    GSTEXTURE koopaSprites = loadTexture(gsGlobal, koopa_array, 96, 24 );
+    
     koopa.spritesheet = &koopaSprites;
     koopa.height = 24;
     koopa.x = 1712;
     koopa.y = 184;
 
-    GSTEXTURE pickupTexture = loadTexture(gsGlobal, pickups_array, 64, 64);
     pickup::gsGlobal = gsGlobal;
     pickup::viewport = &viewport;
     
@@ -398,7 +411,6 @@ int main()
     loadFlowers(&flower[0]);
     
     character goomba[16];
-    GSTEXTURE goombaSprites = loadTexture(gsGlobal, goomba_array, 32, 16);
     for(int i = 0; i < 16; i++)
     {
         goomba[i].spritesheet = &goombaSprites;
@@ -411,15 +423,6 @@ int main()
     block::gsGlobal = gsGlobal;
     block::viewport = &viewport;
     
-    u8 solid[64] = {0,1,0,0,0,0,0,0,
-                    0,0,0,1,1,1,0,0,
-                    1,1,0,0,0,0,0,0,
-                    1,1,0,0,0,0,0,0,
-                    1,1,1,1,0,0,0,0,
-                    1,1,1,0,0,0,0,0,
-                    1,1,1,0,0,0,0,0,
-                    0,0,0,0,0,0,0,0};
-    
     mario.vy = 0;
     int gravity = 1;
     u8 tick = 0;
@@ -430,7 +433,7 @@ int main()
     u8 frameByFrame = 0;
     u8 restart = 0;
     
-    drawStartScreen(gsGlobal, & pad, &hud, &level1, map_data, solid);
+    drawStartScreen(gsGlobal, &pad, &hud, &level1);
     
     drawLevelStart(gsGlobal, &hud, &mario, score, lives);
     mario.x = 0;
@@ -444,7 +447,7 @@ int main()
         gsKit_clear(gsGlobal, bg_color);
 
         pad.read();
-        if(!mario.canMoveDown(&level1, solid, 1) && !mario.animationMode)mario.sprite = 0;
+        if(!mario.canMoveDown(&level1, 1) && !mario.animationMode)mario.sprite = 0;
         else if(!mario.animationMode) mario.sprite = 5;
         // mario fell into a pit
         if(!mario.animationMode && mario.y > viewport.y + 208)
@@ -456,7 +459,7 @@ int main()
 
         if(!mario.animationMode)
         {
-            mario.reactToControllerInput(&pad, tick, &level1, solid, scale_factor, &superMario, &frameByFrame);
+            mario.reactToControllerInput(&pad, tick, &level1, scale_factor, &superMario, &frameByFrame);
         }
         else
         {
@@ -492,30 +495,30 @@ int main()
                 }
             }
             
-            if(!mario.animationMode && mario.canMoveDown(&level1, solid, mario.vy))
+            if(!mario.animationMode && mario.canMoveDown(&level1, mario.vy))
             {
                 mario.y += mario.vy;
                 if((tick & 3) == 0)mario.vy += gravity;
             }
             else if(!mario.animationMode)
             {
-                while(mario.vy > 0 && !mario.canMoveDown(&level1, solid, mario.vy))mario.vy--;
+                while(mario.vy > 0 && !mario.canMoveDown(&level1, mario.vy))mario.vy--;
                 mario.y += mario.vy;
                 mario.vy = 0;
                 
                 mario.sprite = 0;
             }
         }
-        else if(mario.vy < 0 || mario.canMoveDown(&level1, solid, 1)) // jumping
+        else if(mario.vy < 0 || mario.canMoveDown(&level1, 1)) // jumping
         {
-            if(mario.canMoveUp(&level1, solid, mario.vy*(-1)))
+            if(mario.canMoveUp(&level1, mario.vy*(-1)))
             {
                 mario.y += mario.vy;
                 if((tick & 3) == 0)mario.vy += gravity;
             }
             else
             {
-                while(mario.vy < 0 && !mario.canMoveUp(&level1, solid, mario.vy*(-1)))mario.vy++;
+                while(mario.vy < 0 && !mario.canMoveUp(&level1, mario.vy*(-1)))mario.vy++;
                 if(mario.vy == 0)
                 {
                     int index = level1.get_index(mario.x + 8, mario.y - 1);
@@ -563,7 +566,7 @@ int main()
             }
         }
         if(superMario)mario.sprite+=15;
-        drawScreen(gsGlobal, level1.spritesheet, scale_factor, &level1, viewport, map_data, solid);
+        drawScreen(gsGlobal, level1.spritesheet, scale_factor, &level1, viewport);
         mario.draw();
         for(int i = 0; i < 32; i++)
         {
@@ -649,12 +652,12 @@ int main()
             {
                 if(goomba[i].x > viewport.x && goomba[i].x < viewport.x + 320)
                 {
-                    goomba[i].traverse(&level1, solid);
-                    goomba[i].gravity(&level1, solid, tick, gravity);
+                    goomba[i].traverse(&level1);
+                    goomba[i].gravity(&level1,tick, gravity);
                 }
             }
-            koopa.traverse(&level1, solid);
-            koopa.gravity(&level1, solid, tick, gravity);
+            koopa.traverse(&level1);
+            koopa.gravity(&level1,tick, gravity);
             koopa.hflip = koopa.direction ^ 1;
             if((tick&7) == 0)koopa.sprite = 2;
             else koopa.sprite = 3;

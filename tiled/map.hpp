@@ -21,6 +21,7 @@ public:
     int tile_height;
     GSTEXTURE* spritesheet;
     u8* data;
+    u8* solid;
 };
 
 #endif
