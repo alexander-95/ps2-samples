@@ -127,8 +127,8 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
 
 void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, character* mario, int score, int lives)
 {
-    mario->x = 128;
-    mario->y = 128;
+    mario->worldCoordinates.x = 128;
+    mario->worldCoordinates.y = 128;
     for(u16 tick = 0; tick < 128; tick++)
     {
         hud->draw(0, 0);
@@ -292,22 +292,22 @@ void loadFlowers(pickup* flower)
 
 void loadGoombas(character* goomba)
 {    
-    goomba[0].x = 352; goomba[0].y = 192;goomba[0].direction = 0;
-    goomba[1].x = 640; goomba[1].y = 192;
-    goomba[2].x = 816; goomba[2].y = 192;
-    goomba[3].x = 848; goomba[3].y = 192;
-    goomba[4].x = 1280; goomba[4].y = 64;
-    goomba[5].x = 1312; goomba[5].y = 64;
-    goomba[6].x = 1552; goomba[6].y = 192;
-    goomba[7].x = 1576; goomba[7].y = 192;
-    goomba[8].x = 1824; goomba[8].y = 192;
-    goomba[9].x = 1848; goomba[9].y = 192;
-    goomba[10].x = 1984; goomba[10].y = 192;
-    goomba[11].x = 2008; goomba[11].y = 192;
-    goomba[12].x = 2048; goomba[12].y = 192;
-    goomba[13].x = 2072; goomba[13].y = 192;
-    goomba[14].x = 2784; goomba[14].y = 192;
-    goomba[15].x = 2808; goomba[15].y = 192;
+    goomba[0].worldCoordinates.x = 352; goomba[0].worldCoordinates.y = 192;goomba[0].direction = 0;
+    goomba[1].worldCoordinates.x = 640; goomba[1].worldCoordinates.y = 192;
+    goomba[2].worldCoordinates.x = 816; goomba[2].worldCoordinates.y = 192;
+    goomba[3].worldCoordinates.x = 848; goomba[3].worldCoordinates.y = 192;
+    goomba[4].worldCoordinates.x = 1280; goomba[4].worldCoordinates.y = 64;
+    goomba[5].worldCoordinates.x = 1312; goomba[5].worldCoordinates.y = 64;
+    goomba[6].worldCoordinates.x = 1552; goomba[6].worldCoordinates.y = 192;
+    goomba[7].worldCoordinates.x = 1576; goomba[7].worldCoordinates.y = 192;
+    goomba[8].worldCoordinates.x = 1824; goomba[8].worldCoordinates.y = 192;
+    goomba[9].worldCoordinates.x = 1848; goomba[9].worldCoordinates.y = 192;
+    goomba[10].worldCoordinates.x = 1984; goomba[10].worldCoordinates.y = 192;
+    goomba[11].worldCoordinates.x = 2008; goomba[11].worldCoordinates.y = 192;
+    goomba[12].worldCoordinates.x = 2048; goomba[12].worldCoordinates.y = 192;
+    goomba[13].worldCoordinates.x = 2072; goomba[13].worldCoordinates.y = 192;
+    goomba[14].worldCoordinates.x = 2784; goomba[14].worldCoordinates.y = 192;
+    goomba[15].worldCoordinates.x = 2808; goomba[15].worldCoordinates.y = 192;
 }
 
 GSGLOBAL* character::gsGlobal;
@@ -392,8 +392,8 @@ int main()
     
     koopa.spritesheet = &koopaSprites;
     koopa.height = 24;
-    koopa.x = 1712;
-    koopa.y = 184;
+    koopa.worldCoordinates.x = 1712;
+    koopa.worldCoordinates.y = 184;
 
     pickup::gsGlobal = gsGlobal;
     pickup::viewport = &viewport;
@@ -436,8 +436,8 @@ int main()
     drawStartScreen(gsGlobal, &pad, &hud, &level1);
     
     drawLevelStart(gsGlobal, &hud, &mario, score, lives);
-    mario.x = 0;
-    mario.y = 192;
+    mario.worldCoordinates.x = 0;
+    mario.worldCoordinates.y = 192;
     
     while(1)
     {
@@ -450,7 +450,7 @@ int main()
         if(!mario.canMoveDown(&level1, 1) && !mario.animationMode)mario.sprite = 0;
         else if(!mario.animationMode) mario.sprite = 5;
         // mario fell into a pit
-        if(!mario.animationMode && mario.y > viewport.y + 208)
+        if(!mario.animationMode && mario.worldCoordinates.y > viewport.y + 208)
         {
             printf("fell\n");
             mario.animationMode = 4;
@@ -472,9 +472,9 @@ int main()
             mario.animationFrame = 0;
             mario.sprite = 0;
             drawLevelStart(gsGlobal, &hud, &mario, score, lives);
-            mario.x = 0;
+            mario.worldCoordinates.x = 0;
             viewport.x = 0;
-            mario.y = 192;
+            mario.worldCoordinates.y = 192;
             mario.collisionDetection = 1;
             restart = 0;
         }
@@ -497,13 +497,13 @@ int main()
             
             if(!mario.animationMode && mario.canMoveDown(&level1, mario.vy))
             {
-                mario.y += mario.vy;
+                mario.worldCoordinates.y += mario.vy;
                 if((tick & 3) == 0)mario.vy += gravity;
             }
             else if(!mario.animationMode)
             {
                 while(mario.vy > 0 && !mario.canMoveDown(&level1, mario.vy))mario.vy--;
-                mario.y += mario.vy;
+                mario.worldCoordinates.y += mario.vy;
                 mario.vy = 0;
                 
                 mario.sprite = 0;
@@ -513,7 +513,7 @@ int main()
         {
             if(mario.canMoveUp(&level1, mario.vy*(-1)))
             {
-                mario.y += mario.vy;
+                mario.worldCoordinates.y += mario.vy;
                 if((tick & 3) == 0)mario.vy += gravity;
             }
             else
@@ -521,15 +521,15 @@ int main()
                 while(mario.vy < 0 && !mario.canMoveUp(&level1, mario.vy*(-1)))mario.vy++;
                 if(mario.vy == 0)
                 {
-                    int index = level1.get_index(mario.x + 8, mario.y - 1);
+                    int index = level1.get_index(mario.worldCoordinates.x + 8, mario.worldCoordinates.y - 1);
                     int coinx = ((index % 224) * 16)+4;
                     int coiny = (index / 224) * 16;
                     printf("hit box %d (%d) coin location: <%d, %d>\n", index,level1.data[index], coinx, coiny);
                     if(level1.data[index] == 11 || level1.data[index] == 33)
                     {
                         block1.sprite = 32;
-                        block1.x = ((mario.x + 8) >> 4)<<4;
-                        block1.y = ((mario.y - 1) >> 4)<<4;
+                        block1.x = ((mario.worldCoordinates.x + 8) >> 4)<<4;
+                        block1.y = ((mario.worldCoordinates.y - 1) >> 4)<<4;
                         block1.spritesheet = level1.spritesheet;
                         level1.data[index] = 0;
                         block1.active = 1;
@@ -551,7 +551,7 @@ int main()
                         else if(index == 1856)mushroom[1].activated = 1;
                     }
                 }
-                mario.y += mario.vy;
+                mario.worldCoordinates.y += mario.vy;
             }
         }
         else if(mario.vy == 0) // mario is only able to get killed by enemies when not jumping or falling
@@ -640,7 +640,7 @@ int main()
             {
                 for(int i = 0; i < 16; i++)
                 {
-                    if(goomba[i].x > viewport.x && goomba[i].x < viewport.x + 320)goomba[i].hflip^=1;
+                    if(goomba[i].isOnScreen())goomba[i].hflip^=1;
                 }
                 for(int i = 0; i < 32; i++)
                 {
@@ -650,7 +650,7 @@ int main()
             }
             for(int i = 0; i < 16; i++)
             {
-                if(goomba[i].x > viewport.x && goomba[i].x < viewport.x + 320)
+                if(goomba[i].isOnScreen())
                 {
                     goomba[i].traverse(&level1);
                     goomba[i].gravity(&level1,tick, gravity);

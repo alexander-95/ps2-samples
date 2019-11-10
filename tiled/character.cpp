@@ -7,8 +7,8 @@
 
 character::character()
 {
-    x = 0;
-    y = 0;
+    worldCoordinates.x = 0;
+    worldCoordinates.y = 0;
     vy = 0;
     sprite = 0;
     hflip = 0;
@@ -31,7 +31,7 @@ void character::draw()
     if(!activated)return;
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int u1 = width*sprite, v1 = 0, u2 = width*(sprite+1), v2 = height;
-    int x1 = x*2 - viewport->x*2, y1 = y*2 - viewport->y*2;
+    int x1 = worldCoordinates.x*2 - viewport->x*2, y1 = worldCoordinates.y*2 - viewport->y*2;
     if(hflip)
     {
         u1^=u2;
@@ -56,10 +56,10 @@ void character::draw()
 int character::canMoveDown(map* level, int n )
 {
     if(!collisionDetection)return 1;
-    int x1 = x;
-    int y1 = y+n+(height-1);
-    int x2 = x+(width-1);
-    int y2 = y+n+(height-1);
+    int x1 = worldCoordinates.x;
+    int y1 = worldCoordinates.y+n+(height-1);
+    int x2 = worldCoordinates.x+(width-1);
+    int y2 = worldCoordinates.y+n+(height-1);
     
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width);
@@ -79,10 +79,10 @@ int character::canMoveDown(map* level, int n )
 int character::canMoveUp(map* level, int n )
 {
     if(!collisionDetection)return 1;
-    int x1 = x;
-    int y1 = y-n;
-    int x2 = x+(width-1);
-    int y2 = y-n;
+    int x1 = worldCoordinates.x;
+    int y1 = worldCoordinates.y-n;
+    int x2 = worldCoordinates.x+(width-1);
+    int y2 = worldCoordinates.y-n;
     
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width);
@@ -102,10 +102,10 @@ int character::canMoveUp(map* level, int n )
 int character::canMoveRight(map* level, int n )
 {
     if(!collisionDetection)return 1;
-    int x1 = x+n+(width-1);
-    int y1 = y;
-    int x2 = x+n+(width-1);
-    int y2 = y+(height-1);
+    int x1 = worldCoordinates.x+n+(width-1);
+    int y1 = worldCoordinates.y;
+    int x2 = worldCoordinates.x+n+(width-1);
+    int y2 = worldCoordinates.y+(height-1);
     
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width);
@@ -127,10 +127,10 @@ int character::canMoveRight(map* level, int n )
 int character::canMoveLeft(map* level, int n )
 {
     if(!collisionDetection)return 1;
-    int x1 = x-n;
-    int y1 = y;
-    int x2 = x-n;
-    int y2 = y+(height-1);
+    int x1 = worldCoordinates.x-n;
+    int y1 = worldCoordinates.y;
+    int x2 = worldCoordinates.x-n;
+    int y2 = worldCoordinates.y+(height-1);
     
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width);
@@ -143,7 +143,7 @@ int character::canMoveLeft(map* level, int n )
     int index2 = tile_y2 * level->width + tile_x2;
     int value2 = level->data[index2];
 
-    if(!level->solid[value1] && !level->solid[value2] && x-n >= 0) return 1;
+    if(!level->solid[value1] && !level->solid[value2] && worldCoordinates.x-n >= 0) return 1;
     else return 0;
 }
 
@@ -152,12 +152,12 @@ void character::traverse(map* level)
     if(!activated)return;
     if(direction)
     {
-        if(canMoveRight(level, 1))x++;
+        if(canMoveRight(level, 1))worldCoordinates.x++;
         else direction = 0;
     }
     else
     {
-        if(canMoveLeft(level, 1))x--;
+        if(canMoveLeft(level, 1))worldCoordinates.x--;
         else direction = 1;
     }
 }
@@ -169,13 +169,13 @@ void character::gravity(map* level, u8 tick, int gravity )
     {
         if(canMoveDown(level, vy))
         {
-            y += vy;
+            worldCoordinates.y += vy;
             if((tick & 3) == 0)vy += gravity;
         }
         else
         {
             while(vy > 0 && !canMoveDown(level, vy))vy--;
-            y += vy;
+            worldCoordinates.y += vy;
             vy = 0;
         }
     }
@@ -183,20 +183,20 @@ void character::gravity(map* level, u8 tick, int gravity )
     {
         if(canMoveUp(level, vy*(-1)))
         {
-            y += vy;
+            worldCoordinates.y += vy;
             if((tick & 3) == 0)vy += gravity;
         }
         else
         {
             while(vy < 0 && !canMoveUp(level, vy*(-1)))vy++;
-            y += vy;
+            worldCoordinates.y += vy;
         }
     }
 }
 
 int character::isOnScreen()
 {
-    if(x > viewport->x && x < viewport->x + 320)return 1;
+    if(worldCoordinates.x > viewport->x && worldCoordinates.x < viewport->x + 320)return 1;
     else return 0;
 }
 
@@ -204,8 +204,10 @@ int character::isTouching(character* c)
 {
     if(!collisionDetection)return 0;
     u8 collision_x = 0, collision_y = 0;
-    if(c->x > x - c->width && c->x < x + width) collision_x = 1;
-    if(c->y > y - c->height && c->y < y + height) collision_y = 1;
+    if(c->worldCoordinates.x > worldCoordinates.x - c->width &&
+       c->worldCoordinates.x < worldCoordinates.x + width) collision_x = 1;
+    if(c->worldCoordinates.y > worldCoordinates.y - c->height &&
+       c->worldCoordinates.y < worldCoordinates.y + height) collision_y = 1;
     if(collision_x && collision_y) return 1;
     else return 0;
 }
@@ -214,16 +216,16 @@ int character::pickedup(pickup* p)
 {
     if(!p->activated)return 0;
     u8 collision_x = 0, collision_y = 0;
-    if(p->x > x - p->width && p->x < x + width) collision_x = 1;
-    if(p->y > y - p->height && p->y < y + height) collision_y = 1;
+    if(p->x > worldCoordinates.x - p->width && p->x < worldCoordinates.x + width) collision_x = 1;
+    if(p->y > worldCoordinates.y - p->height && p->y < worldCoordinates.y + height) collision_y = 1;
     if(collision_x && collision_y) return 1;
     else return 0;
 }
 
 u8 character::standingOnPipe(map* level)
 {
-    int x1 = x, y1 = y+height+1;
-    int x2 = x+width, y2 = y+height+1;
+    int x1 = worldCoordinates.x, y1 = worldCoordinates.y+height+1;
+    int x2 = worldCoordinates.x+width, y2 = worldCoordinates.y+height+1;
     
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width);
@@ -241,8 +243,8 @@ u8 character::standingOnPipe(map* level)
 }
 u8 character::pipeOnRight(map* level)
 {
-    int x1 = x+width+1, y1 = y;
-    int x2 = x+width+1, y2 = y+height-1;
+    int x1 = worldCoordinates.x+width+1, y1 = worldCoordinates.y;
+    int x2 = worldCoordinates.x+width+1, y2 = worldCoordinates.y+height-1;
     
     // figure out which tile mario is running into
     int tile_x1 = (x1 / level->tile_width);
@@ -264,7 +266,7 @@ u8 character::pipeOnRight(map* level)
 
 void character::print()
 {
-    printf("position: <%d, %d> vy: %d\n", x, y, vy);
+    printf("position: <%d, %d> vy: %d\n", worldCoordinates.x, worldCoordinates.y, vy);
 }
 
 void character::reactToControllerInput(controller* pad, u8 tick, map* level, int scale_factor, u8* superMario, u8* frameByFrame)
@@ -286,7 +288,7 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, int
         }
         if(canMoveLeft(level, 2))
         {
-            x-=2;
+            worldCoordinates.x-=2;
             if(viewport->x > 0 && viewport->y == 0)viewport->x-=2;
         }
     }
@@ -306,16 +308,16 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, int
         }
         if(canMoveRight(level, 2))
         {
-            x+=2;
+            worldCoordinates.x+=2;
             if(viewport->x+(gsGlobal->Width/(2*scale_factor)) < (level->width*level->tile_width) &&
-               x > (gsGlobal->Width/(2*scale_factor)) &&
+               worldCoordinates.x > (gsGlobal->Width/(2*scale_factor)) &&
                viewport->y == 0) viewport->x+=2;
         }
     }
     if(pad->up() || pad->x(1))
     {
         sprite = 5;
-        if(y > 0)
+        if(worldCoordinates.y > 0)
         {
             if(canMoveUp(level, 2) &&
                !canMoveDown(level, 2))vy = -6;//mario.y-=2;
@@ -336,14 +338,14 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, int
             *superMario = 0;
             height = 16;
             width = 16;
-            y+=16;
+            worldCoordinates.y+=16;
         }
         else
         {
             *superMario = 1;
             height = 32;
             width = 18;
-            y -= 16;
+            worldCoordinates.y -= 16;
         }
     }
     if(pad->square(1))
@@ -370,7 +372,7 @@ void character::doAnimation(u8 tick, u8* superMario, u8* restart)
         {
             if((tick & 7) == 0)
             {
-                y+=2;
+                worldCoordinates.y+=2;
                 animationFrame++;
             }
         }
@@ -380,8 +382,8 @@ void character::doAnimation(u8 tick, u8* superMario, u8* restart)
             animationFrame = 0;
             viewport->x = 2368;
             viewport->y = 240;
-            x = 2384;
-            y = 240;
+            worldCoordinates.x = 2384;
+            worldCoordinates.y = 240;
         }
     }
     // growing into big mario
@@ -395,7 +397,7 @@ void character::doAnimation(u8 tick, u8* superMario, u8* restart)
             if((tick & 3) == 0)
             {
                 sprite = arr1[animationFrame];
-                y += arr2[animationFrame];
+                worldCoordinates.y += arr2[animationFrame];
                 if(sprite == 0)
                 {
                     height = 16;
@@ -432,7 +434,7 @@ void character::doAnimation(u8 tick, u8* superMario, u8* restart)
         {
             if((tick & 1) == 0)
             {
-                y -= 5;
+                worldCoordinates.y -= 5;
                 animationFrame++;
             }
         }
@@ -440,7 +442,7 @@ void character::doAnimation(u8 tick, u8* superMario, u8* restart)
         {
             if((tick & 1) == 0)
             {
-                y += 5;
+                worldCoordinates.y += 5;
                 animationFrame++;
             }
         }
@@ -456,7 +458,7 @@ void character::doAnimation(u8 tick, u8* superMario, u8* restart)
         {
             if((tick & 7) == 0)
             {
-                x+=2;
+                worldCoordinates.x+=2;
                 animationFrame++;
             }
         }
@@ -466,8 +468,8 @@ void character::doAnimation(u8 tick, u8* superMario, u8* restart)
             animationFrame = 0;
             viewport->x = 0;
             viewport->y = 0;
-            x = 0;
-            y = 192;
+            worldCoordinates.x = 0;
+            worldCoordinates.y = 192;
         }
     }
 }

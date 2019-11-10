@@ -29,8 +29,7 @@ public:
     void doAnimation(u8 tick, u8* superMario, u8* restart);
     void print();
     
-    int x;
-    int y;
+    point worldCoordinates;
     int vy;
     int sprite; // sprite number to draw
     u8 hflip; // horizontal flip for sprite
