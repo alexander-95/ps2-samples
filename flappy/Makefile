@@ -3,7 +3,7 @@
 # |     ___|   |____
 
 BIN        = flappy.elf
-OBJS       = flappy.o controller.o log.o debugMenu.o graphics.o draw.o ioman.o bird.o pipe.o pipeList.o
+OBJS       = flappy.o controller.o log.o debugMenu.o graphics.o draw.o ioman.o bird.o pipe.o pipeList.o iterator.o
 TEX_OBJS   = spritesheet.o font.o
 AUDIO_OBJS = sfx_point.o sfx_wing.o sfx_hit.o sfx_die.o sfx_swooshing.o
 IRX_OBJS   = libsd.o audsrv.o
@@ -40,6 +40,8 @@ all:
 	ee-as -G0 audsrv.s -o audsrv.o
 
 #	create object files
+	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c iterator.cpp -o iterator.o
+
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -c controller.cpp -o controller.o
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c log.cpp -o log.o
 	ee-g++ -D_EE -O2 -G0 -Wall -I$(EE_INCLUDES) -I$(SDK_COMMON) -I$(GSKIT_INCLUDES) -c debugMenu.cpp -o debugMenu.o

@@ -34,6 +34,8 @@
 #include "audio/sfx_die.h"
 #include "audio/sfx_swooshing.h"
 
+#include "iterator.hpp"
+
 static int padBuf[256] __attribute__((aligned(64)));
 #define IO_CUSTOM_SIMPLEACTION 1 // handler for parameter-less actions
 
@@ -185,7 +187,7 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, textureResources*
     char* labels2[3] = {"red", "yellow", "blue"};
     item[1] = getItem("color", b->color, labels2, 0, 2, updateColor);
 
-    item[2] = getItem("color", *s->score, NULL, 0, 255, updateScore);
+    item[2] = getItem("score", *s->score, NULL, 0, 255, updateScore);
     
     menu.item = item;
     //menu.title = "DEBUG MENU";
