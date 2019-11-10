@@ -3,6 +3,7 @@
 // |     ___|   |____
 
 #include "debugMenu.hpp"
+#include "iterator.hpp"
 
 DebugMenu& DebugMenu::getInstance(Log* l, char* title)
 {
@@ -58,22 +59,29 @@ void DebugMenu::draw()
     
     // set the cursor location
     l->buffer[topLeft+2+((3+cursor)*l->bufWidth)] = '>';
+
+    MenuIter* iter = createIterator();
     
     // fill in the menu items
-    for(i = 0; i < 3; i++)
+    for(iter->first(); !iter->isDone();iter->next())
     {
         // fill out the menu item names
-        for(j = 0; item[i].name[j]; j++) l->buffer[topLeft+(l->bufWidth*(3+i))+j+4] = item[i].name[j];
-
-        if(item[i].label)
+        for(j = 0; iter->currentItem()->name[j]; j++)
         {
-            for(j = 0; item[i].label[item[i].val][j]; j++) l->buffer[topLeft+(l->bufWidth*(3+i))+j+14] = item[i].label[item[i].val][j];
+            l->buffer[topLeft+(l->bufWidth*(3+iter->index))+j+4] = iter->currentItem()->name[j];
+        }
+        if(iter->currentItem()->label)
+        {
+            for(j = 0; iter->currentItem()->label[iter->currentItem()->val][j]; j++)
+            {
+                l->buffer[topLeft+(l->bufWidth*(3+iter->index))+j+14] = iter->currentItem()->label[iter->currentItem()->val][j];
+            }
         }
         else
         {
             char label[3];
-            sprintf(label, "%d", item[i].val);
-            for(j = 0; label[j]; j++) l->buffer[topLeft+(l->bufWidth*(3+i))+j+14] = label[j];
+            sprintf(label, "%d", iter->currentItem()->val);
+            for(j = 0; label[j]; j++) l->buffer[topLeft+(l->bufWidth*(3+iter->index))+j+14] = label[j];
         }
     }
     active = 1;
@@ -146,4 +154,9 @@ void DebugMenu::prevItem()
     cursor--;
     if(cursor == -1) cursor = itemCount-1;
     setCursor();
+}
+
+MenuIter* DebugMenu::createIterator()
+{
+    return new MenuIter(this);
 }

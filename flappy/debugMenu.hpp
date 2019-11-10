@@ -4,6 +4,10 @@
 
 #include <gsKit.h>
 #include "log.hpp"
+#include "iterator.hpp"
+
+#ifndef DEBUGMENU_H
+#define DEBUGMENU_H
 
 class DebugMenu
 {
@@ -34,8 +38,10 @@ public:
     void prevValue();
     void nextItem();
     void prevItem();
-
+    MenuIter* createIterator();
 private:
     DebugMenu(Log* l, char* title);
     static DebugMenu* instance;
 };
+
+#endif
