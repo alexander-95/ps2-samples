@@ -22,11 +22,7 @@ public:
     void gravity(map* level, u8 tick, int gravity);
     int isOnScreen();
     int isTouching(character* c);
-    int pickedup(pickup* p);
-    u8 standingOnPipe(map* level);
-    u8 pipeOnRight(map* level);
-    void reactToControllerInput(controller* pad, u8 tick, map* level, int scale_factor, u8* superMario, u8* frameByFrame);
-    void doAnimation(u8 tick, u8* superMario, u8* restart);
+    //void doAnimation(u8 tick, u8* superMario, u8* restart);
     void print();
     
     point worldCoordinates;
@@ -45,4 +41,14 @@ public:
     
     static GSGLOBAL* gsGlobal;
     static point* viewport;
+};
+
+class PlayableCharacter : public character
+{
+public:
+    int pickedup(pickup* p);
+    u8 standingOnPipe(map* level);
+    u8 pipeOnRight(map* level);
+    void reactToControllerInput(controller* pad, u8 tick, map* level, int scale_factor, u8* superMario, u8* frameByFrame);
+    void doAnimation(u8 tick, u8* superMario, u8* restart);
 };

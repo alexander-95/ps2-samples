@@ -125,7 +125,7 @@ void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, ma
     }
 }
 
-void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, character* mario, int score, int lives)
+void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, PlayableCharacter* mario, int score, int lives)
 {
     mario->worldCoordinates.x = 128;
     mario->worldCoordinates.y = 128;
@@ -385,7 +385,8 @@ int main()
     character::gsGlobal = gsGlobal;
     character::viewport = &viewport;
     
-    character mario;
+    //character mario;
+    PlayableCharacter mario;
     mario.spritesheet = &marioSprites;
 
     character koopa;

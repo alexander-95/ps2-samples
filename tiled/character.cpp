@@ -212,7 +212,12 @@ int character::isTouching(character* c)
     else return 0;
 }
 
-int character::pickedup(pickup* p)
+void character::print()
+{
+    printf("position: <%d, %d> vy: %d\n", worldCoordinates.x, worldCoordinates.y, vy);
+}
+
+int PlayableCharacter::pickedup(pickup* p)
 {
     if(!p->activated)return 0;
     u8 collision_x = 0, collision_y = 0;
@@ -222,7 +227,7 @@ int character::pickedup(pickup* p)
     else return 0;
 }
 
-u8 character::standingOnPipe(map* level)
+u8 PlayableCharacter::standingOnPipe(map* level)
 {
     int x1 = worldCoordinates.x, y1 = worldCoordinates.y+height+1;
     int x2 = worldCoordinates.x+width, y2 = worldCoordinates.y+height+1;
@@ -241,7 +246,7 @@ u8 character::standingOnPipe(map* level)
     else return 0;
 
 }
-u8 character::pipeOnRight(map* level)
+u8 PlayableCharacter::pipeOnRight(map* level)
 {
     int x1 = worldCoordinates.x+width+1, y1 = worldCoordinates.y;
     int x2 = worldCoordinates.x+width+1, y2 = worldCoordinates.y+height-1;
@@ -264,12 +269,7 @@ u8 character::pipeOnRight(map* level)
 
 }
 
-void character::print()
-{
-    printf("position: <%d, %d> vy: %d\n", worldCoordinates.x, worldCoordinates.y, vy);
-}
-
-void character::reactToControllerInput(controller* pad, u8 tick, map* level, int scale_factor, u8* superMario, u8* frameByFrame)
+void PlayableCharacter::reactToControllerInput(controller* pad, u8 tick, map* level, int scale_factor, u8* superMario, u8* frameByFrame)
 {
     if(animationMode) return;
     if(pad->left())
@@ -363,7 +363,7 @@ void character::reactToControllerInput(controller* pad, u8 tick, map* level, int
     }
 }
 
-void character::doAnimation(u8 tick, u8* superMario, u8* restart)
+void PlayableCharacter::doAnimation(u8 tick, u8* superMario, u8* restart)
 {
     // mario is entering a pipe
     if(animationMode == 1)
@@ -473,3 +473,4 @@ void character::doAnimation(u8 tick, u8* superMario, u8* restart)
         }
     }
 }
+
