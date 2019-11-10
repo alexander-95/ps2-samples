@@ -224,7 +224,7 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1)
     }
 }
 
-void loadCoins(pickup* coin)
+void loadCoins(Coin* coin)
 {
     for(int i = 0; i < 32; i++)
     {
@@ -265,7 +265,7 @@ void loadCoins(pickup* coin)
     coin[28].x = 2516; coin[28].y = 320; coin[28].activated = 1;
 }
 
-void loadMushrooms(pickup* mushroom)
+void loadMushrooms(Mushroom* mushroom)
 {
     for(int i = 0; i < 4; i++)
     {
@@ -278,7 +278,7 @@ void loadMushrooms(pickup* mushroom)
     mushroom[1].x = 1024; mushroom[1].y = 128; mushroom[1].sprite = 1;
 }
 
-void loadFlowers(pickup* flower)
+void loadFlowers(Flower* flower)
 {
     for(int i = 0; i < 2; i++)
     {
@@ -399,15 +399,15 @@ int main()
     pickup::gsGlobal = gsGlobal;
     pickup::viewport = &viewport;
     
-    pickup coin[32];
+    Coin coin[32];
     for(int i = 0; i < 32; i++) coin[i].spritesheet = &pickupTexture;
     loadCoins(&coin[0]);    
     
-    pickup mushroom[4];
+    Mushroom mushroom[4];
     for(int i = 0; i < 4; i++)mushroom[i].spritesheet = &pickupTexture;
     loadMushrooms(&mushroom[0]);
     
-    pickup flower[2];
+    Flower flower[2];
     for(int i = 0; i < 2; i++)flower[i].spritesheet = &pickupTexture;
     loadFlowers(&flower[0]);
     
@@ -661,8 +661,7 @@ int main()
             koopa.gravity(&level1,tick, gravity);
             koopa.hflip = koopa.direction ^ 1;
             if((tick&7) == 0)koopa.sprite = 2;
-            else koopa.sprite = 3;
-            
+            else koopa.sprite = 3;            
         }
         if((tick&31) == 0)time--; // every 32 frames
         tick++;

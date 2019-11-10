@@ -46,26 +46,12 @@ void pickup::update()
 {
     if(activated)
     {
-        if(type == 0) // coin
-        {
-            int arr[25] ={-20, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
-            if(phase < 25)y+=arr[phase];
-            else
-            {
-                activated = 0;
-                printf("+200\n");
-            }
-            if(phase < 26)phase++;
+        if(phase < 8)y-=2;
+        else
+        {        
+            //printf("mushroom\n");
         }
-        else if(type == 1 or type == 2) // mushroom or flower
-        {
-            if(phase < 8)y-=2;
-            else
-            {        
-                //printf("mushroom\n");
-            }
-            if(phase < 9)phase++;
-        }
+        if(phase < 9)phase++;
     }
 }
 
@@ -81,4 +67,20 @@ void pickup::print()
     printf("type        = %d\n", type);
     printf("gsGlobal    = %p\n", gsGlobal);
     printf("spritesheet = %p\n\n", spritesheet);
+}
+
+
+void Coin::update()
+{
+    if(activated)
+    {
+        int arr[25] ={-20, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 };
+        if(phase < 25)y+=arr[phase];
+        else
+        {
+            activated = 0;
+            printf("+200\n");
+        }
+        if(phase < 26)phase++;
+    }
 }

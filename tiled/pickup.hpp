@@ -12,9 +12,9 @@ class pickup
 {
 public:
     pickup();
-    ~pickup();
+    virtual ~pickup();
     void draw();
-    void update();
+    virtual void update();
     void print();
     int x;
     int y;
@@ -27,6 +27,22 @@ public:
     GSTEXTURE* spritesheet;
     static GSGLOBAL* gsGlobal;
     static point* viewport;
+};
+
+class Coin : public pickup
+{
+public:
+    void update();
+};
+
+class Mushroom : public pickup
+{
+
+};
+
+class Flower : public pickup
+{
+
 };
 
 #endif
