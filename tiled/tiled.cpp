@@ -14,13 +14,13 @@
 #include "textures/cursor.h"
 
 #include "controller.hpp"
-#include "map.hpp"
 #include "map_data.h"
 #include "character.hpp"
 #include "block.hpp"
 #include "pickup.hpp"
 #include "HUD.hpp"
 
+#include "levelBuilder.hpp"
 #include "utils.h"
 
 void gsKit_texture_abgr(GSGLOBAL* gsGlobal, GSTEXTURE* tex, u32* arr, u32 width, u32 height)
@@ -56,12 +56,12 @@ GSTEXTURE loadTexture(GSGLOBAL* gsGlobal, u32* tex_array, int width, int height)
     GSTEXTURE tex;
     tex.Width=width;
     tex.Height=height;
-    tex.PSM = GS_PSM_CT32;;
+    tex.PSM = GS_PSM_CT32;
     gsKit_texture_abgr(gsGlobal, &tex, tex_array, width, height );
     return tex;
 }
 
-void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, point start, int value, int z)
+void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, LevelBuilderBase* level, point start, int value, int z)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int index_x = value % 8; // 8 is the width of the tilesheet, in tiles
@@ -87,7 +87,7 @@ void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map*
                             z,TexCol);
 }
 
-void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, map* level, point viewport)
+void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, LevelBuilderBase* level, point viewport)
 {
     // figure out the tile to draw
     point tile;
@@ -144,7 +144,7 @@ void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, PlayableCharacter* mario, int 
     printf("game started\n");
 }
 
-void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1)
+void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, LevelBuilder_1_1* level1)
 {
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
@@ -224,92 +224,6 @@ void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, map* level1)
     }
 }
 
-void loadCoins(Coin* coin)
-{
-    for(int i = 0; i < 32; i++)
-    {
-        coin[i].width = 8;
-        coin[i].height = 16;
-    }
-    coin[0].x = 260; coin[0].y = 144;
-    coin[1].x = 372; coin[1].y = 144;
-    coin[2].x = 356; coin[2].y = 80;
-    coin[3].x = 1508; coin[3].y = 80;
-    coin[4].x = 1700; coin[4].y = 144;
-    coin[5].x = 1748; coin[5].y = 144;
-    coin[6].x = 1796; coin[6].y = 144;
-    coin[7].x = 2068; coin[7].y = 80;
-    coin[8].x = 2084; coin[8].y = 80;
-    coin[9].x = 2724; coin[9].y = 144;
-
-    // underground coins
-    coin[10].x = 2436; coin[10].y = 384; coin[10].activated = 1;
-    coin[11].x = 2452; coin[11].y = 384; coin[11].activated = 1;
-    coin[12].x = 2468; coin[12].y = 384; coin[12].activated = 1;
-    coin[13].x = 2484; coin[13].y = 384; coin[13].activated = 1;
-    coin[14].x = 2500; coin[14].y = 384; coin[14].activated = 1;
-    coin[15].x = 2516; coin[15].y = 384; coin[15].activated = 1;
-    coin[16].x = 2532; coin[16].y = 384; coin[16].activated = 1;
-    coin[17].x = 2436; coin[17].y = 352; coin[17].activated = 1;
-    coin[18].x = 2452; coin[18].y = 352; coin[18].activated = 1;
-    coin[19].x = 2468; coin[19].y = 352; coin[19].activated = 1;
-    coin[20].x = 2484; coin[20].y = 352; coin[20].activated = 1;
-    coin[21].x = 2500; coin[21].y = 352; coin[21].activated = 1;
-    coin[22].x = 2516; coin[22].y = 352; coin[22].activated = 1;
-    coin[23].x = 2532; coin[23].y = 352; coin[23].activated = 1;
-    
-    coin[24].x = 2452; coin[24].y = 320; coin[24].activated = 1;
-    coin[25].x = 2468; coin[25].y = 320; coin[25].activated = 1;
-    coin[26].x = 2484; coin[26].y = 320; coin[26].activated = 1;
-    coin[27].x = 2500; coin[27].y = 320; coin[27].activated = 1;
-    coin[28].x = 2516; coin[28].y = 320; coin[28].activated = 1;
-}
-
-void loadMushrooms(Mushroom* mushroom)
-{
-    for(int i = 0; i < 4; i++)
-    {
-        mushroom[i].width = 16;
-        mushroom[i].height = 16;
-        mushroom[i].type = 1;
-        mushroom[i].activated = 0;
-    }
-    mushroom[0].x = 336; mushroom[0].y = 144;
-    mushroom[1].x = 1024; mushroom[1].y = 128; mushroom[1].sprite = 1;
-}
-
-void loadFlowers(Flower* flower)
-{
-    for(int i = 0; i < 2; i++)
-    {
-        flower[i].width = 16;
-        flower[i].height = 16;
-        flower[i].type = 2;
-    }
-    flower[0].x = 1248; flower[0].y = 144;
-    flower[1].x = 1744; flower[1].y = 80;
-}
-
-void loadGoombas(character* goomba)
-{    
-    goomba[0].worldCoordinates.x = 352; goomba[0].worldCoordinates.y = 192;goomba[0].direction = 0;
-    goomba[1].worldCoordinates.x = 640; goomba[1].worldCoordinates.y = 192;
-    goomba[2].worldCoordinates.x = 816; goomba[2].worldCoordinates.y = 192;
-    goomba[3].worldCoordinates.x = 848; goomba[3].worldCoordinates.y = 192;
-    goomba[4].worldCoordinates.x = 1280; goomba[4].worldCoordinates.y = 64;
-    goomba[5].worldCoordinates.x = 1312; goomba[5].worldCoordinates.y = 64;
-    goomba[6].worldCoordinates.x = 1552; goomba[6].worldCoordinates.y = 192;
-    goomba[7].worldCoordinates.x = 1576; goomba[7].worldCoordinates.y = 192;
-    goomba[8].worldCoordinates.x = 1824; goomba[8].worldCoordinates.y = 192;
-    goomba[9].worldCoordinates.x = 1848; goomba[9].worldCoordinates.y = 192;
-    goomba[10].worldCoordinates.x = 1984; goomba[10].worldCoordinates.y = 192;
-    goomba[11].worldCoordinates.x = 2008; goomba[11].worldCoordinates.y = 192;
-    goomba[12].worldCoordinates.x = 2048; goomba[12].worldCoordinates.y = 192;
-    goomba[13].worldCoordinates.x = 2072; goomba[13].worldCoordinates.y = 192;
-    goomba[14].worldCoordinates.x = 2784; goomba[14].worldCoordinates.y = 192;
-    goomba[15].worldCoordinates.x = 2808; goomba[15].worldCoordinates.y = 192;
-}
-
 GSGLOBAL* character::gsGlobal;
 GSGLOBAL* pickup::gsGlobal;
 GSGLOBAL* block::gsGlobal;
@@ -371,16 +285,11 @@ int main()
                               1,1,1,0,0,0,0,0,
                               1,1,1,0,0,0,0,0,
                               0,0,0,0,0,0,0,0};
+
     
     HUD hud;
     HUD::gsGlobal = gsGlobal;
     hud.spritesheet = &hudTexture;
-    
-    map level1;
-    level1.spritesheet = &tilesheet;
-    level1.data = map_data;
-    level1.solid = tilesheet_solid;
-    
     
     character::gsGlobal = gsGlobal;
     character::viewport = &viewport;
@@ -389,36 +298,19 @@ int main()
     PlayableCharacter mario;
     mario.spritesheet = &marioSprites;
 
-    character koopa;
-    
-    koopa.spritesheet = &koopaSprites;
-    koopa.height = 24;
-    koopa.worldCoordinates.x = 1712;
-    koopa.worldCoordinates.y = 184;
-
     pickup::gsGlobal = gsGlobal;
     pickup::viewport = &viewport;
-    
-    Coin coin[32];
-    for(int i = 0; i < 32; i++) coin[i].spritesheet = &pickupTexture;
-    loadCoins(&coin[0]);    
-    
-    Mushroom mushroom[4];
-    for(int i = 0; i < 4; i++)mushroom[i].spritesheet = &pickupTexture;
-    loadMushrooms(&mushroom[0]);
-    
-    Flower flower[2];
-    for(int i = 0; i < 2; i++)flower[i].spritesheet = &pickupTexture;
-    loadFlowers(&flower[0]);
-    
-    character goomba[16];
-    for(int i = 0; i < 16; i++)
-    {
-        goomba[i].spritesheet = &goombaSprites;
-        goomba[i].direction = 1;
-    }
-    loadGoombas(&goomba[0]);
 
+    LevelBuilder_1_1 level;
+    Coin* coin = level.loadCoins(&pickupTexture);    
+    Mushroom* mushroom = level.loadMushrooms(&pickupTexture);
+    Flower* flower = level.loadFlowers(&pickupTexture);
+    character* goomba = level.loadGoombas(&goombaSprites);
+    character* koopa = level.loadKoopas(&koopaSprites);
+    level.spritesheet = &tilesheet;
+    level.data = map_data;
+    level.solid = tilesheet_solid;
+    
     // this will represent the box that was hit
     block block1;
     block::gsGlobal = gsGlobal;
@@ -434,7 +326,7 @@ int main()
     u8 frameByFrame = 0;
     u8 restart = 0;
     
-    drawStartScreen(gsGlobal, &pad, &hud, &level1);
+    drawStartScreen(gsGlobal, &pad, &hud, &level);
     
     drawLevelStart(gsGlobal, &hud, &mario, score, lives);
     mario.worldCoordinates.x = 0;
@@ -448,7 +340,7 @@ int main()
         gsKit_clear(gsGlobal, bg_color);
 
         pad.read();
-        if(!mario.canMoveDown(&level1, 1) && !mario.animationMode)mario.sprite = 0;
+        if(!mario.canMoveDown(&level, 1) && !mario.animationMode)mario.sprite = 0;
         else if(!mario.animationMode) mario.sprite = 5;
         // mario fell into a pit
         if(!mario.animationMode && mario.worldCoordinates.y > viewport.y + 208)
@@ -456,11 +348,11 @@ int main()
             printf("fell\n");
             mario.animationMode = 4;
         }
-        if(mario.pipeOnRight(&level1))mario.animationMode = 5;
+        if(mario.pipeOnRight(&level))mario.animationMode = 5;
 
         if(!mario.animationMode)
         {
-            mario.reactToControllerInput(&pad, tick, &level1, scale_factor, &superMario, &frameByFrame);
+            mario.reactToControllerInput(&pad, tick, &level, scale_factor, &superMario, &frameByFrame);
         }
         else
         {
@@ -479,7 +371,6 @@ int main()
             mario.collisionDetection = 1;
             restart = 0;
         }
-
                 
         // dealing with gravity
         if(mario.vy > 0)
@@ -496,43 +387,43 @@ int main()
                 }
             }
             
-            if(!mario.animationMode && mario.canMoveDown(&level1, mario.vy))
+            if(!mario.animationMode && mario.canMoveDown(&level, mario.vy))
             {
                 mario.worldCoordinates.y += mario.vy;
                 if((tick & 3) == 0)mario.vy += gravity;
             }
             else if(!mario.animationMode)
             {
-                while(mario.vy > 0 && !mario.canMoveDown(&level1, mario.vy))mario.vy--;
+                while(mario.vy > 0 && !mario.canMoveDown(&level, mario.vy))mario.vy--;
                 mario.worldCoordinates.y += mario.vy;
                 mario.vy = 0;
                 
                 mario.sprite = 0;
             }
         }
-        else if(mario.vy < 0 || mario.canMoveDown(&level1, 1)) // jumping
+        else if(mario.vy < 0 || mario.canMoveDown(&level, 1)) // jumping
         {
-            if(mario.canMoveUp(&level1, mario.vy*(-1)))
+            if(mario.canMoveUp(&level, mario.vy*(-1)))
             {
                 mario.worldCoordinates.y += mario.vy;
                 if((tick & 3) == 0)mario.vy += gravity;
             }
             else
             {
-                while(mario.vy < 0 && !mario.canMoveUp(&level1, mario.vy*(-1)))mario.vy++;
+                while(mario.vy < 0 && !mario.canMoveUp(&level, mario.vy*(-1)))mario.vy++;
                 if(mario.vy == 0)
                 {
-                    int index = level1.get_index(mario.worldCoordinates.x + 8, mario.worldCoordinates.y - 1);
-                    int coinx = ((index % 224) * 16)+4;
-                    int coiny = (index / 224) * 16;
-                    printf("hit box %d (%d) coin location: <%d, %d>\n", index,level1.data[index], coinx, coiny);
-                    if(level1.data[index] == 11 || level1.data[index] == 33)
+                    int index = level.get_index(mario.worldCoordinates.x + 8, mario.worldCoordinates.y - 1);
+                    int coinx = ((index % level.width) * 16)+4;
+                    int coiny = (index / level.width) * 16;
+                    printf("hit box %d (%d) coin location: <%d, %d>\n", index,level.data[index], coinx, coiny);
+                    if(level.data[index] == 11 || level.data[index] == 33)
                     {
                         block1.sprite = 32;
                         block1.x = ((mario.worldCoordinates.x + 8) >> 4)<<4;
                         block1.y = ((mario.worldCoordinates.y - 1) >> 4)<<4;
-                        block1.spritesheet = level1.spritesheet;
-                        level1.data[index] = 0;
+                        block1.spritesheet = level.spritesheet;
+                        level.data[index] = 0;
                         block1.active = 1;
                         printf("viewport: <%d, %d>", viewport.x, viewport.y);
                         printf("<%d, %d>\n", block1.x, block1.y);
@@ -567,7 +458,7 @@ int main()
             }
         }
         if(superMario)mario.sprite+=15;
-        drawScreen(gsGlobal, level1.spritesheet, scale_factor, &level1, viewport);
+        drawScreen(gsGlobal, level.spritesheet, scale_factor, &level, viewport);
         mario.draw();
         for(int i = 0; i < 32; i++)
         {
@@ -608,7 +499,7 @@ int main()
         {
             if(goomba[i].isOnScreen())goomba[i].draw();
         }
-        if(koopa.isOnScreen())koopa.draw();
+        if(koopa[0].isOnScreen())koopa[0].draw();
 
         if(block1.active)
         {
@@ -617,12 +508,12 @@ int main()
             {
                 if(block1.update())
                 {
-                    int index_x = block1.x / level1.tile_width;
-                    int index_y = block1.y / level1.tile_height;
+                    int index_x = block1.x / level.tile_width;
+                    int index_y = block1.y / level.tile_height;
                     printf("box location: <%d, %d>\n", block1.x, block1.y);
                     block1.active = 0;
                     block1.phase = 0;
-                    level1.data[(index_y*level1.width)+index_x] = 32;
+                    level.data[(index_y*level.width)+index_x] = 32;
                 }
             }
         }
@@ -653,15 +544,15 @@ int main()
             {
                 if(goomba[i].isOnScreen())
                 {
-                    goomba[i].traverse(&level1);
-                    goomba[i].gravity(&level1,tick, gravity);
+                    goomba[i].traverse(&level);
+                    goomba[i].gravity(&level,tick, gravity);
                 }
             }
-            koopa.traverse(&level1);
-            koopa.gravity(&level1,tick, gravity);
-            koopa.hflip = koopa.direction ^ 1;
-            if((tick&7) == 0)koopa.sprite = 2;
-            else koopa.sprite = 3;            
+            koopa[0].traverse(&level);
+            koopa[0].gravity(&level,tick, gravity);
+            koopa[0].hflip = koopa[0].direction ^ 1;
+            if((tick&7) == 0)koopa[0].sprite = 2;
+            else koopa[0].sprite = 3;            
         }
         if((tick&31) == 0)time--; // every 32 frames
         tick++;
