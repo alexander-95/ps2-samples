@@ -2,6 +2,9 @@
 //  ____|   |    ____|
 // |     ___|   |____
 
+#ifndef CHARACTER_HPP
+#define CHARACTER_HPP
+
 #include <gsKit.h>
 #include "levelBuilder.hpp"
 #include "pickup.hpp"
@@ -52,3 +55,5 @@ public:
     void reactToControllerInput(controller* pad, u8 tick, LevelBuilderBase* level, int scale_factor, u8* superMario, u8* frameByFrame);
     void doAnimation(u8 tick, u8* superMario, u8* restart);
 };
+
+#endif

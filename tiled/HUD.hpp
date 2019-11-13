@@ -2,6 +2,9 @@
 //  ____|   |    ____|
 // |     ___|   |____
 
+#ifndef HUD_HPP
+#define HUD_HPP
+
 #include <gsKit.h>
 
 class HUD
@@ -23,3 +26,5 @@ public:
     GSTEXTURE* spritesheet;
     static GSGLOBAL* gsGlobal;
 };
+
+#endif
