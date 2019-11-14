@@ -102,9 +102,9 @@ int main()
     pickup::viewport = &viewport;
 
     LevelBuilder_1_1 level;
-    Coin* coin = level.loadCoins(&pickupTexture);    
-    Mushroom* mushroom = level.loadMushrooms(&pickupTexture);
-    Flower* flower = level.loadFlowers(&pickupTexture);
+    level.loadCoins(&pickupTexture);    
+    level.loadMushrooms(&pickupTexture);
+    level.loadFlowers(&pickupTexture);
     character* goomba = level.loadGoombas(&goombaSprites);
     character* koopa = level.loadKoopas(&koopaSprites);
     level.spritesheet = &tilesheet;
@@ -218,9 +218,9 @@ int main()
                     pickup.x = (index % level.width) * 16;
                     pickup.y = (index / level.width) * 16;
 
-                    Coin* collected_coin = level.getCoin(coin, pickup.x + 4, pickup.y);
-                    Flower* collected_flower = level.getFlower(flower, pickup.x, pickup.y);
-                    Mushroom* collected_mushroom = level.getMushroom(mushroom, pickup.x, pickup.y);
+                    Coin* collected_coin = level.getCoin(pickup.x + 4, pickup.y);
+                    Flower* collected_flower = level.getFlower(pickup.x, pickup.y);
+                    Mushroom* collected_mushroom = level.getMushroom(pickup.x, pickup.y);
                     
                     printf("hit box %d (%d) coin location: <%d, %d>\n", index,level.data[index], pickup.x, pickup.y);
                     if(level.data[index] == 11 || level.data[index] == 33)
@@ -268,37 +268,37 @@ int main()
         mario.draw();
         for(int i = 0; i < 32; i++)
         {
-            coin[i].draw();
-            if(i < 10)coin[i].update();
-            if(mario.pickedup(&coin[i]))
+            level.coin[i].draw();
+            if(i < 10)level.coin[i].update();
+            if(mario.pickedup(&level.coin[i]))
             {
                 printf("picked up a coin\n");
-                coin[i].activated = 0;
+                level.coin[i].activated = 0;
                 score+=200;
             }
         }
         for(int i = 0; i < 4; i++)
         {
-            if(mario.pickedup(&mushroom[0]))
+            if(mario.pickedup(&level.mushroom[0]))
             {
                 printf("picked up mushroom\n");
-                mushroom[i].activated = 0;
+                level.mushroom[i].activated = 0;
                 mario.animationMode = 2;
             }
-            mushroom[i].draw();
-            mushroom[i].update();
+            level.mushroom[i].draw();
+            level.mushroom[i].update();
         }
         for(int i = 0; i < 2; i++)
         {
-            flower[i].draw();
+            level.flower[i].draw();
             if((tick & 7)==0)
             {
-                flower[i].update();
+                level.flower[i].update();
             }
             if(tick&1)
             {
-                flower[i].sprite++;
-                flower[i].sprite&=3;
+                level.flower[i].sprite++;
+                level.flower[i].sprite&=3;
             }
         }
         for(int i = 0;i < 16; i++)
@@ -342,8 +342,8 @@ int main()
                 }
                 for(int i = 0; i < 32; i++)
                 {
-                    coin[i].sprite++;
-                    coin[i].sprite&=3;
+                    level.coin[i].sprite++;
+                    level.coin[i].sprite&=3;
                 }
             }
             for(int i = 0; i < 16; i++)

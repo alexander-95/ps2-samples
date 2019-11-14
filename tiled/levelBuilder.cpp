@@ -17,7 +17,7 @@ u16 LevelBuilder_1_1::get_index(int x, int y)
     int index_y = y / tile_height;
     return (index_y*width)+index_x;
 }
-Coin* LevelBuilder_1_1::getCoin(Coin* coin, int x, int y)
+Coin* LevelBuilder_1_1::getCoin(int x, int y)
 {
     for(int i = 0; i < coinCount; i++)
     {
@@ -29,7 +29,7 @@ Coin* LevelBuilder_1_1::getCoin(Coin* coin, int x, int y)
     }
     return NULL;
 }
-Mushroom* LevelBuilder_1_1::getMushroom(Mushroom* mushroom, int x, int y)
+Mushroom* LevelBuilder_1_1::getMushroom(int x, int y)
 {
     for(int i = 0; i < mushroomCount; i++)
     {
@@ -41,7 +41,7 @@ Mushroom* LevelBuilder_1_1::getMushroom(Mushroom* mushroom, int x, int y)
     }
     return NULL;
 }
-Flower* LevelBuilder_1_1::getFlower(Flower* flower, int x, int y)
+Flower* LevelBuilder_1_1::getFlower(int x, int y)
 {
     for(int i = 0; i < flowerCount; i++)
     {
@@ -70,9 +70,9 @@ LevelBuilder_1_1::~LevelBuilder_1_1()
 
 }
 
-Coin* LevelBuilder_1_1::loadCoins(GSTEXTURE* tex)
+void LevelBuilder_1_1::loadCoins(GSTEXTURE* tex)
 {
-    Coin* coin = new Coin[coinCount];
+    coin = new Coin[coinCount];
     
     for(int i = 0; i < 32; i++)
     {
@@ -112,14 +112,12 @@ Coin* LevelBuilder_1_1::loadCoins(GSTEXTURE* tex)
     coin[26].x = 2484; coin[26].y = 320; coin[26].activated = 1;
     coin[27].x = 2500; coin[27].y = 320; coin[27].activated = 1;
     coin[28].x = 2516; coin[28].y = 320; coin[28].activated = 1;
-
-    return coin;
 }
 
-Mushroom* LevelBuilder_1_1::loadMushrooms(GSTEXTURE* tex)
+void LevelBuilder_1_1::loadMushrooms(GSTEXTURE* tex)
 {
     mushroomCount = 4;
-    Mushroom* mushroom = new Mushroom[mushroomCount];
+    mushroom = new Mushroom[mushroomCount];
     for(int i = 0; i < 4; i++)
     {
         mushroom[i].width = 16;
@@ -130,13 +128,12 @@ Mushroom* LevelBuilder_1_1::loadMushrooms(GSTEXTURE* tex)
     }
     mushroom[0].x = 336; mushroom[0].y = 144;
     mushroom[1].x = 1024; mushroom[1].y = 128; mushroom[1].sprite = 1;
-    return mushroom;
 }
 
-Flower* LevelBuilder_1_1::loadFlowers(GSTEXTURE* tex)
+void LevelBuilder_1_1::loadFlowers(GSTEXTURE* tex)
 {
     flowerCount = 2;
-    Flower* flower = new Flower[flowerCount];
+    flower = new Flower[flowerCount];
     for(int i = 0; i < 2; i++)
     {
         flower[i].width = 16;
@@ -146,7 +143,6 @@ Flower* LevelBuilder_1_1::loadFlowers(GSTEXTURE* tex)
     }
     flower[0].x = 1248; flower[0].y = 144;
     flower[1].x = 1744; flower[1].y = 80;
-    return flower;
 }
 
 character* LevelBuilder_1_1::loadGoombas(GSTEXTURE* tex)

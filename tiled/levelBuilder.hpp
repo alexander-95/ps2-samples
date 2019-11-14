@@ -23,6 +23,12 @@ public:
     u8 goombaCount;
     u8 koopaCount;
 
+    character* goomba;
+    character* koopa;
+    Coin* coin;
+    Flower* flower;
+    Mushroom* mushroom;
+
     u8 width;
     u8 height;
     u8 absoluteHeight;
@@ -38,16 +44,16 @@ class LevelBuilder_1_1 : public LevelBuilderBase
 public:
     LevelBuilder_1_1();
     ~LevelBuilder_1_1();
-    Coin* loadCoins(GSTEXTURE* tex);
-    Mushroom* loadMushrooms(GSTEXTURE* tex);
-    Flower* loadFlowers(GSTEXTURE* tex);
+    void loadCoins(GSTEXTURE* tex);
+    void loadMushrooms(GSTEXTURE* tex);
+    void loadFlowers(GSTEXTURE* tex);
     character* loadGoombas(GSTEXTURE* tex);
     character* loadKoopas(GSTEXTURE* tex);
     u8 get_box(int x, int y);
     u16 get_index(int x, int y);
-    Coin* getCoin(Coin* coin, int x, int y);
-    Mushroom* getMushroom(Mushroom* mushroom, int x, int y);
-    Flower* getFlower(Flower* flower, int x, int y);
+    Coin* getCoin(int x, int y);
+    Mushroom* getMushroom(int x, int y);
+    Flower* getFlower(int x, int y);
 };
 
 class LevelBuilder_1_2
