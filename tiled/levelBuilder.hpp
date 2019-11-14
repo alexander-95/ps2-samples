@@ -47,8 +47,8 @@ public:
     void loadCoins(GSTEXTURE* tex);
     void loadMushrooms(GSTEXTURE* tex);
     void loadFlowers(GSTEXTURE* tex);
-    character* loadGoombas(GSTEXTURE* tex);
-    character* loadKoopas(GSTEXTURE* tex);
+    void loadGoombas(GSTEXTURE* tex);
+    void loadKoopas(GSTEXTURE* tex);
     u8 get_box(int x, int y);
     u16 get_index(int x, int y);
     Coin* getCoin(int x, int y);

@@ -145,10 +145,10 @@ void LevelBuilder_1_1::loadFlowers(GSTEXTURE* tex)
     flower[1].x = 1744; flower[1].y = 80;
 }
 
-character* LevelBuilder_1_1::loadGoombas(GSTEXTURE* tex)
+void LevelBuilder_1_1::loadGoombas(GSTEXTURE* tex)
 {    
     goombaCount = 16;
-    character* goomba = new character[goombaCount];
+    goomba = new character[goombaCount];
 
     for(int i = 0; i < goombaCount; i++)
     {
@@ -172,19 +172,17 @@ character* LevelBuilder_1_1::loadGoombas(GSTEXTURE* tex)
     goomba[13].worldCoordinates.x = 2072; goomba[13].worldCoordinates.y = 192;
     goomba[14].worldCoordinates.x = 2784; goomba[14].worldCoordinates.y = 192;
     goomba[15].worldCoordinates.x = 2808; goomba[15].worldCoordinates.y = 192;
-    return goomba;
 }
 
-character* LevelBuilder_1_1::loadKoopas(GSTEXTURE* tex)
+void LevelBuilder_1_1::loadKoopas(GSTEXTURE* tex)
 {
     koopaCount = 1;
-    character* koopa = new character[koopaCount];
+    koopa = new character[koopaCount];
     koopa[0].spritesheet = tex;
 
     koopa[0].height = 24;
     koopa[0].worldCoordinates.x = 1712;
     koopa[0].worldCoordinates.y = 184;
-    return koopa;
 }
 
 

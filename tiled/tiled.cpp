@@ -105,8 +105,8 @@ int main()
     level.loadCoins(&pickupTexture);    
     level.loadMushrooms(&pickupTexture);
     level.loadFlowers(&pickupTexture);
-    character* goomba = level.loadGoombas(&goombaSprites);
-    character* koopa = level.loadKoopas(&koopaSprites);
+    level.loadGoombas(&goombaSprites);
+    level.loadKoopas(&koopaSprites);
     level.spritesheet = &tilesheet;
     level.data = map_data;
     level.solid = tilesheet_solid;
@@ -178,12 +178,12 @@ int main()
             // did mario stomp any goombas?
             for(int i = 0; i < 16; i++)
             {
-                if(goomba[i].isOnScreen() && mario.isTouching(&goomba[i]))
+                if(level.goomba[i].isOnScreen() && mario.isTouching(&level.goomba[i]))
                 {
-                    goomba[i].sprite = 1;
+                    level.goomba[i].sprite = 1;
                     mario.vy = -6;
-                    goomba[i].activated = 0;
-                    goomba[i].collisionDetection = 0;
+                    level.goomba[i].activated = 0;
+                    level.goomba[i].collisionDetection = 0;
                 }
             }
             
@@ -256,7 +256,7 @@ int main()
         {
             for(int i = 0; i < 16; i++)
             {
-                if(mario.animationMode == 0 && goomba[i].isOnScreen() && mario.isTouching(&goomba[i]))
+                if(mario.animationMode == 0 && level.goomba[i].isOnScreen() && mario.isTouching(&level.goomba[i]))
                 {
                     printf("touching a goomba\n");
                     mario.animationMode = 4;
@@ -303,9 +303,9 @@ int main()
         }
         for(int i = 0;i < 16; i++)
         {
-            if(goomba[i].isOnScreen())goomba[i].draw();
+            if(level.goomba[i].isOnScreen())level.goomba[i].draw();
         }
-        if(koopa[0].isOnScreen())koopa[0].draw();
+        if(level.koopa[0].isOnScreen())level.koopa[0].draw();
 
         if(block1.active)
         {
@@ -338,7 +338,7 @@ int main()
             {
                 for(int i = 0; i < 16; i++)
                 {
-                    if(goomba[i].isOnScreen())goomba[i].hflip^=1;
+                    if(level.goomba[i].isOnScreen())level.goomba[i].hflip^=1;
                 }
                 for(int i = 0; i < 32; i++)
                 {
@@ -348,17 +348,17 @@ int main()
             }
             for(int i = 0; i < 16; i++)
             {
-                if(goomba[i].isOnScreen())
+                if(level.goomba[i].isOnScreen())
                 {
-                    goomba[i].traverse(&level);
-                    goomba[i].gravity(&level,tick, gravity);
+                    level.goomba[i].traverse(&level);
+                    level.goomba[i].gravity(&level,tick, gravity);
                 }
             }
-            koopa[0].traverse(&level);
-            koopa[0].gravity(&level,tick, gravity);
-            koopa[0].hflip = koopa[0].direction ^ 1;
-            if((tick&7) == 0)koopa[0].sprite = 2;
-            else koopa[0].sprite = 3;            
+            level.koopa[0].traverse(&level);
+            level.koopa[0].gravity(&level,tick, gravity);
+            level.koopa[0].hflip = level.koopa[0].direction ^ 1;
+            if((tick&7) == 0)level.koopa[0].sprite = 2;
+            else level.koopa[0].sprite = 3;            
         }
         if((tick&31) == 0)time--; // every 32 frames
         tick++;
