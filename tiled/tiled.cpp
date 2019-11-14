@@ -86,7 +86,6 @@ int main()
                               1,1,1,0,0,0,0,0,
                               1,1,1,0,0,0,0,0,
                               0,0,0,0,0,0,0,0};
-
     
     HUD hud;
     HUD::gsGlobal = gsGlobal;
@@ -215,9 +214,15 @@ int main()
                 if(mario.vy == 0)
                 {
                     int index = level.get_index(mario.worldCoordinates.x + 8, mario.worldCoordinates.y - 1);
-                    int coinx = ((index % level.width) * 16)+4;
-                    int coiny = (index / level.width) * 16;
-                    printf("hit box %d (%d) coin location: <%d, %d>\n", index,level.data[index], coinx, coiny);
+                    point pickup;
+                    pickup.x = (index % level.width) * 16;
+                    pickup.y = (index / level.width) * 16;
+
+                    Coin* collected_coin = level.getCoin(coin, pickup.x + 4, pickup.y);
+                    Flower* collected_flower = level.getFlower(flower, pickup.x, pickup.y);
+                    Mushroom* collected_mushroom = level.getMushroom(mushroom, pickup.x, pickup.y);
+                    
+                    printf("hit box %d (%d) coin location: <%d, %d>\n", index,level.data[index], pickup.x, pickup.y);
                     if(level.data[index] == 11 || level.data[index] == 33)
                     {
                         block1.sprite = 32;
@@ -228,20 +233,20 @@ int main()
                         block1.active = 1;
                         printf("viewport: <%d, %d>", viewport.x, viewport.y);
                         printf("<%d, %d>\n", block1.x, block1.y);
-                        if(index == 2032){coin[0].activated = 1;score+=200;}
-                        else if(index == 2037)mushroom[0].activated = 1;
-                        else if(index == 2039){coin[1].activated = 1;score+=200;}
-                        else if(index == 1142){coin[2].activated = 1;score+=200;}
-                        else if(index == 1214){coin[3].activated = 1;score+=200;}
-                        else if(index == 2122){coin[4].activated = 1;score+=200;}
-                        else if(index == 2125){coin[5].activated = 1;score+=200;}
-                        else if(index == 2128){coin[6].activated = 1;score+=200;}
-                        else if(index == 1249){coin[7].activated = 1;score+=200;}
-                        else if(index == 1250){coin[8].activated = 1;score+=200;}
-                        else if(index == 2186){coin[9].activated = 1;score+=200;}
-                        else if(index == 2094)flower[0].activated = 1;
-                        else if(index == 1229)flower[1].activated = 1;
-                        else if(index == 1856)mushroom[1].activated = 1;
+
+                        if(collected_coin)
+                        {
+                            collected_coin->activated = 1;
+                            score+=200;
+                        }
+                        else if(collected_flower)
+                        {
+                            collected_flower->activated = 1;
+                        }
+                        else if(collected_mushroom)
+                        {
+                            collected_mushroom->activated = 1;
+                        }
                     }
                 }
                 mario.worldCoordinates.y += mario.vy;

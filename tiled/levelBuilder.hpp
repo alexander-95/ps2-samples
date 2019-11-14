@@ -45,7 +45,9 @@ public:
     character* loadKoopas(GSTEXTURE* tex);
     u8 get_box(int x, int y);
     u16 get_index(int x, int y);
-
+    Coin* getCoin(Coin* coin, int x, int y);
+    Mushroom* getMushroom(Mushroom* mushroom, int x, int y);
+    Flower* getFlower(Flower* flower, int x, int y);
 };
 
 class LevelBuilder_1_2

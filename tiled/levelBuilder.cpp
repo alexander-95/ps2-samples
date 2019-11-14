@@ -17,6 +17,42 @@ u16 LevelBuilder_1_1::get_index(int x, int y)
     int index_y = y / tile_height;
     return (index_y*width)+index_x;
 }
+Coin* LevelBuilder_1_1::getCoin(Coin* coin, int x, int y)
+{
+    for(int i = 0; i < coinCount; i++)
+    {
+        if(coin[i].x == x && coin[i].y == y)
+        {
+            printf("returning coin %d\n", i);
+            return &coin[i];
+        }
+    }
+    return NULL;
+}
+Mushroom* LevelBuilder_1_1::getMushroom(Mushroom* mushroom, int x, int y)
+{
+    for(int i = 0; i < mushroomCount; i++)
+    {
+        if(mushroom[i].x == x && mushroom[i].y == y)
+        {
+            printf("returning mushroom %d\n", i);
+            return &mushroom[i];
+        }
+    }
+    return NULL;
+}
+Flower* LevelBuilder_1_1::getFlower(Flower* flower, int x, int y)
+{
+    for(int i = 0; i < flowerCount; i++)
+    {
+        if(flower[i].x == x && flower[i].y == y)
+        {
+            printf("returning flower %d\n", i);
+            return &flower[i];
+        }
+    }
+    return NULL;
+}
 
 LevelBuilder_1_1::LevelBuilder_1_1()
 {
