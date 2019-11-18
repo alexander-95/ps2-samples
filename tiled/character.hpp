@@ -17,12 +17,12 @@ public:
     character();
     ~character();
     void draw();
-    int canMoveDown(LevelBuilderBase* level, int n);
-    int canMoveUp(LevelBuilderBase* level, int n);
-    int canMoveLeft(LevelBuilderBase* level, int n);
-    int canMoveRight(LevelBuilderBase* level, int n);
-    void traverse(LevelBuilderBase* level);
-    void gravity(LevelBuilderBase* level, u8 tick, int gravity);
+    int canMoveDown(Level* level, int n);
+    int canMoveUp(Level* level, int n);
+    int canMoveLeft(Level* level, int n);
+    int canMoveRight(Level* level, int n);
+    void traverse(Level* level);
+    void gravity(Level* level, u8 tick, int gravity);
     int isOnScreen();
     int isTouching(character* c);
     //void doAnimation(u8 tick, u8* superMario, u8* restart);
@@ -50,9 +50,9 @@ class PlayableCharacter : public character
 {
 public:
     int pickedup(pickup* p);
-    u8 standingOnPipe(LevelBuilderBase* level);
-    u8 pipeOnRight(LevelBuilderBase* level);
-    void reactToControllerInput(controller* pad, u8 tick, LevelBuilderBase* level, int scale_factor, u8* superMario, u8* frameByFrame);
+    u8 standingOnPipe(Level* level);
+    u8 pipeOnRight(Level* level);
+    void reactToControllerInput(controller* pad, u8 tick, Level* level, int scale_factor, u8* superMario, u8* frameByFrame);
     void doAnimation(u8 tick, u8* superMario, u8* restart);
 };
 

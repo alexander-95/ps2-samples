@@ -53,7 +53,7 @@ void character::draw()
                             1, TexCol);
 }
 
-int character::canMoveDown(LevelBuilderBase* level, int n )
+int character::canMoveDown(Level* level, int n )
 {
     if(!collisionDetection)return 1;
     int x1 = worldCoordinates.x;
@@ -76,7 +76,7 @@ int character::canMoveDown(LevelBuilderBase* level, int n )
     else return 0;
 }
 
-int character::canMoveUp(LevelBuilderBase* level, int n )
+int character::canMoveUp(Level* level, int n )
 {
     if(!collisionDetection)return 1;
     int x1 = worldCoordinates.x;
@@ -99,7 +99,7 @@ int character::canMoveUp(LevelBuilderBase* level, int n )
     else return 0;
 }
 
-int character::canMoveRight(LevelBuilderBase* level, int n )
+int character::canMoveRight(Level* level, int n )
 {
     if(!collisionDetection)return 1;
     int x1 = worldCoordinates.x+n+(width-1);
@@ -124,7 +124,7 @@ int character::canMoveRight(LevelBuilderBase* level, int n )
     else return 0;
 }
 
-int character::canMoveLeft(LevelBuilderBase* level, int n )
+int character::canMoveLeft(Level* level, int n )
 {
     if(!collisionDetection)return 1;
     int x1 = worldCoordinates.x-n;
@@ -147,7 +147,7 @@ int character::canMoveLeft(LevelBuilderBase* level, int n )
     else return 0;
 }
 
-void character::traverse(LevelBuilderBase* level)
+void character::traverse(Level* level)
 {
     if(!activated)return;
     if(direction)
@@ -162,7 +162,7 @@ void character::traverse(LevelBuilderBase* level)
     }
 }
 
-void character::gravity(LevelBuilderBase* level, u8 tick, int gravity )
+void character::gravity(Level* level, u8 tick, int gravity )
 {
     if(!activated)return;
     if(vy > 0)
@@ -227,7 +227,7 @@ int PlayableCharacter::pickedup(pickup* p)
     else return 0;
 }
 
-u8 PlayableCharacter::standingOnPipe(LevelBuilderBase* level)
+u8 PlayableCharacter::standingOnPipe(Level* level)
 {
     int x1 = worldCoordinates.x, y1 = worldCoordinates.y+height+1;
     int x2 = worldCoordinates.x+width, y2 = worldCoordinates.y+height+1;
@@ -246,7 +246,7 @@ u8 PlayableCharacter::standingOnPipe(LevelBuilderBase* level)
     else return 0;
 
 }
-u8 PlayableCharacter::pipeOnRight(LevelBuilderBase* level)
+u8 PlayableCharacter::pipeOnRight(Level* level)
 {
     int x1 = worldCoordinates.x+width+1, y1 = worldCoordinates.y;
     int x2 = worldCoordinates.x+width+1, y2 = worldCoordinates.y+height-1;
@@ -269,7 +269,7 @@ u8 PlayableCharacter::pipeOnRight(LevelBuilderBase* level)
 
 }
 
-void PlayableCharacter::reactToControllerInput(controller* pad, u8 tick, LevelBuilderBase* level, int scale_factor, u8* superMario, u8* frameByFrame)
+void PlayableCharacter::reactToControllerInput(controller* pad, u8 tick, Level* level, int scale_factor, u8* superMario, u8* frameByFrame)
 {
     if(animationMode) return;
     if(pad->left())

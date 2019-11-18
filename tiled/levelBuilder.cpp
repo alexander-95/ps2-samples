@@ -2,22 +2,44 @@
 //  ____|   |    ____|
 // |     ___|   |____
 
+#include <gsKit.h>
+#include "graphics.hpp"
 #include "levelBuilder.hpp"
 #include "pickup.hpp"
 #include "character.hpp"
+#include "map_data.h"
 
-u8 LevelBuilder_1_1::get_box(int x, int y)
+LevelBuilderBase::LevelBuilderBase(GSGLOBAL* gsGlobal, GSTEXTURE* tilesheet, GSTEXTURE* pickupTexture, GSTEXTURE* koopaSprites, GSTEXTURE* goombaSprites)
+{
+    this->gsGlobal = gsGlobal;
+    this->tilesheet = tilesheet;
+    this->pickupTexture = pickupTexture;
+    this->koopaSprites = koopaSprites;
+    this->goombaSprites = goombaSprites;
+}
+
+LevelBuilderBase::~LevelBuilderBase()
+{
+
+}
+
+Level* LevelBuilderBase::build(GSGLOBAL* gsGlobal)
+{
+    return NULL;
+}
+
+u8 Level::get_box(int x, int y)
 {
     int index = get_index(x, y);
     return data[index];
 }
-u16 LevelBuilder_1_1::get_index(int x, int y)
+u16 Level::get_index(int x, int y)
 {
     int index_x = x / tile_width;
     int index_y = y / tile_height;
     return (index_y*width)+index_x;
 }
-Coin* LevelBuilder_1_1::getCoin(int x, int y)
+Coin* Level::getCoin(int x, int y)
 {
     for(int i = 0; i < coinCount; i++)
     {
@@ -29,7 +51,7 @@ Coin* LevelBuilder_1_1::getCoin(int x, int y)
     }
     return NULL;
 }
-Mushroom* LevelBuilder_1_1::getMushroom(int x, int y)
+Mushroom* Level::getMushroom(int x, int y)
 {
     for(int i = 0; i < mushroomCount; i++)
     {
@@ -41,7 +63,7 @@ Mushroom* LevelBuilder_1_1::getMushroom(int x, int y)
     }
     return NULL;
 }
-Flower* LevelBuilder_1_1::getFlower(int x, int y)
+Flower* Level::getFlower(int x, int y)
 {
     for(int i = 0; i < flowerCount; i++)
     {
@@ -54,152 +76,204 @@ Flower* LevelBuilder_1_1::getFlower(int x, int y)
     return NULL;
 }
 
-LevelBuilder_1_1::LevelBuilder_1_1()
+LevelBuilder_1_1::LevelBuilder_1_1(GSGLOBAL* gsGlobal, GSTEXTURE* tilesheet, GSTEXTURE* pickupTexture, GSTEXTURE* koopaSprites, GSTEXTURE* goombaSprites) :
+    LevelBuilderBase(gsGlobal, tilesheet, pickupTexture, koopaSprites, goombaSprites)
 {
-    coinCount = 32;
-    mushroomCount = 4;
 
-    width = 224;
-    height = 15;
-    absoluteHeight = 30;
-    tile_width = 16;
-    tile_height = 16;
 }
 LevelBuilder_1_1::~LevelBuilder_1_1()
 {
 
 }
 
+Level* LevelBuilder_1_1::build(GSGLOBAL* gsGlobal)
+{ 
+    level = new Level();
+    level->coinCount = 32;
+    level->mushroomCount = 4;
+
+    level->width = 224;
+    level->height = 15;
+    level->absoluteHeight = 30;
+    level->tile_width = 16;
+    level->tile_height = 16;
+
+    u8 solid[64] = {0,1,0,0,0,0,0,0,
+                    0,0,0,1,1,1,0,0,
+                    1,1,0,0,0,0,0,0,
+                    1,1,0,0,0,0,0,0,
+                    1,1,1,1,0,0,0,0,
+                    1,1,1,0,0,0,0,0,
+                    1,1,1,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0};
+    for(int i = 0; i < 64;i++)level->solid[i] = solid[i];
+    
+    loadCoins(pickupTexture);
+    loadMushrooms(pickupTexture);
+    loadFlowers(pickupTexture);
+    loadGoombas(goombaSprites);
+    loadKoopas(koopaSprites);
+    level->spritesheet = tilesheet;
+    level->data = map_data;
+    //level->solid = tilesheet_solid;
+    return level;
+}
+
 void LevelBuilder_1_1::loadCoins(GSTEXTURE* tex)
 {
-    coin = new Coin[coinCount];
-    
+    level->coin = new Coin[level->coinCount];
+
     for(int i = 0; i < 32; i++)
     {
-        coin[i].width = 8;
-        coin[i].height = 16;
-        coin[i].spritesheet = tex;
+        level->coin[i].width = 8;
+        level->coin[i].height = 16;
+        level->coin[i].spritesheet = tex;
     }
-    coin[0].x = 260; coin[0].y = 144;
-    coin[1].x = 372; coin[1].y = 144;
-    coin[2].x = 356; coin[2].y = 80;
-    coin[3].x = 1508; coin[3].y = 80;
-    coin[4].x = 1700; coin[4].y = 144;
-    coin[5].x = 1748; coin[5].y = 144;
-    coin[6].x = 1796; coin[6].y = 144;
-    coin[7].x = 2068; coin[7].y = 80;
-    coin[8].x = 2084; coin[8].y = 80;
-    coin[9].x = 2724; coin[9].y = 144;
+    level->coin[0].x = 260; level->coin[0].y = 144;
+    level->coin[1].x = 372; level->coin[1].y = 144;
+    level->coin[2].x = 356; level->coin[2].y = 80;
+    level->coin[3].x = 1508; level->coin[3].y = 80;
+    level->coin[4].x = 1700; level->coin[4].y = 144;
+    level->coin[5].x = 1748; level->coin[5].y = 144;
+    level->coin[6].x = 1796; level->coin[6].y = 144;
+    level->coin[7].x = 2068; level->coin[7].y = 80;
+    level->coin[8].x = 2084; level->coin[8].y = 80;
+    level->coin[9].x = 2724; level->coin[9].y = 144;
 
     // underground coins
-    coin[10].x = 2436; coin[10].y = 384; coin[10].activated = 1;
-    coin[11].x = 2452; coin[11].y = 384; coin[11].activated = 1;
-    coin[12].x = 2468; coin[12].y = 384; coin[12].activated = 1;
-    coin[13].x = 2484; coin[13].y = 384; coin[13].activated = 1;
-    coin[14].x = 2500; coin[14].y = 384; coin[14].activated = 1;
-    coin[15].x = 2516; coin[15].y = 384; coin[15].activated = 1;
-    coin[16].x = 2532; coin[16].y = 384; coin[16].activated = 1;
-    coin[17].x = 2436; coin[17].y = 352; coin[17].activated = 1;
-    coin[18].x = 2452; coin[18].y = 352; coin[18].activated = 1;
-    coin[19].x = 2468; coin[19].y = 352; coin[19].activated = 1;
-    coin[20].x = 2484; coin[20].y = 352; coin[20].activated = 1;
-    coin[21].x = 2500; coin[21].y = 352; coin[21].activated = 1;
-    coin[22].x = 2516; coin[22].y = 352; coin[22].activated = 1;
-    coin[23].x = 2532; coin[23].y = 352; coin[23].activated = 1;
-    
-    coin[24].x = 2452; coin[24].y = 320; coin[24].activated = 1;
-    coin[25].x = 2468; coin[25].y = 320; coin[25].activated = 1;
-    coin[26].x = 2484; coin[26].y = 320; coin[26].activated = 1;
-    coin[27].x = 2500; coin[27].y = 320; coin[27].activated = 1;
-    coin[28].x = 2516; coin[28].y = 320; coin[28].activated = 1;
+    level->coin[10].x = 2436; level->coin[10].y = 384; level->coin[10].activated = 1;
+    level->coin[11].x = 2452; level->coin[11].y = 384; level->coin[11].activated = 1;
+    level->coin[12].x = 2468; level->coin[12].y = 384; level->coin[12].activated = 1;
+    level->coin[13].x = 2484; level->coin[13].y = 384; level->coin[13].activated = 1;
+    level->coin[14].x = 2500; level->coin[14].y = 384; level->coin[14].activated = 1;
+    level->coin[15].x = 2516; level->coin[15].y = 384; level->coin[15].activated = 1;
+    level->coin[16].x = 2532; level->coin[16].y = 384; level->coin[16].activated = 1;
+    level->coin[17].x = 2436; level->coin[17].y = 352; level->coin[17].activated = 1;
+    level->coin[18].x = 2452; level->coin[18].y = 352; level->coin[18].activated = 1;
+    level->coin[19].x = 2468; level->coin[19].y = 352; level->coin[19].activated = 1;
+    level->coin[20].x = 2484; level->coin[20].y = 352; level->coin[20].activated = 1;
+    level->coin[21].x = 2500; level->coin[21].y = 352; level->coin[21].activated = 1;
+    level->coin[22].x = 2516; level->coin[22].y = 352; level->coin[22].activated = 1;
+    level->coin[23].x = 2532; level->coin[23].y = 352; level->coin[23].activated = 1;
+
+    level->coin[24].x = 2452; level->coin[24].y = 320; level->coin[24].activated = 1;
+    level->coin[25].x = 2468; level->coin[25].y = 320; level->coin[25].activated = 1;
+    level->coin[26].x = 2484; level->coin[26].y = 320; level->coin[26].activated = 1;
+    level->coin[27].x = 2500; level->coin[27].y = 320; level->coin[27].activated = 1;
+    level->coin[28].x = 2516; level->coin[28].y = 320; level->coin[28].activated = 1;
 }
 
 void LevelBuilder_1_1::loadMushrooms(GSTEXTURE* tex)
 {
-    mushroomCount = 4;
-    mushroom = new Mushroom[mushroomCount];
+    level->mushroomCount = 4;
+    level->mushroom = new Mushroom[level->mushroomCount];
     for(int i = 0; i < 4; i++)
     {
-        mushroom[i].width = 16;
-        mushroom[i].height = 16;
-        mushroom[i].type = 1;
-        mushroom[i].activated = 0;
-        mushroom[i].spritesheet = tex;
+        level->mushroom[i].width = 16;
+        level->mushroom[i].height = 16;
+        level->mushroom[i].type = 1;
+        level->mushroom[i].activated = 0;
+        level->mushroom[i].spritesheet = tex;
     }
-    mushroom[0].x = 336; mushroom[0].y = 144;
-    mushroom[1].x = 1024; mushroom[1].y = 128; mushroom[1].sprite = 1;
+    level->mushroom[0].x = 336; level->mushroom[0].y = 144;
+    level->mushroom[1].x = 1024; level->mushroom[1].y = 128; level->mushroom[1].sprite = 1;
 }
 
 void LevelBuilder_1_1::loadFlowers(GSTEXTURE* tex)
 {
-    flowerCount = 2;
-    flower = new Flower[flowerCount];
+    level->flowerCount = 2;
+    level->flower = new Flower[level->flowerCount];
     for(int i = 0; i < 2; i++)
     {
-        flower[i].width = 16;
-        flower[i].height = 16;
-        flower[i].type = 2;
-        flower[i].spritesheet = tex;
+        level->flower[i].width = 16;
+        level->flower[i].height = 16;
+        level->flower[i].type = 2;
+        level->flower[i].spritesheet = tex;
     }
-    flower[0].x = 1248; flower[0].y = 144;
-    flower[1].x = 1744; flower[1].y = 80;
+    level->flower[0].x = 1248; level->flower[0].y = 144;
+    level->flower[1].x = 1744; level->flower[1].y = 80;
 }
 
 void LevelBuilder_1_1::loadGoombas(GSTEXTURE* tex)
-{    
-    goombaCount = 16;
-    goomba = new character[goombaCount];
+{
+    level->goombaCount = 16;
+    level->goomba = new character[level->goombaCount];
 
-    for(int i = 0; i < goombaCount; i++)
+    for(int i = 0; i < level->goombaCount; i++)
     {
-        goomba[i].spritesheet = tex;
-        goomba[i].direction = 1;
+        level->goomba[i].spritesheet = tex;
+        level->goomba[i].direction = 1;
     }
-    
-    goomba[0].worldCoordinates.x = 352; goomba[0].worldCoordinates.y = 192;goomba[0].direction = 0;
-    goomba[1].worldCoordinates.x = 640; goomba[1].worldCoordinates.y = 192;
-    goomba[2].worldCoordinates.x = 816; goomba[2].worldCoordinates.y = 192;
-    goomba[3].worldCoordinates.x = 848; goomba[3].worldCoordinates.y = 192;
-    goomba[4].worldCoordinates.x = 1280; goomba[4].worldCoordinates.y = 64;
-    goomba[5].worldCoordinates.x = 1312; goomba[5].worldCoordinates.y = 64;
-    goomba[6].worldCoordinates.x = 1552; goomba[6].worldCoordinates.y = 192;
-    goomba[7].worldCoordinates.x = 1576; goomba[7].worldCoordinates.y = 192;
-    goomba[8].worldCoordinates.x = 1824; goomba[8].worldCoordinates.y = 192;
-    goomba[9].worldCoordinates.x = 1848; goomba[9].worldCoordinates.y = 192;
-    goomba[10].worldCoordinates.x = 1984; goomba[10].worldCoordinates.y = 192;
-    goomba[11].worldCoordinates.x = 2008; goomba[11].worldCoordinates.y = 192;
-    goomba[12].worldCoordinates.x = 2048; goomba[12].worldCoordinates.y = 192;
-    goomba[13].worldCoordinates.x = 2072; goomba[13].worldCoordinates.y = 192;
-    goomba[14].worldCoordinates.x = 2784; goomba[14].worldCoordinates.y = 192;
-    goomba[15].worldCoordinates.x = 2808; goomba[15].worldCoordinates.y = 192;
+
+    level->goomba[0].worldCoordinates.x = 352; level->goomba[0].worldCoordinates.y = 192;level->goomba[0].direction = 0;
+    level->goomba[1].worldCoordinates.x = 640; level->goomba[1].worldCoordinates.y = 192;
+    level->goomba[2].worldCoordinates.x = 816; level->goomba[2].worldCoordinates.y = 192;
+    level->goomba[3].worldCoordinates.x = 848; level->goomba[3].worldCoordinates.y = 192;
+    level->goomba[4].worldCoordinates.x = 1280; level->goomba[4].worldCoordinates.y = 64;
+    level->goomba[5].worldCoordinates.x = 1312; level->goomba[5].worldCoordinates.y = 64;
+    level->goomba[6].worldCoordinates.x = 1552; level->goomba[6].worldCoordinates.y = 192;
+    level->goomba[7].worldCoordinates.x = 1576; level->goomba[7].worldCoordinates.y = 192;
+    level->goomba[8].worldCoordinates.x = 1824; level->goomba[8].worldCoordinates.y = 192;
+    level->goomba[9].worldCoordinates.x = 1848; level->goomba[9].worldCoordinates.y = 192;
+    level->goomba[10].worldCoordinates.x = 1984; level->goomba[10].worldCoordinates.y = 192;
+    level->goomba[11].worldCoordinates.x = 2008; level->goomba[11].worldCoordinates.y = 192;
+    level->goomba[12].worldCoordinates.x = 2048; level->goomba[12].worldCoordinates.y = 192;
+    level->goomba[13].worldCoordinates.x = 2072; level->goomba[13].worldCoordinates.y = 192;
+    level->goomba[14].worldCoordinates.x = 2784; level->goomba[14].worldCoordinates.y = 192;
+    level->goomba[15].worldCoordinates.x = 2808; level->goomba[15].worldCoordinates.y = 192;
 }
 
 void LevelBuilder_1_1::loadKoopas(GSTEXTURE* tex)
 {
-    koopaCount = 1;
-    koopa = new character[koopaCount];
-    koopa[0].spritesheet = tex;
+    level->koopaCount = 1;
+    level->koopa = new character[level->koopaCount];
+    level->koopa[0].spritesheet = tex;
 
-    koopa[0].height = 24;
-    koopa[0].worldCoordinates.x = 1712;
-    koopa[0].worldCoordinates.y = 184;
+    level->koopa[0].height = 24;
+    level->koopa[0].worldCoordinates.x = 1712;
+    level->koopa[0].worldCoordinates.y = 184;
 }
 
 
-LevelBuilder_1_2::LevelBuilder_1_2()
+LevelBuilder_1_2::LevelBuilder_1_2(GSGLOBAL* gsGlobal, GSTEXTURE* tilesheet, GSTEXTURE* pickupTexture, GSTEXTURE* koopaSprites, GSTEXTURE* goombaSprites) :
+    LevelBuilderBase(gsGlobal, tilesheet, pickupTexture, koopaSprites, goombaSprites)
 {
-
+    
 }
 LevelBuilder_1_2::~LevelBuilder_1_2()
 {
 
 }
 
-LevelBuilder::LevelBuilder()
+Level* LevelBuilder_1_2::build(GSGLOBAL* gsGlobal)
 {
+    return NULL;
+}
 
+LevelBuilder::LevelBuilder(GSGLOBAL* gsGlobal, GSTEXTURE* tilesheet, GSTEXTURE* pickupTexture, GSTEXTURE* koopaSprites, GSTEXTURE* goombaSprites)
+{
+    this->gsGlobal = gsGlobal;
+    this->tilesheet = tilesheet;
+    this->pickupTexture = pickupTexture;
+    this->koopaSprites = koopaSprites;
+    this->goombaSprites = goombaSprites;    
 }
 LevelBuilder::~LevelBuilder()
 {
-
+    
+}
+Level* LevelBuilder::build(u8 world, u8 level)
+{
+    LevelBuilderBase* levelBuilder;
+    if(world == 1)
+    {
+        if(level == 1) levelBuilder =  new LevelBuilder_1_1(gsGlobal, tilesheet, pickupTexture, koopaSprites, goombaSprites);
+        else levelBuilder =  new LevelBuilder_1_2(gsGlobal, tilesheet, pickupTexture, koopaSprites, goombaSprites);
+    }
+    else
+    {
+        printf("Failed to create level %d-%d", world, level);
+        return NULL;
+    }
+    return levelBuilder->build(gsGlobal);
 }

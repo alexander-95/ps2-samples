@@ -8,7 +8,7 @@
 #include "textures/cursor.h"
 #include "graphics.hpp"
 
-void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, LevelBuilderBase* level, point start, int value, int z)
+void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, Level* level, point start, int value, int z)
 {
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);// set color
     int index_x = value % 8; // 8 is the width of the tilesheet, in tiles
@@ -34,7 +34,7 @@ void drawTile(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, Leve
                             z,TexCol);
 }
 
-void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, LevelBuilderBase* level, point viewport)
+void drawScreen(GSGLOBAL* gsGlobal, GSTEXTURE* spritesheet, int scale_factor, Level* level, point viewport)
 {
     // figure out the tile to draw
     point tile;
@@ -91,7 +91,7 @@ void drawLevelStart(GSGLOBAL* gsGlobal, HUD* hud, PlayableCharacter* mario, int 
     printf("game started\n");
 }
 
-void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, LevelBuilder_1_1* level1)
+void drawStartScreen(GSGLOBAL* gsGlobal, controller* pad, HUD* hud, Level* level1)
 {
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
     u64 TexCol = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
