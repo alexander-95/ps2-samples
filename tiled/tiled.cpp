@@ -65,9 +65,7 @@ int main()
 
     // place the top corner of the screen at this location of the map and render the first tile.
     // int x = 0, y=0; // top left corner of the screen
-    point viewport;
-    viewport.x = 0;
-    viewport.y = 0;
+    point viewport = {0, 0};
     
     int scale_factor = 2;
     u64 bg_color = GS_SETREG_RGBAQ(0x5C,0x94,0xFC,0x00,0x00);
@@ -95,7 +93,6 @@ int main()
     pickup::viewport = &viewport;
 
     LevelBuilder levelBuilder(gsGlobal, &tilesheet, &pickupTexture, &koopaSprites, &goombaSprites);
-    Level* level = levelBuilder.build(1, 1);
     
     // this will represent the box that was hit
     block block1;
@@ -111,8 +108,12 @@ int main()
     int lives = 3;
     u8 frameByFrame = 0;
     u8 restart = 0;
+
+    Level* level1 = levelBuilder.build(1, 1);
+    drawStartScreen(gsGlobal, &pad, &hud, level1);
+    delete level1;
+    Level* level = levelBuilder.build(1, 1);
     
-    drawStartScreen(gsGlobal, &pad, &hud, level);
     drawLevelStart(gsGlobal, &hud, &mario, score, lives);
     mario.worldCoordinates.x = 0;
     mario.worldCoordinates.y = 192;
@@ -161,7 +162,7 @@ int main()
         if(mario.vy > 0)
         {
             // did mario stomp any goombas?
-            for(int i = 0; i < 16; i++)
+            for(int i = 0; i < level->goombaCount; i++)
             {
                 if(level->goomba[i].isOnScreen() && mario.isTouching(&level->goomba[i]))
                 {
@@ -239,7 +240,7 @@ int main()
         }
         else if(mario.vy == 0) // mario is only able to get killed by enemies when not jumping or falling
         {
-            for(int i = 0; i < 16; i++)
+            for(int i = 0; i < level->goombaCount; i++)
             {
                 if(mario.animationMode == 0 && level->goomba[i].isOnScreen() && mario.isTouching(&level->goomba[i]))
                 {
@@ -251,7 +252,7 @@ int main()
         if(superMario)mario.sprite+=15;
         drawScreen(gsGlobal, level->spritesheet, scale_factor, level, viewport);
         mario.draw();
-        for(int i = 0; i < 32; i++)
+        for(int i = 0; i < level->coinCount; i++)
         {
             level->coin[i].draw();
             if(i < 10)level->coin[i].update();
@@ -262,7 +263,7 @@ int main()
                 score+=200;
             }
         }
-        for(int i = 0; i < 4; i++)
+        for(int i = 0; i < level->mushroomCount; i++)
         {
             if(mario.pickedup(&level->mushroom[0]))
             {
@@ -273,7 +274,7 @@ int main()
             level->mushroom[i].draw();
             level->mushroom[i].update();
         }
-        for(int i = 0; i < 2; i++)
+        for(int i = 0; i < level->flowerCount; i++)
         {
             level->flower[i].draw();
             if((tick & 7)==0)
@@ -286,11 +287,14 @@ int main()
                 level->flower[i].sprite&=3;
             }
         }
-        for(int i = 0;i < 16; i++)
+        for(int i = 0;i < level->goombaCount; i++)
         {
             if(level->goomba[i].isOnScreen())level->goomba[i].draw();
         }
-        if(level->koopa[0].isOnScreen())level->koopa[0].draw();
+        for(int i = 0;i < level->koopaCount; i++)
+        {
+            if(level->koopa[0].isOnScreen())level->koopa[0].draw();
+        }
 
         if(block1.active)
         {
@@ -321,17 +325,17 @@ int main()
         {
             if((tick&7) == 0) // every 8 frames
             {
-                for(int i = 0; i < 16; i++)
+                for(int i = 0; i < level->goombaCount; i++)
                 {
                     if(level->goomba[i].isOnScreen())level->goomba[i].hflip^=1;
                 }
-                for(int i = 0; i < 32; i++)
+                for(int i = 0; i < level->coinCount; i++)
                 {
                     level->coin[i].sprite++;
                     level->coin[i].sprite&=3;
                 }
             }
-            for(int i = 0; i < 16; i++)
+            for(int i = 0; i < level->goombaCount; i++)
             {
                 if(level->goomba[i].isOnScreen())
                 {
@@ -339,11 +343,15 @@ int main()
                     level->goomba[i].gravity(level,tick, gravity);
                 }
             }
-            level->koopa[0].traverse(level);
-            level->koopa[0].gravity(level,tick, gravity);
-            level->koopa[0].hflip = level->koopa[0].direction ^ 1;
-            if((tick&7) == 0)level->koopa[0].sprite = 2;
-            else level->koopa[0].sprite = 3;            
+            for(int i = 0; i < level->koopaCount; i++)
+            {
+                level->koopa[0].traverse(level);
+                level->koopa[0].gravity(level,tick, gravity);
+                level->koopa[0].hflip = level->koopa[0].direction ^ 1;
+                if((tick&7) == 0)level->koopa[0].sprite = 2;
+                else level->koopa[0].sprite = 3;
+            }
+
         }
         if((tick&31) == 0)time--; // every 32 frames
         tick++;

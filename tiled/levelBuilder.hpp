@@ -38,6 +38,8 @@ public:
     u8* data;
     u8 solid[64];
 
+    Level();
+    ~Level();
     u8 get_box(int x, int y);
     u16 get_index(int x, int y);
     Coin* getCoin(int x, int y);

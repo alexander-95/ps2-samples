@@ -266,11 +266,15 @@ u8 PlayableCharacter::pipeOnRight(Level* level)
     
     if((value1 == 40 || value1 == 48) && value2 == 48) return 1;
     else return 0;
-
 }
 
 void PlayableCharacter::reactToControllerInput(controller* pad, u8 tick, Level* level, int scale_factor, u8* superMario, u8* frameByFrame)
 {
+    if(worldCoordinates.x > (level->width*level->tile_width - gsGlobal->Width/(2*scale_factor)) ||
+       worldCoordinates.x < gsGlobal->Width/(2*scale_factor)) cameraLock = ENABLED;
+    else cameraLock = DISABLED;
+    if(worldCoordinates.y == 0) cameraLock = ENABLED;
+
     if(animationMode) return;
     if(pad->left())
     {
@@ -366,6 +370,11 @@ void PlayableCharacter::reactToControllerInput(controller* pad, u8 tick, Level* 
 void PlayableCharacter::doAnimation(u8 tick, u8* superMario, u8* restart)
 {
     // mario is entering a pipe
+    //point playerRespawnLocation = {2384, 240};
+    //point viewportRespawnLocation = {2368, 240};
+    point playerRespawnLocation = {16, 272};
+    point viewportRespawnLocation = {0, 240};
+    
     if(animationMode == 1)
     {
         if(animationFrame < 10)
@@ -380,10 +389,8 @@ void PlayableCharacter::doAnimation(u8 tick, u8* superMario, u8* restart)
         {
             animationMode = 0;
             animationFrame = 0;
-            viewport->x = 2368;
-            viewport->y = 240;
-            worldCoordinates.x = 2384;
-            worldCoordinates.y = 240;
+            *viewport = viewportRespawnLocation;
+            worldCoordinates = playerRespawnLocation;
         }
     }
     // growing into big mario
@@ -464,12 +471,13 @@ void PlayableCharacter::doAnimation(u8 tick, u8* superMario, u8* restart)
         }
         else
         {
+            point playerRespawnLocation = {0, 192};
+            point viewportRespawnLocation = {0, 0};
+
             animationMode = 0;
             animationFrame = 0;
-            viewport->x = 0;
-            viewport->y = 0;
-            worldCoordinates.x = 0;
-            worldCoordinates.y = 192;
+            *viewport = viewportRespawnLocation;
+            worldCoordinates = playerRespawnLocation;
         }
     }
 }

@@ -11,6 +11,8 @@
 #include "controller.hpp"
 #include "utils.h"
 
+enum toggle{DISABLED, ENABLED};
+
 class character
 {
 public:
@@ -40,6 +42,7 @@ public:
     u8 animationFrame;
     u8 collisionDetection;
     u8 activated;
+    u8 cameraLock;
     GSTEXTURE* spritesheet;
     
     static GSGLOBAL* gsGlobal;

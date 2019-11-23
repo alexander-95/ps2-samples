@@ -28,6 +28,21 @@ Level* LevelBuilderBase::build(GSGLOBAL* gsGlobal)
     return NULL;
 }
 
+Level::Level()
+{
+    coinCount = 0;
+    mushroomCount = 0;
+    flowerCount = 0;
+    goombaCount = 0;
+    koopaCount = 0;
+
+    width = 0;
+    height = 0;
+    
+}
+Level::~Level()
+{}
+
 u8 Level::get_box(int x, int y)
 {
     int index = get_index(x, y);
@@ -91,6 +106,9 @@ Level* LevelBuilder_1_1::build(GSGLOBAL* gsGlobal)
     level = new Level();
     level->coinCount = 32;
     level->mushroomCount = 4;
+    level->flowerCount = 2;
+    level->koopaCount = 1;
+    level->goombaCount = 16;
 
     level->width = 224;
     level->height = 15;
@@ -114,8 +132,7 @@ Level* LevelBuilder_1_1::build(GSGLOBAL* gsGlobal)
     loadGoombas(goombaSprites);
     loadKoopas(koopaSprites);
     level->spritesheet = tilesheet;
-    level->data = map_data;
-    //level->solid = tilesheet_solid;
+    level->data = map_data_1_1;
     return level;
 }
 
@@ -165,9 +182,8 @@ void LevelBuilder_1_1::loadCoins(GSTEXTURE* tex)
 
 void LevelBuilder_1_1::loadMushrooms(GSTEXTURE* tex)
 {
-    level->mushroomCount = 4;
     level->mushroom = new Mushroom[level->mushroomCount];
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < level->mushroomCount; i++)
     {
         level->mushroom[i].width = 16;
         level->mushroom[i].height = 16;
@@ -181,9 +197,8 @@ void LevelBuilder_1_1::loadMushrooms(GSTEXTURE* tex)
 
 void LevelBuilder_1_1::loadFlowers(GSTEXTURE* tex)
 {
-    level->flowerCount = 2;
     level->flower = new Flower[level->flowerCount];
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < level->flowerCount; i++)
     {
         level->flower[i].width = 16;
         level->flower[i].height = 16;
@@ -196,7 +211,6 @@ void LevelBuilder_1_1::loadFlowers(GSTEXTURE* tex)
 
 void LevelBuilder_1_1::loadGoombas(GSTEXTURE* tex)
 {
-    level->goombaCount = 16;
     level->goomba = new character[level->goombaCount];
 
     for(int i = 0; i < level->goombaCount; i++)
@@ -225,7 +239,6 @@ void LevelBuilder_1_1::loadGoombas(GSTEXTURE* tex)
 
 void LevelBuilder_1_1::loadKoopas(GSTEXTURE* tex)
 {
-    level->koopaCount = 1;
     level->koopa = new character[level->koopaCount];
     level->koopa[0].spritesheet = tex;
 
@@ -247,7 +260,37 @@ LevelBuilder_1_2::~LevelBuilder_1_2()
 
 Level* LevelBuilder_1_2::build(GSGLOBAL* gsGlobal)
 {
-    return NULL;
+    level = new Level();
+    level->coinCount = 0;
+    level->mushroomCount = 0;
+    level->flowerCount = 0;
+    level->koopaCount = 0;
+    level->goombaCount = 0;
+
+    level->width = 192;
+    level->height = 15;
+    level->absoluteHeight = 45;
+    level->tile_width = 16;
+    level->tile_height = 16;
+
+    u8 solid[64] = {0,1,0,0,0,0,0,0,
+                    0,0,0,1,1,1,0,0,
+                    1,1,0,0,0,0,0,0,
+                    1,1,0,0,0,0,0,0,
+                    1,1,1,1,0,0,0,0,
+                    1,1,1,0,0,0,0,0,
+                    1,1,1,0,0,0,0,0,
+                    0,0,0,0,0,0,0,0};
+    for(int i = 0; i < 64;i++)level->solid[i] = solid[i];
+    
+    //loadCoins(pickupTexture);
+    //loadMushrooms(pickupTexture);
+    //loadFlowers(pickupTexture);
+    //loadGoombas(goombaSprites);
+    //loadKoopas(koopaSprites);
+    level->spritesheet = tilesheet;
+    level->data = map_data_1_2;
+    return level;
 }
 
 LevelBuilder::LevelBuilder(GSGLOBAL* gsGlobal, GSTEXTURE* tilesheet, GSTEXTURE* pickupTexture, GSTEXTURE* koopaSprites, GSTEXTURE* goombaSprites)
@@ -268,7 +311,12 @@ Level* LevelBuilder::build(u8 world, u8 level)
     if(world == 1)
     {
         if(level == 1) levelBuilder =  new LevelBuilder_1_1(gsGlobal, tilesheet, pickupTexture, koopaSprites, goombaSprites);
-        else levelBuilder =  new LevelBuilder_1_2(gsGlobal, tilesheet, pickupTexture, koopaSprites, goombaSprites);
+        else if(level == 2) levelBuilder =  new LevelBuilder_1_2(gsGlobal, tilesheet, pickupTexture, koopaSprites, goombaSprites);
+        else
+        {
+            printf("Failed to create level %d-%d", world, level);
+            return NULL;
+        }
     }
     else
     {
