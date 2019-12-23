@@ -56,7 +56,7 @@ public:
     u8 standingOnPipe(Level* level);
     u8 pipeOnRight(Level* level);
     void reactToControllerInput(controller* pad, u8 tick, Level* level, int scale_factor, u8* superMario, u8* frameByFrame);
-    void doAnimation(u8 tick, u8* superMario, u8* restart);
+    void doAnimation(Level* level, u8 tick, u8* superMario, u8* restart);
 };
 
 #endif

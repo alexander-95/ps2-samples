@@ -94,7 +94,7 @@ Flower* Level::getFlower(int x, int y)
 LevelBuilder_1_1::LevelBuilder_1_1(GSGLOBAL* gsGlobal, GSTEXTURE* tilesheet, GSTEXTURE* pickupTexture, GSTEXTURE* koopaSprites, GSTEXTURE* goombaSprites) :
     LevelBuilderBase(gsGlobal, tilesheet, pickupTexture, koopaSprites, goombaSprites)
 {
-
+    
 }
 LevelBuilder_1_1::~LevelBuilder_1_1()
 {
@@ -102,7 +102,7 @@ LevelBuilder_1_1::~LevelBuilder_1_1()
 }
 
 Level* LevelBuilder_1_1::build(GSGLOBAL* gsGlobal)
-{ 
+{
     level = new Level();
     level->coinCount = 32;
     level->mushroomCount = 4;
@@ -133,6 +133,14 @@ Level* LevelBuilder_1_1::build(GSGLOBAL* gsGlobal)
     loadKoopas(koopaSprites);
     level->spritesheet = tilesheet;
     level->data = map_data_1_1;
+
+    level->playerRespawnEntryLocation.x = 2384;
+    level->playerRespawnEntryLocation.y = 240;
+    level->viewportRespawnEntryLocation.x = 2368;
+    level->viewportRespawnEntryLocation.y = 240;
+    level->cameraLockEntry = ENABLED;
+    level->cameraLockExit = DISABLED;
+
     return level;
 }
 
@@ -251,7 +259,7 @@ void LevelBuilder_1_1::loadKoopas(GSTEXTURE* tex)
 LevelBuilder_1_2::LevelBuilder_1_2(GSGLOBAL* gsGlobal, GSTEXTURE* tilesheet, GSTEXTURE* pickupTexture, GSTEXTURE* koopaSprites, GSTEXTURE* goombaSprites) :
     LevelBuilderBase(gsGlobal, tilesheet, pickupTexture, koopaSprites, goombaSprites)
 {
-    
+
 }
 LevelBuilder_1_2::~LevelBuilder_1_2()
 {
@@ -290,6 +298,13 @@ Level* LevelBuilder_1_2::build(GSGLOBAL* gsGlobal)
     //loadKoopas(koopaSprites);
     level->spritesheet = tilesheet;
     level->data = map_data_1_2;
+
+    level->playerRespawnEntryLocation.x = 16;
+    level->playerRespawnEntryLocation.y = 272;
+    level->viewportRespawnEntryLocation.x = 0;
+    level->viewportRespawnEntryLocation.y = 240;
+    level->cameraLockEntry = DISABLED;
+    level->cameraLockExit = ENABLED;    
     return level;
 }
 

@@ -6,6 +6,7 @@
 #define LEVELBUILDER_HPP
 
 #include <tamtypes.h>
+#include "utils.h"
 
 // forward declarations
 class Coin;
@@ -38,6 +39,16 @@ public:
     u8* data;
     u8 solid[64];
 
+    // respawn locations when entering a pipe
+    point playerRespawnEntryLocation;
+    point viewportRespawnEntryLocation;
+    u8 cameraLockEntry;
+
+    // respawn locations for exiting a pipe
+    point playerRespawnExitLocation;
+    point viewportRespawnExitLocation;
+    u8 cameraLockExit;
+    
     Level();
     ~Level();
     u8 get_box(int x, int y);

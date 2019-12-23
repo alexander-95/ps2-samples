@@ -76,7 +76,6 @@ int main()
     GSTEXTURE pickupTexture = loadTexture(gsGlobal, pickups_array, 64, 64, GS_PSM_CT32);
     GSTEXTURE koopaSprites = loadTexture(gsGlobal, koopa_array, 96, 24, GS_PSM_CT32 );
     GSTEXTURE goombaSprites = loadTexture(gsGlobal, goomba_array, 32, 16, GS_PSM_CT32);
-
     
     HUD hud;
     HUD::gsGlobal = gsGlobal;
@@ -112,7 +111,7 @@ int main()
     Level* level1 = levelBuilder.build(1, 1);
     drawStartScreen(gsGlobal, &pad, &hud, level1);
     delete level1;
-    Level* level = levelBuilder.build(1, 1);
+    Level* level = levelBuilder.build(1, 2);
     
     drawLevelStart(gsGlobal, &hud, &mario, score, lives);
     mario.worldCoordinates.x = 0;
@@ -142,7 +141,7 @@ int main()
         }
         else
         {
-            mario.doAnimation(tick, &superMario, &restart);
+            mario.doAnimation(level, tick, &superMario, &restart);
         }
         
         if(restart)

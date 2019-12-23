@@ -270,10 +270,10 @@ u8 PlayableCharacter::pipeOnRight(Level* level)
 
 void PlayableCharacter::reactToControllerInput(controller* pad, u8 tick, Level* level, int scale_factor, u8* superMario, u8* frameByFrame)
 {
-    if(worldCoordinates.x > (level->width*level->tile_width - gsGlobal->Width/(2*scale_factor)) ||
-       worldCoordinates.x < gsGlobal->Width/(2*scale_factor)) cameraLock = ENABLED;
-    else cameraLock = DISABLED;
-    if(worldCoordinates.y == 0) cameraLock = ENABLED;
+    u8 cameraCanMove = (worldCoordinates.x < (level->width*level->tile_width - gsGlobal->Width/(2*scale_factor)) &&
+                        worldCoordinates.x > gsGlobal->Width/(2*scale_factor));
+    
+    //if(worldCoordinates.y == 0) cameraLock = ENABLED;
 
     if(animationMode) return;
     if(pad->left())
@@ -293,7 +293,7 @@ void PlayableCharacter::reactToControllerInput(controller* pad, u8 tick, Level* 
         if(canMoveLeft(level, 2))
         {
             worldCoordinates.x-=2;
-            if(viewport->x > 0 && viewport->y == 0)viewport->x-=2;
+            if(cameraCanMove && !cameraLock)viewport->x-=2;
         }
     }
     if(pad->right())
@@ -313,9 +313,7 @@ void PlayableCharacter::reactToControllerInput(controller* pad, u8 tick, Level* 
         if(canMoveRight(level, 2))
         {
             worldCoordinates.x+=2;
-            if(viewport->x+(gsGlobal->Width/(2*scale_factor)) < (level->width*level->tile_width) &&
-               worldCoordinates.x > (gsGlobal->Width/(2*scale_factor)) &&
-               viewport->y == 0) viewport->x+=2;
+            if(cameraCanMove && !cameraLock) viewport->x+=2;
         }
     }
     if(pad->up() || pad->x(1))
@@ -367,14 +365,10 @@ void PlayableCharacter::reactToControllerInput(controller* pad, u8 tick, Level* 
     }
 }
 
-void PlayableCharacter::doAnimation(u8 tick, u8* superMario, u8* restart)
+void PlayableCharacter::doAnimation(Level* level, u8 tick, u8* superMario, u8* restart)
 {
+    cameraLock = level->cameraLockEntry;
     // mario is entering a pipe
-    //point playerRespawnLocation = {2384, 240};
-    //point viewportRespawnLocation = {2368, 240};
-    point playerRespawnLocation = {16, 272};
-    point viewportRespawnLocation = {0, 240};
-    
     if(animationMode == 1)
     {
         if(animationFrame < 10)
@@ -389,8 +383,8 @@ void PlayableCharacter::doAnimation(u8 tick, u8* superMario, u8* restart)
         {
             animationMode = 0;
             animationFrame = 0;
-            *viewport = viewportRespawnLocation;
-            worldCoordinates = playerRespawnLocation;
+            *viewport = level->viewportRespawnEntryLocation;
+            worldCoordinates = level->playerRespawnEntryLocation;
         }
     }
     // growing into big mario
@@ -478,6 +472,7 @@ void PlayableCharacter::doAnimation(u8 tick, u8* superMario, u8* restart)
             animationFrame = 0;
             *viewport = viewportRespawnLocation;
             worldCoordinates = playerRespawnLocation;
+            cameraLock = DISABLED;
         }
     }
 }
