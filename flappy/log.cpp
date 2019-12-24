@@ -105,12 +105,6 @@ void Log::debug(char* msg, ...)
     }
 }
 
-
-void Log::setLine(int lineNumber, char* msg, u8 col)
-{
-    printf("\n");
-}
-
 void Log::clearLine(int lineNumber)
 {
     for(int i = 0; i < bufWidth; i++)

@@ -10,7 +10,6 @@ class Bird;
 class Log
 {
 private:
-    void setLine(int lineNumber, char* msg, u8 col);
     void clearLine(int lineNumber);
     void clearBuffer();
     void logToFile(char* msg);
