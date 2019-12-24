@@ -1,17 +1,23 @@
 #include "draw.hpp"
 
-void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 style)
+void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 style, u8 color)
 {
     ascii -= 32;
     u8 charWidth = 7, charHeight = 9;
     u8 ascii_x = ascii % 18, ascii_y = ascii / 18;
     int offset = 0;
     if(style == 1)offset = 63;
-    
+
+    u64 BLACK = GS_SETREG_RGBAQ(0x00,0x00,0x00,0x80,0x00);
+    u64 RED = GS_SETREG_RGBAQ(0x80,0x00,0x00,0x80,0x00);
+    u64 GREEN = GS_SETREG_RGBAQ(0x00,0x80,0x00,0x80,0x00);
+    u64 BLUE = GS_SETREG_RGBAQ(0x00,0x00,0x80,0x80,0x00);
+    u64 CYAN = GS_SETREG_RGBAQ(0x00,0x80,0x80,0x80,0x00);
+    u64 MAGENTA = GS_SETREG_RGBAQ(0x80,0x00,0x80,0x80,0x00);
+    u64 YELLOW = GS_SETREG_RGBAQ(0x80,0x80,0x00,0x80,0x00);
     u64 WHITE = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
-    // u64 RED = GS_SETREG_RGBAQ(0x80,0x00,0x00,0x80,0x00);
-    // u64 GREEN = GS_SETREG_RGBAQ(0x00,0x80,0x00,0x80,0x00);
-    // u64 BLUE = GS_SETREG_RGBAQ(0x00,0x00,0x80,0x80,0x00);
+
+    u64 COLOR[] = {BLACK, RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW, WHITE};
     
     gsKit_prim_quad_texture(gsGlobal, font,
                             x*charWidth, y*charHeight,     // x1, y1
@@ -25,7 +31,7 @@ void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 st
 
                             (x+1)*charWidth, (y+1)*charHeight, // x4, y4
                             (ascii_x+1)* charWidth, (ascii_y+1)*charHeight+offset, // u4, v4
-                            6,WHITE);
+                            6,COLOR[color]);
 }
 
 void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font,Log* l, u8 style)
@@ -37,14 +43,14 @@ void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font,Log* l, u8 style)
     {
         for(i = 0; i < l->bufHeight; i++)
         {
-            for(j = 0; j < l->bufWidth; j++) drawChar(gsGlobal, font, l->buffer[(i*l->bufWidth)+j], j, i, style);
+            for(j = 0; j < l->bufWidth; j++) drawChar(gsGlobal, font, l->buffer[(i*l->bufWidth)+j], j, i, style,l->color[(i*l->bufWidth)+j]);
         }
     }
     else if(scrollingMode == SCROLLING)
     {
         for(i = l->index; i < l->index+l->bufHeight; i++)
         {
-            for(j = 0; j < l->bufWidth; j++) drawChar(gsGlobal, font, l->buffer[((i%l->bufHeight)*l->bufWidth)+j], j, (i-l->index), style);
+            for(j = 0; j < l->bufWidth; j++) drawChar(gsGlobal, font, l->buffer[((i%l->bufHeight)*l->bufWidth)+j], j, (i-l->index), style, l->color[((i%l->bufHeight)*l->bufWidth)+j]);
         }
     }
 }

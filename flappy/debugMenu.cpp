@@ -39,26 +39,56 @@ void DebugMenu::draw()
     // temporary counters
     int i, j;
 
+    u8 borderColor = 3; // blue
+    u8 cursorColor = 4; // cyan
+
     // set the corners of the debug menu
     l->buffer[topLeft] = 127;
     l->buffer[topRight] = 128;
     l->buffer[bottomLeft] = 129;
     l->buffer[bottomRight] = 130;
+    l->color[topLeft] = borderColor;
+    l->color[topRight] = borderColor;
+    l->color[bottomLeft] = borderColor;
+    l->color[bottomRight] = borderColor;
 
     // set the borders of the debug menu
-    for(i = topLeft+1; i < topRight; i++) l->buffer[i] = 137;
-    for(i = bottomLeft+1; i < bottomRight; i++) l->buffer[i] = 137;
-    for(i = topLeft+l->bufWidth; i < bottomLeft; i+=l->bufWidth) l->buffer[i] = 136;
-    for(i = topRight+l->bufWidth; i < bottomRight; i+=l->bufWidth) l->buffer[i] = 136;
+    for(i = topLeft+1; i < topRight; i++)
+    {
+         l->buffer[i] = 137;
+         l->color[i] = borderColor;
+    }
+    for(i = bottomLeft+1; i < bottomRight; i++)
+    {
+        l->buffer[i] = 137;
+        l->color[i] = borderColor;
+    }
+    for(i = topLeft+l->bufWidth; i < bottomLeft; i+=l->bufWidth)
+    {
+        l->buffer[i] = 136;
+        l->color[i] = borderColor;
+    }
+    for(i = topRight+l->bufWidth; i < bottomRight; i+=l->bufWidth)
+    {
+        l->buffer[i] = 136;
+        l->color[i] = borderColor;
+    }
 
     // set the title bar of the debug menu
     for(i = 0; title[i]; i++) l->buffer[topLeft+l->bufWidth+i+2] = title[i];
-    for(i = topLeft+(2*l->bufWidth)+1; i < topRight+(2*l->bufWidth); i++) l->buffer[i] = 137;
+    for(i = topLeft+(2*l->bufWidth)+1; i < topRight+(2*l->bufWidth); i++)
+    {
+         l->buffer[i] = 137;
+         l->color[i] = borderColor;
+    }
     l->buffer[topLeft+(2*l->bufWidth)] = 131;
     l->buffer[topRight+(2*l->bufWidth)] = 132;
+    l->color[topLeft+(2*l->bufWidth)] = borderColor;
+    l->color[topRight+(2*l->bufWidth)] = borderColor;
     
     // set the cursor location
     l->buffer[topLeft+2+((3+cursor)*l->bufWidth)] = '>';
+    l->color[topLeft+2+((3+cursor)*l->bufWidth)] = cursorColor;
 
     MenuIter* iter = createIterator();
     
@@ -101,11 +131,15 @@ void DebugMenu::setCursor()
     // clear entire cursor column
     for(int i = 0; i < h-3; i++)
     {
-        l->buffer[(x+2)+((y+3+i)*l->bufWidth)] = ' ';
+        int curr = (x+2)+((y+3+i)*l->bufWidth);
+        l->buffer[curr] = ' ';
+        l->color[curr] = 7;
     }
 
     // draw the new cursor
-    l->buffer[(y*l->bufWidth+x)+2+((3+cursor)*l->bufWidth)] = '>';
+    int curr = (y*l->bufWidth+x)+2+((3+cursor)*l->bufWidth);
+    l->buffer[curr] = '>';
+    l->color[curr] = 4;
 }
 
 void DebugMenu::refreshLabel()

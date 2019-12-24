@@ -170,13 +170,14 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, textureResources*
      * The identical pointers verify the singleton pattern.
      * This should be added as a test.
      */
+    /*
     DebugMenu& second_menu = DebugMenu::getInstance(l, "SECOND DEBUG MENU");
     char buf[16];
     sprintf(buf, "%p", &menu);
     l->logMessage(buf);
     sprintf(buf, "%p", &second_menu);
     l->logMessage(buf);
-    
+    */
     menu.itemCount = 3;
     
     menuItem* item = new menuItem[menu.itemCount];
@@ -190,7 +191,6 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, textureResources*
     item[2] = getItem("score", *s->score, NULL, 0, 255, updateScore);
     
     menu.item = item;
-    //menu.title = "DEBUG MENU";
     
     while(1)
     {
@@ -251,7 +251,7 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
         }
         if(b->touchingGround())
         {
-            printf("bird hit the ground\n");
+            l->debug("bird hit the ground");
             return;
         }
         if(collision(b, pipes))
@@ -266,6 +266,7 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
         if(*s->score!=oldScore)
         {
             ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playPointSound);
+            l->debug("updated score. score = %d", *s->score );
         }
 
         // deal with gravity
@@ -278,6 +279,7 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawScore(gsGlobal, *s->score, &texture->spriteSheet);
+        drawBuffer(gsGlobal, &texture->font, l, *s->font);
         updateFrame(gsGlobal, &texture->font, l->buffer);
     }
 }
@@ -295,6 +297,7 @@ void postgameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b,
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawEnd(gsGlobal, &texture->spriteSheet, *s->score, *s->highScore);
+        drawBuffer(gsGlobal, &texture->font, l, *s->font);
         updateFrame(gsGlobal, &texture->font, l->buffer);
     }
 }
@@ -385,20 +388,6 @@ int main(int argc, char* argv[])
     drawTitleScreen(gsGlobal, &texture.spriteSheet);
     
     Log log;
-    log.index = 0;
-    log.logfile = "mass:flappy/log.txt";
-    log.logToFile = 0;
-    log.logToScreen = 1;
-    log.bufWidth = 90;
-    log.bufHeight = 56;
-    log.buffer = new char[log.bufWidth*log.bufHeight];
-    if(log.logToFile)
-    {
-        FILE* f = fopen(log.logfile, "w");
-        fprintf(f, "log initialised\n");
-        fclose(f);
-    }
-    log.clearBuffer();
 
     loadSound(&audio.point, sfx_point_array, 50736);
     loadSound(&audio.wing, sfx_wing_array, 8560);
@@ -406,8 +395,7 @@ int main(int argc, char* argv[])
     loadSound(&audio.die, sfx_die_array, 38160);
     loadSound(&audio.swooshing, sfx_swooshing_array, 101360);
 
-    log.logMessage("DEBUG: audio loaded");
-    
+    log.debug("audio loaded");
     sysReset();
     init();
     
@@ -420,8 +408,7 @@ int main(int argc, char* argv[])
     padInit(0);
     pad.openPad(port,slot, padBuf);
 
-    log.logMessage("DEBUG: controller initialized");
-   
+    log.debug("controller initialized");
     int score = 0, highScore = 0, nightMode = 0;
 
     Bird bird;
@@ -433,7 +420,7 @@ int main(int argc, char* argv[])
     pipes.nightMode = &nightMode;
     pipes.setup();
 
-    log.logMessage("DEBUG: pipes setup");
+    log.debug("pipes setup");
 
     enum color{RED, YELLOW, BLUE};
     enum fontstyle{PLAIN, OUTLINED};
@@ -452,7 +439,7 @@ int main(int argc, char* argv[])
     
     while(1)
     {
-        log.logMessage("DEBUG: resetting score");
+        log.debug("resetting score");
         score = 0;
         bird.reset(BLUE);
         pipes.reset();

@@ -9,22 +9,29 @@ class Bird;
 
 class Log
 {
+private:
+    void setLine(int lineNumber, char* msg, u8 col);
+    void clearLine(int lineNumber);
+    void clearBuffer();
+    void logToFile(char* msg);
+    void init();
+    
 public:
     s8 index;
     char* buffer;
+    u8* color;
     char* logfile;
-    u8 logToFile;
     u8 logToScreen;
     u8 bufWidth;
     u8 bufHeight;
     u8 wrap; // bool to indicate whether we've filled up the screen
 
     Log();
+    Log(char* logfile);
     ~Log();
     void logMessage(char* msg);
-    void setLine(int lineNumber, char* msg);
-    void clearLine(int lineNumber);
-    void clearBuffer();
+    void debug(char* msg, ...);
+    
 };
 
 typedef struct settings

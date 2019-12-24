@@ -1,25 +1,62 @@
 #include "log.hpp"
 #include "graphics.hpp"
 
+Log::Log(char* logfile)
+{
+    init();
+    if(logfile)
+    {
+        FILE* f = fopen(logfile, "w");
+        fprintf(f, "log initialised\n");
+        fclose(f);
+    }
+}
+
 Log::Log()
-{}
+{
+    init();
+}
+
+void Log::init()
+{
+    bufWidth = 90; // magic number
+    bufHeight = 56; // magic number
+    index = 0;
+    buffer = new char[bufWidth*bufHeight];
+    color = new u8[bufWidth*bufHeight];
+    logfile = NULL;
+    logToScreen = 1;
+    clearBuffer();
+}
 
 Log::~Log()
-{}
+{
+    delete buffer;
+}
+
+void Log::logToFile(char* msg)
+{
+    FILE* f = fopen(logfile, "a");
+    fprintf(f, "%s\n",msg);
+    fclose(f);
+}
 
 void Log::logMessage(char* msg)
 {
-    if(logToFile)
+    if(logfile)
     {
-        FILE* f = fopen(logfile, "a");
-        fprintf(f, "%s\n",msg);
-        fclose(f);
+        logToFile(msg);
     }
     if(logToScreen)
     {
         printf("%s", msg);
         clearLine(index);
-        setLine(index, msg);
+        for(int i = 0; msg[i]; i++)
+        {
+            int curr = i+index*bufWidth;
+            buffer[curr] = msg[i];
+            color[curr] = 7;
+        }
         index++;// = (l->index+1) % 56;
         if(index == bufHeight)
         {
@@ -31,13 +68,46 @@ void Log::logMessage(char* msg)
     }
 }
 
-void Log::setLine(int lineNumber, char* msg)
+void Log::debug(char* msg, ...)
 {
-    for(int i = 0; msg[i]; i++)
+    char buf[1024];
+    va_list args;
+    int printed;
+
+    va_start(args, msg);
+    printed = vsprintf(buf, msg, args);
+    va_end(args);
+
+    if(logfile) logToFile(buf);
+    if(logToScreen)
     {
-        buffer[i+lineNumber*bufWidth] = msg[i];
-        printf("%c", msg[i]);
+        printf("%s", buf);
+        clearLine(index);
+        char* label = "DEBUG: "; // length = 7
+        for(int i = 0; label[i]; i++)
+        {
+            int curr = i+index*bufWidth;
+            buffer[curr] = label[i];
+            color[curr] = 2; // green
+        }
+        for(int i = 0; buf[i]; i++)
+        {
+            int curr = (i+7)+index*bufWidth;
+            buffer[curr] = buf[i];
+            color[curr] = 7;
+        }
+        index++;
+        if(index == bufHeight)
+        {
+            wrap = 1;
+            index = 0;
+        }
     }
+}
+
+
+void Log::setLine(int lineNumber, char* msg, u8 col)
+{
     printf("\n");
 }
 
@@ -45,7 +115,10 @@ void Log::clearLine(int lineNumber)
 {
     for(int i = 0; i < bufWidth; i++)
     {
-        buffer[i+lineNumber*bufWidth] = 0;
+        int curr = i+lineNumber*bufWidth;
+        buffer[curr] = 0;
+        color[curr] = 7; // clear the buffer to white
+        
     }
 }
 
