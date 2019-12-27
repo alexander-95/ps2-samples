@@ -226,7 +226,7 @@ void pregameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, textureResources*
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawGetReady(gsGlobal, &texture->spriteSheet);
-        drawBuffer(gsGlobal, &texture->font, l, *s->font);
+        l->drawBuffer(gsGlobal, &texture->font, *s->font);
         updateFrame(gsGlobal, &texture->font, l->buffer);
     }
 
@@ -257,8 +257,12 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
         if(collision(b, pipes))
         {
             // this sound file won't be loaded on a real PS2
-            if(!collided)ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playHitSound);
-            collided = 1;
+            if(!collided)
+            {
+                ioPutRequest(IO_CUSTOM_SIMPLEACTION, &playHitSound);
+                collided = 1;
+                l->debug("hit a pipe");
+            }
         }
         
         int oldScore = *s->score;
@@ -279,7 +283,7 @@ void gameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b, PipeList* pipes,
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawScore(gsGlobal, *s->score, &texture->spriteSheet);
-        drawBuffer(gsGlobal, &texture->font, l, *s->font);
+        l->drawBuffer(gsGlobal, &texture->font, *s->font);
         updateFrame(gsGlobal, &texture->font, l->buffer);
     }
 }
@@ -297,7 +301,7 @@ void postgameLoop(GSGLOBAL* gsGlobal, controller* pad, Bird* b,
         b->draw();
         drawPlatform(gsGlobal, &texture->spriteSheet);
         drawEnd(gsGlobal, &texture->spriteSheet, *s->score, *s->highScore);
-        drawBuffer(gsGlobal, &texture->font, l, *s->font);
+        l->drawBuffer(gsGlobal, &texture->font, *s->font);
         updateFrame(gsGlobal, &texture->font, l->buffer);
     }
 }

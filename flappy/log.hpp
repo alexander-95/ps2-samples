@@ -14,7 +14,7 @@ private:
     void clearBuffer();
     void logToFile(char* msg);
     void init();
-    
+
 public:
     s8 index;
     char* buffer;
@@ -30,7 +30,8 @@ public:
     ~Log();
     void logMessage(char* msg);
     void debug(char* msg, ...);
-    
+    void drawChar(GSGLOBAL* gsGlobal, GSTEXTURE* font, char ascii, u8 x, u8 y, u8 style, u8 color);
+    void drawBuffer(GSGLOBAL* gsGlobal, GSTEXTURE* font, u8 style);
 };
 
 typedef struct settings
